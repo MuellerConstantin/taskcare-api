@@ -1,7 +1,7 @@
 package de.x1c1b.taskcare.service.infrastructure.persistence.jpa;
 
-import de.x1c1b.taskcare.service.infrastructure.persistence.jpa.mapper.UserEntityMapper;
-import de.x1c1b.taskcare.service.infrastructure.persistence.jpa.mapper.UserEntityMapperImpl;
+import de.x1c1b.taskcare.service.infrastructure.persistence.jpa.entity.mapper.UserEntityMapper;
+import de.x1c1b.taskcare.service.infrastructure.persistence.jpa.entity.mapper.UserEntityMapperImpl;
 import de.x1c1b.taskcare.service.infrastructure.persistence.jpa.repository.UserEntityRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

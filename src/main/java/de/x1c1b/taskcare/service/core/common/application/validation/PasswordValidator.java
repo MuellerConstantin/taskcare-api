@@ -5,7 +5,7 @@ import javax.validation.ConstraintValidatorContext;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class PasswordValidator implements ConstraintValidator<Username, String> {
+public class PasswordValidator implements ConstraintValidator<Password, String> {
 
     /**
      * Regular expression to validate a password.
@@ -20,6 +20,10 @@ public class PasswordValidator implements ConstraintValidator<Username, String> 
 
     @Override
     public boolean isValid(String password, ConstraintValidatorContext constraintValidatorContext) {
+        if (null == password) {
+            return true;
+        }
+
         Pattern pattern = Pattern.compile(PASSWORD_REGEX);
         Matcher matcher = pattern.matcher(password);
         return matcher.matches();

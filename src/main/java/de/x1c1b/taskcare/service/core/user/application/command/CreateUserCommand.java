@@ -8,7 +8,10 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.validation.constraints.*;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.util.Optional;
 
 @AllArgsConstructor
@@ -19,19 +22,19 @@ public class CreateUserCommand {
     @NotNull
     @NotEmpty
     @Username
-    @Max(15)
+    @Size(max = 15)
     private String username;
 
     @NotNull
     @NotEmpty
     @Email
-    @Max(1024)
+    @Size(max = 1024)
     private String email;
 
     @NotEmpty
     @NotNull
     @Password
-    @Max(256)
+    @Size(max = 256)
     private String password;
 
     private String firstName;

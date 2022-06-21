@@ -5,7 +5,7 @@ import de.x1c1b.taskcare.service.core.user.application.DefaultUserService;
 import de.x1c1b.taskcare.service.core.user.application.UserService;
 import de.x1c1b.taskcare.service.core.user.domain.UserRepository;
 import de.x1c1b.taskcare.service.infrastructure.persistence.jpa.JpaUserRepository;
-import de.x1c1b.taskcare.service.infrastructure.persistence.jpa.mapper.UserEntityMapper;
+import de.x1c1b.taskcare.service.infrastructure.persistence.jpa.entity.mapper.UserEntityMapper;
 import de.x1c1b.taskcare.service.infrastructure.persistence.jpa.repository.UserEntityRepository;
 import de.x1c1b.taskcare.service.infrastructure.security.spring.SpringSecretEncoder;
 import org.springframework.context.annotation.Bean;

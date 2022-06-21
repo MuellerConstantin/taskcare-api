@@ -11,6 +11,8 @@ import de.x1c1b.taskcare.service.core.user.application.query.FindAllUsersQuery;
 import de.x1c1b.taskcare.service.core.user.application.query.FindUserByUsernameQuery;
 import de.x1c1b.taskcare.service.core.user.domain.User;
 
+import javax.validation.Valid;
+
 public interface UserService {
 
     User query(FindUserByUsernameQuery query) throws EntityNotFoundException;
@@ -21,9 +23,9 @@ public interface UserService {
 
     Page<User> query(FindAllUsersQuery query);
 
-    void execute(CreateUserCommand command);
+    void execute(@Valid CreateUserCommand command);
 
-    void execute(UpdateUserByUsernameCommand command) throws EntityNotFoundException;
+    void execute(@Valid UpdateUserByUsernameCommand command) throws EntityNotFoundException;
 
     void execute(DeleteUserByUsernameCommand command) throws EntityNotFoundException;
 }

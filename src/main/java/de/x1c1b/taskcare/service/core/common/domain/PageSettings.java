@@ -1,6 +1,9 @@
 package de.x1c1b.taskcare.service.core.common.domain;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * Controls paging settings when accessing a collection.
@@ -18,20 +21,4 @@ public class PageSettings {
 
     @Builder.Default
     private int perPage = 25;
-
-    @Builder.Default
-    private String sortBy = null;
-
-    @Builder.Default
-    private SortDirection sortDirection = null;
-
-    @AllArgsConstructor
-    @Getter
-    @ToString
-    public enum SortDirection {
-        ASC("ASC"),
-        DESC("DESC");
-
-        private final String name;
-    }
 }

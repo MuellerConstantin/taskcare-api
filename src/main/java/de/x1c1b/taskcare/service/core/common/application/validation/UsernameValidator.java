@@ -21,6 +21,10 @@ public class UsernameValidator implements ConstraintValidator<Username, String> 
 
     @Override
     public boolean isValid(String username, ConstraintValidatorContext constraintValidatorContext) {
+        if (null == username) {
+            return true;
+        }
+
         Pattern pattern = Pattern.compile(USERNAME_REGEX);
         Matcher matcher = pattern.matcher(username);
         return matcher.matches();

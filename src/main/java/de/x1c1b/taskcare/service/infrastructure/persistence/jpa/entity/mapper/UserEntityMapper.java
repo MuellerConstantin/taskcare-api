@@ -1,4 +1,4 @@
-package de.x1c1b.taskcare.service.infrastructure.persistence.jpa.mapper;
+package de.x1c1b.taskcare.service.infrastructure.persistence.jpa.entity.mapper;
 
 import de.x1c1b.taskcare.service.core.common.domain.Page;
 import de.x1c1b.taskcare.service.core.user.domain.User;

@@ -45,8 +45,6 @@ public class DefaultUserService implements UserService {
         return userRepository.findAll(PageSettings.builder()
                 .page(query.getPage())
                 .perPage(query.getPerPage())
-                .sortBy(query.getSortBy())
-                .sortDirection(query.getSortDirection())
                 .build());
     }
 

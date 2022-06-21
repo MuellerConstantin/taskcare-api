@@ -4,11 +4,10 @@ import de.x1c1b.taskcare.service.core.common.domain.Page;
 import de.x1c1b.taskcare.service.core.common.domain.PageSettings;
 import de.x1c1b.taskcare.service.core.user.domain.User;
 import de.x1c1b.taskcare.service.core.user.domain.UserRepository;
-import de.x1c1b.taskcare.service.infrastructure.persistence.jpa.mapper.UserEntityMapper;
+import de.x1c1b.taskcare.service.infrastructure.persistence.jpa.entity.mapper.UserEntityMapper;
 import de.x1c1b.taskcare.service.infrastructure.persistence.jpa.repository.UserEntityRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
@@ -27,16 +26,7 @@ public class JpaUserRepository implements UserRepository {
 
     @Override
     public Page<User> findAll(PageSettings pageSettings) {
-        var sortRequest = Sort.by(
-                PageSettings.SortDirection.DESC.equals(pageSettings.getSortDirection()) ?
-                        Sort.Direction.DESC :
-                        Sort.Direction.ASC,
-                null != pageSettings.getSortBy() ?
-                        pageSettings.getSortBy() :
-                        "username");
-
-        var pageRequest = PageRequest.of(pageSettings.getPage(), pageSettings.getPerPage(), sortRequest);
-
+        var pageRequest = PageRequest.of(pageSettings.getPage(), pageSettings.getPerPage());
         return userEntityMapper.mapToDomain(userEntityRepository.findAll(pageRequest));
     }
 
