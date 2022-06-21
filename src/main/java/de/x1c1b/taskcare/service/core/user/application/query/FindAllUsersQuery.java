@@ -1,6 +1,6 @@
 package de.x1c1b.taskcare.service.core.user.application.query;
 
-import de.x1c1b.taskcare.service.core.common.domain.Page;
+import de.x1c1b.taskcare.service.core.common.domain.PageSettings;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -22,5 +22,5 @@ public class FindAllUsersQuery {
     private String sortBy = null;
 
     @Builder.Default
-    private Page.SortDirection sortDirection = null;
+    private PageSettings.SortDirection sortDirection = null;
 }

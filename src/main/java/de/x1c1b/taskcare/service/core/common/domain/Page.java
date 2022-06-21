@@ -1,6 +1,9 @@
 package de.x1c1b.taskcare.service.core.common.domain;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
@@ -21,16 +24,4 @@ public class Page<E> {
     private int perPage;
     private long totalElements;
     private long totalPages;
-    private String sortBy;
-    private SortDirection sortDirection;
-
-    @AllArgsConstructor
-    @Getter
-    @ToString
-    public enum SortDirection {
-        ASC("ASC"),
-        DESC("DESC");
-
-        private final String name;
-    }
 }
