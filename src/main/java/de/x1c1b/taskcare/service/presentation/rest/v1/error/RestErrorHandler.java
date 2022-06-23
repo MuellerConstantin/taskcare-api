@@ -14,6 +14,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.validation.BindException;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
@@ -325,6 +329,62 @@ public class RestErrorHandler extends ResponseEntityExceptionHandler {
                 .message("The specified resource does not exist.")
                 .timestamp(OffsetDateTime.now())
                 .status(HttpStatus.NOT_FOUND.value())
+                .path(((ServletWebRequest) request).getRequest().getServletPath())
+                .build();
+
+        return new ResponseEntity<>(restError, new HttpHeaders(), HttpStatus.valueOf(restError.getStatus()));
+    }
+
+    @ExceptionHandler(UsernameNotFoundException.class)
+    public ResponseEntity<Object> handleUsernameNotFound(UsernameNotFoundException exc,
+                                                         WebRequest request) {
+
+        RestError restError = RestError.builder()
+                .message("Username and/or password are invalid.")
+                .timestamp(OffsetDateTime.now())
+                .status(HttpStatus.UNAUTHORIZED.value())
+                .path(((ServletWebRequest) request).getRequest().getServletPath())
+                .build();
+
+        return new ResponseEntity<>(restError, new HttpHeaders(), HttpStatus.valueOf(restError.getStatus()));
+    }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<Object> handleBadCredentials(BadCredentialsException exc,
+                                                       WebRequest request) {
+
+        RestError restError = RestError.builder()
+                .message("Username and/or password are invalid.")
+                .timestamp(OffsetDateTime.now())
+                .status(HttpStatus.UNAUTHORIZED.value())
+                .path(((ServletWebRequest) request).getRequest().getServletPath())
+                .build();
+
+        return new ResponseEntity<>(restError, new HttpHeaders(), HttpStatus.valueOf(restError.getStatus()));
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<Object> handleAuthentication(AuthenticationException exc,
+                                                       WebRequest request) {
+
+        RestError restError = RestError.builder()
+                .message("Access must be authenticated.")
+                .timestamp(OffsetDateTime.now())
+                .status(HttpStatus.UNAUTHORIZED.value())
+                .path(((ServletWebRequest) request).getRequest().getServletPath())
+                .build();
+
+        return new ResponseEntity<>(restError, new HttpHeaders(), HttpStatus.valueOf(restError.getStatus()));
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<Object> handleAccessDenied(AccessDeniedException exc,
+                                                     WebRequest request) {
+
+        RestError restError = RestError.builder()
+                .message("Permissions for access are missing.")
+                .timestamp(OffsetDateTime.now())
+                .status(HttpStatus.FORBIDDEN.value())
                 .path(((ServletWebRequest) request).getRequest().getServletPath())
                 .build();
 
