@@ -1,5 +1,7 @@
 package de.x1c1b.taskcare.service.presentation.rest.v1.error;
 
+import de.x1c1b.taskcare.service.core.board.application.BoardMustBeAdministrableException;
+import de.x1c1b.taskcare.service.core.board.application.IsAlreadyMemberOfBoardException;
 import de.x1c1b.taskcare.service.core.common.application.EntityNotFoundException;
 import de.x1c1b.taskcare.service.core.user.application.EmailAlreadyInUseException;
 import de.x1c1b.taskcare.service.core.user.application.UsernameAlreadyInUseException;
@@ -385,6 +387,34 @@ public class RestErrorHandler extends ResponseEntityExceptionHandler {
                 .message("Permissions for access are missing.")
                 .timestamp(OffsetDateTime.now())
                 .status(HttpStatus.FORBIDDEN.value())
+                .path(((ServletWebRequest) request).getRequest().getServletPath())
+                .build();
+
+        return new ResponseEntity<>(restError, new HttpHeaders(), HttpStatus.valueOf(restError.getStatus()));
+    }
+
+    @ExceptionHandler(IsAlreadyMemberOfBoardException.class)
+    public ResponseEntity<Object> handleIsAlreadyMemberOfBoard(IsAlreadyMemberOfBoardException exc,
+                                                               WebRequest request) {
+
+        RestError restError = RestError.builder()
+                .message("The user to be added is already a member of the board.")
+                .timestamp(OffsetDateTime.now())
+                .status(HttpStatus.CONFLICT.value())
+                .path(((ServletWebRequest) request).getRequest().getServletPath())
+                .build();
+
+        return new ResponseEntity<>(restError, new HttpHeaders(), HttpStatus.valueOf(restError.getStatus()));
+    }
+
+    @ExceptionHandler(BoardMustBeAdministrableException.class)
+    public ResponseEntity<Object> handleBoardMustBeAdministrable(BoardMustBeAdministrableException exc,
+                                                                 WebRequest request) {
+
+        RestError restError = RestError.builder()
+                .message("The last remaining admin of a board cannot be removed.")
+                .timestamp(OffsetDateTime.now())
+                .status(HttpStatus.CONFLICT.value())
                 .path(((ServletWebRequest) request).getRequest().getServletPath())
                 .build();
 

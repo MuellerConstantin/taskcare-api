@@ -14,6 +14,7 @@ import de.x1c1b.taskcare.service.infrastructure.persistence.jpa.repository.Membe
 import de.x1c1b.taskcare.service.infrastructure.persistence.jpa.repository.UserEntityRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -60,6 +61,7 @@ public class JpaBoardRepository implements BoardRepository {
     }
 
     @Override
+    @Transactional
     public boolean deleteById(UUID uuid) {
         if (existsById(uuid)) {
             boardEntityRepository.deleteById(uuid);
@@ -70,6 +72,7 @@ public class JpaBoardRepository implements BoardRepository {
     }
 
     @Override
+    @Transactional
     public void save(Board boardAggregate) {
 
         BoardEntity boardEntity = boardEntityRepository.save(boardEntityMapper.mapToEntity(boardAggregate));

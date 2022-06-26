@@ -19,7 +19,6 @@ import java.util.Optional;
 public class CreateBoardCommand {
     @NotNull
     @NotEmpty
-    @Username
     @Size(max = 100)
     private String name;
 

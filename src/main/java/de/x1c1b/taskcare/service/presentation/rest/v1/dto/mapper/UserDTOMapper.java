@@ -14,12 +14,12 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface UserDTOMapper {
 
-    UserDTO mapToDTO(User user);
+    UserDTO mapToDTO(User userAggregate);
 
     @Mapping(source = "content", target = "content", defaultExpression = "java(new ArrayList<>())")
-    PageDTO<UserDTO> mapToDTO(Page<User> page);
+    PageDTO<UserDTO> mapToDTO(Page<User> userAggregatePage);
 
-    CreateUserCommand mapToCommand(CreateUserDTO dto);
+    CreateUserCommand mapToCommand(CreateUserDTO createUserDTO);
 
-    UpdateUserByUsernameCommand mapToCommand(String username, UpdateUserDTO dto);
+    UpdateUserByUsernameCommand mapToCommand(UpdateUserDTO updateUserDTO, String username);
 }

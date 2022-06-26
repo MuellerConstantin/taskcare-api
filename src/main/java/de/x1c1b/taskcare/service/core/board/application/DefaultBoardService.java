@@ -118,4 +118,23 @@ public class DefaultBoardService implements BoardService {
             throw new EntityNotFoundException();
         }
     }
+
+    @Override
+    public void execute(ChangeBoardMemberRoleByIdCommand command) throws EntityNotFoundException {
+        Board board = boardRepository.findById(command.getId()).orElseThrow(EntityNotFoundException::new);
+
+        if (board.getMembers().stream().noneMatch(member ->
+                !member.getUsername().equals(command.getUsername()) &&
+                        member.getRole().equals(Role.ADMINISTRATOR))) {
+            // Ensures that the last admin cannot be removed and the board remains administrable
+            throw new BoardMustBeAdministrableException();
+        }
+
+        Member member = board.getMembers().stream().filter(m -> m.getUsername().equals(command.getUsername()))
+                .findFirst().orElseThrow(EntityNotFoundException::new);
+
+        member.setRole(Role.valueOf(command.getRole()));
+
+        boardRepository.save(board);
+    }
 }

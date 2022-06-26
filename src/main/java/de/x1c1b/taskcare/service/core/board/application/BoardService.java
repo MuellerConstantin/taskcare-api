@@ -30,4 +30,6 @@ public interface BoardService {
     void execute(@Valid AddBoardMemberByIdCommand command) throws EntityNotFoundException, IsAlreadyMemberOfBoardException;
 
     void execute(@Valid RemoveBoardMemberByIdCommand command) throws EntityNotFoundException;
+
+    void execute(@Valid ChangeBoardMemberRoleByIdCommand command) throws EntityNotFoundException;
 }
