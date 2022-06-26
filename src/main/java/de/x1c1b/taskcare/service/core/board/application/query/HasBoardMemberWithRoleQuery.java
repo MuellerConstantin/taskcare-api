@@ -5,12 +5,15 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.UUID;
+
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
 @Builder
 public class HasBoardMemberWithRoleQuery {
 
+    private UUID id;
     private String username;
     private String role;
 }

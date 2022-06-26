@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.OffsetDateTime;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
@@ -20,5 +21,7 @@ public class Board {
     private String description;
     private OffsetDateTime createdAt;
     private String createdBy;
-    private Set<Member> members;
+
+    @Builder.Default
+    private Set<Member> members = new HashSet<>();
 }

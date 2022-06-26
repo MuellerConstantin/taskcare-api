@@ -8,9 +8,9 @@ import java.util.UUID;
 
 public interface BoardRepository extends Repository<UUID, Board> {
 
-    boolean hasMember(String username);
+    boolean hasMember(UUID id, String username);
 
-    boolean hasMemberWithRole(String username, Role role);
+    boolean hasMemberWithRole(UUID id, String username, Role role);
 
     Page<Board> findAllWithMembership(String username, PageSettings pageSettings);
 }

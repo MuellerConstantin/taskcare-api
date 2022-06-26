@@ -19,13 +19,13 @@ import javax.persistence.Table;
 public class UserEntity {
 
     @Id
-    @Column(name = "username", unique = true)
+    @Column(name = "username", unique = true, nullable = false)
     private String username;
 
-    @Column(name = "email", unique = true)
+    @Column(name = "email", unique = true, nullable = false)
     private String email;
 
-    @Column(name = "password")
+    @Column(name = "password", nullable = false)
     private String password;
 
     @Column(name = "first_name")
@@ -34,9 +34,9 @@ public class UserEntity {
     @Column(name = "last_name")
     private String lastName;
 
-    @Column(name = "enabled")
+    @Column(name = "enabled", nullable = false)
     private boolean enabled;
 
-    @Column(name = "locked")
+    @Column(name = "locked", nullable = false)
     private boolean locked;
 }

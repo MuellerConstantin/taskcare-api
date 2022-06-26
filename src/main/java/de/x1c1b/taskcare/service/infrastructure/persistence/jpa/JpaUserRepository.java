@@ -47,8 +47,8 @@ public class JpaUserRepository implements UserRepository {
     }
 
     @Override
-    public void save(User model) {
-        userEntityRepository.save(userEntityMapper.mapToEntity(model));
+    public void save(User userAggregate) {
+        userEntityRepository.save(userEntityMapper.mapToEntity(userAggregate));
     }
 
     @Override

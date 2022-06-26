@@ -2,6 +2,12 @@ spring:
   jpa:
     hibernate:
       ddl-auto: create-drop
+    show-sql: true
+logging:
+  level:
+    org:
+      hibernate:
+        SQL: DEBUG
 taskcare:
   security:
     jwt:

@@ -9,9 +9,9 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface UserEntityMapper {
 
-    UserEntity mapToEntity(User user);
+    UserEntity mapToEntity(User userAggregate);
 
-    User mapToDomain(UserEntity entity);
+    User mapToDomain(UserEntity userEntity);
 
     @Mapping(source = "number", target = "page")
     @Mapping(source = "size", target = "perPage")

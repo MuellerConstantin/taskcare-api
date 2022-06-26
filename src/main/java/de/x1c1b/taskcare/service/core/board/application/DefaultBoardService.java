@@ -33,12 +33,12 @@ public class DefaultBoardService implements BoardService {
 
     @Override
     public boolean query(HasBoardMemberQuery query) {
-        return boardRepository.hasMember(query.getUsername());
+        return boardRepository.hasMember(query.getId(), query.getUsername());
     }
 
     @Override
     public boolean query(HasBoardMemberWithRoleQuery query) {
-        return boardRepository.hasMemberWithRole(query.getUsername(), Role.valueOf(query.getRole()));
+        return boardRepository.hasMemberWithRole(query.getId(), query.getUsername(), Role.valueOf(query.getRole()));
     }
 
     @Override
@@ -106,6 +106,13 @@ public class DefaultBoardService implements BoardService {
     @Override
     public void execute(@Valid RemoveBoardMemberByIdCommand command) throws EntityNotFoundException {
         Board board = boardRepository.findById(command.getId()).orElseThrow(EntityNotFoundException::new);
+
+        if (board.getMembers().stream().noneMatch(member ->
+                !member.getUsername().equals(command.getUsername()) &&
+                        member.getRole().equals(Role.ADMINISTRATOR))) {
+            // Ensures that the last admin cannot be removed and the board remains administrable
+            throw new BoardMustBeAdministrableException();
+        }
 
         if (null == board.getMembers() || board.getMembers().removeIf(member -> member.getUsername().equals(command.getUsername()))) {
             throw new EntityNotFoundException();

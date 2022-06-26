@@ -18,5 +18,5 @@ public interface Repository<ID, E> {
 
     boolean deleteById(ID id);
 
-    void save(E model);
+    void save(E aggregate);
 }
