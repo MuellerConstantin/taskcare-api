@@ -15,7 +15,7 @@ import java.util.Set;
 public class UserEntity {
 
     @Id
-    @Column(name = "username", unique = true, nullable = false)
+    @Column(name = "username", unique = true, nullable = false, length = 15)
     private String username;
 
     @Column(name = "email", unique = true, nullable = false)
@@ -24,10 +24,10 @@ public class UserEntity {
     @Column(name = "password", nullable = false)
     private String password;
 
-    @Column(name = "first_name")
+    @Column(name = "first_name", length = 100)
     private String firstName;
 
-    @Column(name = "last_name")
+    @Column(name = "last_name", length = 100)
     private String lastName;
 
     @Column(name = "enabled", nullable = false)

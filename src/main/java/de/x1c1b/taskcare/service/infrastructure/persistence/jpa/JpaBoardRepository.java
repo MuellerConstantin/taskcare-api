@@ -6,8 +6,6 @@ import de.x1c1b.taskcare.service.core.board.domain.Role;
 import de.x1c1b.taskcare.service.core.common.domain.Page;
 import de.x1c1b.taskcare.service.core.common.domain.PageSettings;
 import de.x1c1b.taskcare.service.infrastructure.persistence.jpa.entity.BoardEntity;
-import de.x1c1b.taskcare.service.infrastructure.persistence.jpa.entity.MemberEntity;
-import de.x1c1b.taskcare.service.infrastructure.persistence.jpa.entity.UserEntity;
 import de.x1c1b.taskcare.service.infrastructure.persistence.jpa.entity.mapper.BoardEntityMapper;
 import de.x1c1b.taskcare.service.infrastructure.persistence.jpa.repository.BoardEntityRepository;
 import de.x1c1b.taskcare.service.infrastructure.persistence.jpa.repository.UserEntityRepository;
@@ -74,13 +72,6 @@ public class JpaBoardRepository implements BoardRepository {
     public void save(Board boardAggregate) {
 
         BoardEntity boardEntity = boardEntityMapper.mapToEntity(boardAggregate);
-
-        boardAggregate.getMembers().forEach(member -> {
-            UserEntity userEntity = userEntityRepository.findById(member.getUsername()).orElseThrow();
-            MemberEntity memberEntity = new MemberEntity(boardEntity, userEntity, member.getRole().getName());
-            boardEntity.getMembers().add(memberEntity);
-        });
-
         boardEntityRepository.save(boardEntity);
     }
 }

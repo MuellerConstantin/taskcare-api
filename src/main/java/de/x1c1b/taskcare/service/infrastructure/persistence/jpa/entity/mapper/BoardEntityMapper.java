@@ -2,58 +2,107 @@ package de.x1c1b.taskcare.service.infrastructure.persistence.jpa.entity.mapper;
 
 import de.x1c1b.taskcare.service.core.board.domain.Board;
 import de.x1c1b.taskcare.service.core.board.domain.Member;
-import de.x1c1b.taskcare.service.core.board.domain.Role;
+import de.x1c1b.taskcare.service.core.board.domain.Task;
 import de.x1c1b.taskcare.service.core.common.domain.Page;
 import de.x1c1b.taskcare.service.infrastructure.persistence.jpa.entity.BoardEntity;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.Named;
+import de.x1c1b.taskcare.service.infrastructure.persistence.jpa.entity.MemberEntity;
+import de.x1c1b.taskcare.service.infrastructure.persistence.jpa.entity.TaskEntity;
+import de.x1c1b.taskcare.service.infrastructure.persistence.jpa.entity.UserEntity;
+import de.x1c1b.taskcare.service.infrastructure.persistence.jpa.repository.UserEntityRepository;
+import org.mapstruct.*;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
-import java.util.Set;
-import java.util.stream.Collectors;
 
-@Mapper(componentModel = "spring")
-public interface BoardEntityMapper {
+@Mapper(componentModel = "spring", uses = UserEntityRepository.class,
+        injectionStrategy = InjectionStrategy.FIELD,
+        builder = @Builder(disableBuilder = true))
+public abstract class BoardEntityMapper {
 
-    @Mapping(target = "createdAt", source = "createdAt", qualifiedByName = "timestampToInstant")
-    @Mapping(target = "createdAtOffset", source = "createdAt", qualifiedByName = "timestampToOffset")
+    @Autowired
+    private UserEntityRepository userEntityRepository;
+
+    @Mapping(target = "createdAtOffset", source = "createdAt")
     @Mapping(target = "members", ignore = true)
-    BoardEntity mapToEntity(Board boardAggregate);
+    @Mapping(target = "tasks", ignore = true)
+    public abstract BoardEntity mapToEntity(Board boardAggregate);
 
-    @Mapping(target = "createdAt", source = "boardEntity", qualifiedByName = "timestampFromBoardEntity")
-    @Mapping(target = "members", source = "boardEntity", qualifiedByName = "membersFromBoardEntity")
-    Board mapToDomain(BoardEntity boardEntity);
+    @Mapping(target = "createdAt", source = "boardEntity", qualifiedByName = "createdAtFromBoardEntity")
+    public abstract Board mapToDomain(BoardEntity boardEntity);
 
     @Mapping(source = "number", target = "page")
     @Mapping(source = "size", target = "perPage")
     @Mapping(source = "content", target = "content", defaultExpression = "java(new ArrayList<>())")
-    Page<Board> mapToDomain(org.springframework.data.domain.Page<BoardEntity> page);
+    public abstract Page<Board> mapToDomain(org.springframework.data.domain.Page<BoardEntity> page);
 
-    @Named("membersFromBoardEntity")
-    default Set<Member> membersFromBoardEntity(BoardEntity boardEntity) {
-        return boardEntity.getMembers().stream()
-                .map(member -> Member.builder()
-                        .username(member.getUser().getUsername())
-                        .role(Role.valueOf(member.getRole()))
-                        .build())
-                .collect(Collectors.toSet());
+    @Mapping(source = "user.username", target = "username")
+    public abstract Member mapToDomain(MemberEntity memberEntity);
+
+    @Mapping(target = "createdAt", source = "taskEntity", qualifiedByName = "createdAtFromTaskEntity")
+    @Mapping(target = "expiresAt", source = "taskEntity", qualifiedByName = "expiresAtFromTaskEntity")
+    public abstract Task mapToDomain(TaskEntity taskEntity);
+
+    @AfterMapping
+    void mapToEntityAfterMapping(Board boardAggregate, @MappingTarget BoardEntity boardEntity) {
+        boardAggregate.getMembers().forEach(member -> {
+            UserEntity userEntity = userEntityRepository.findById(member.getUsername()).orElseThrow();
+            MemberEntity memberEntity = new MemberEntity(boardEntity, userEntity, member.getRole().getName());
+            boardEntity.getMembers().add(memberEntity);
+        });
+
+        boardAggregate.getTasks().forEach(task -> {
+            TaskEntity taskEntity = TaskEntity.builder()
+                    .id(task.getId())
+                    .name(task.getName())
+                    .board(boardEntity)
+                    .description(task.getDescription())
+                    .priority(task.getPriority())
+                    .status(task.getStatus().getName())
+                    .createdBy(task.getCreatedBy())
+                    .createdAt(timestampToInstant(task.getCreatedAt()))
+                    .createdAtOffset(timestampToOffset(task.getCreatedAt()))
+                    .expiresAt(timestampToInstant(task.getExpiresAt()))
+                    .expiresAtOffset(timestampToOffset(task.getExpiresAt()))
+                    .build();
+
+            boardEntity.getTasks().add(taskEntity);
+        });
     }
 
-    @Named("timestampToInstant")
-    default Instant timestampToInstant(OffsetDateTime timestamp) {
-        return timestamp.toInstant();
+    @Named("createdAtFromBoardEntity")
+    OffsetDateTime createdAtFromBoardEntity(BoardEntity boardEntity) {
+        if (null != boardEntity.getCreatedAt() && null != boardEntity.getCreatedAtOffset()) {
+            return OffsetDateTime.ofInstant(boardEntity.getCreatedAt(), ZoneId.of(boardEntity.getCreatedAtOffset()));
+        } else {
+            return null;
+        }
     }
 
-    @Named("timestampToOffset")
-    default String timestampToOffset(OffsetDateTime timestamp) {
-        return timestamp.getOffset().getId();
+    @Named("createdAtFromTaskEntity")
+    OffsetDateTime createdAtFromTaskEntity(TaskEntity taskEntity) {
+        if (null != taskEntity.getCreatedAt() && null != taskEntity.getCreatedAtOffset()) {
+            return OffsetDateTime.ofInstant(taskEntity.getCreatedAt(), ZoneId.of(taskEntity.getCreatedAtOffset()));
+        } else {
+            return null;
+        }
     }
 
-    @Named("timestampFromBoardEntity")
-    default OffsetDateTime timestampFromBoardEntity(BoardEntity entity) {
-        return OffsetDateTime.ofInstant(entity.getCreatedAt(), ZoneId.of(entity.getCreatedAtOffset()));
+    @Named("expiresAtFromTaskEntity")
+    OffsetDateTime expiresAtFromTaskEntity(TaskEntity taskEntity) {
+        if (null != taskEntity.getExpiresAt() && null != taskEntity.getExpiresAtOffset()) {
+            return OffsetDateTime.ofInstant(taskEntity.getExpiresAt(), ZoneId.of(taskEntity.getExpiresAtOffset()));
+        } else {
+            return null;
+        }
+    }
+
+    Instant timestampToInstant(OffsetDateTime timestamp) {
+        return null == timestamp ? null : timestamp.toInstant();
+    }
+
+    String timestampToOffset(OffsetDateTime timestamp) {
+        return null == timestamp ? null : timestamp.getOffset().getId();
     }
 }

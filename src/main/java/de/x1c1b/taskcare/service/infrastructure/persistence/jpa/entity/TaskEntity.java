@@ -5,15 +5,15 @@ import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
 import java.time.Instant;
-import java.util.*;
+import java.util.UUID;
 
 @Entity
-@Table(name = "boards")
+@Table(name = "tasks")
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
 @Builder
-public class BoardEntity {
+public class TaskEntity {
 
     @Id
     @Type(type = "uuid-char")
@@ -35,15 +35,24 @@ public class BoardEntity {
     @Column(name = "created_by")
     private String createdBy;
 
-    @EqualsAndHashCode.Exclude
-    @ToString.Exclude
-    @OneToMany(mappedBy = "board", orphanRemoval = true, cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    @Builder.Default
-    private Set<MemberEntity> members = new HashSet<>();
+    @Column(name = "priority")
+    private Integer priority;
+
+    @Column(name = "responsible")
+    private String responsible;
+
+    @Column(name = "status")
+    private String status;
+
+    @Column(name = "expires_at")
+    private Instant expiresAt;
+
+    @Column(name = "expires_at_offset")
+    private String expiresAtOffset;
 
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
-    @OneToMany(mappedBy = "board", orphanRemoval = true, cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    @Builder.Default
-    private List<TaskEntity> tasks = new ArrayList<>();
+    @ManyToOne
+    @JoinColumn(name = "board_id", insertable = false, updatable = false)
+    private BoardEntity board;
 }

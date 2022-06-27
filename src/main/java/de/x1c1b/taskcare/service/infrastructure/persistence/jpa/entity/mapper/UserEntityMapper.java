@@ -9,6 +9,7 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface UserEntityMapper {
 
+    @Mapping(target = "memberships", ignore = true)
     UserEntity mapToEntity(User userAggregate);
 
     User mapToDomain(UserEntity userEntity);
