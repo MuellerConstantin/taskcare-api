@@ -13,12 +13,12 @@ import org.springframework.stereotype.Component;
 import java.util.Set;
 
 @Component
-public class DomainUserService implements UserDetailsService {
+public class DomainUserDetailsService implements UserDetailsService {
 
     private final UserService userService;
 
     @Autowired
-    public DomainUserService(UserService userService) {
+    public DomainUserDetailsService(UserService userService) {
         this.userService = userService;
     }
 

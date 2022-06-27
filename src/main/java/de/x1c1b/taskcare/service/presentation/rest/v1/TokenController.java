@@ -15,13 +15,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/v1/auth")
-public class AuthController {
+public class TokenController {
 
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider jwtTokenProvider;
 
     @Autowired
-    public AuthController(AuthenticationManager authenticationManager, JwtTokenProvider jwtTokenProvider) {
+    public TokenController(AuthenticationManager authenticationManager, JwtTokenProvider jwtTokenProvider) {
         this.authenticationManager = authenticationManager;
         this.jwtTokenProvider = jwtTokenProvider;
     }
