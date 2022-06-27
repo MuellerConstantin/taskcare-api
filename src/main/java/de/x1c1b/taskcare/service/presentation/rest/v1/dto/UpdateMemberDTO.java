@@ -9,8 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Data
 @Builder
-public class CreateBoardMemberDTO {
+public class UpdateMemberDTO {
 
-    private String username;
     private String role;
 }

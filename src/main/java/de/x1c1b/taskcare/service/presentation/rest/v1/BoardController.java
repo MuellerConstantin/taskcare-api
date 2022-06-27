@@ -48,15 +48,15 @@ public class BoardController {
 
     @PostMapping("/boards")
     @ResponseStatus(HttpStatus.CREATED)
-    void create(@AuthenticationPrincipal UserDetails userDetails, @RequestBody CreateBoardDTO dto) {
-        CreateBoardCommand command = boardDTOMapper.mapToCommand(dto, userDetails.getUsername());
+    void create(@AuthenticationPrincipal UserDetails userDetails, @RequestBody CreateBoardDTO createBoardDTO) {
+        CreateBoardCommand command = boardDTOMapper.mapToCommand(createBoardDTO, userDetails.getUsername());
         boardService.execute(command);
     }
 
     @PatchMapping("/boards/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    void updateById(@PathVariable("id") UUID id, @RequestBody UpdateBoardDTO dto) {
-        UpdateBoardByIdCommand command = boardDTOMapper.mapToCommand(dto, id);
+    void updateById(@PathVariable("id") UUID id, @RequestBody UpdateBoardDTO updateBoardDTO) {
+        UpdateBoardByIdCommand command = boardDTOMapper.mapToCommand(updateBoardDTO, id);
         boardService.execute(command);
     }
 

@@ -15,6 +15,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Aspect
 @Component
 public class BoardServiceAccessEvaluator {
@@ -60,7 +62,7 @@ public class BoardServiceAccessEvaluator {
     }
 
     @Before("execution(* de.x1c1b.taskcare.service.core.board.application.BoardService.execute(de.x1c1b.taskcare.service.core.board.application.command.AddMemberByIdCommand)) && args(command)")
-    void evaluateAddBoardMemberById(AddMemberByIdCommand command) {
+    void evaluateAddMemberById(AddMemberByIdCommand command) {
 
         UserDetails currentPrincipal = extractCurrentPrinciple();
 
@@ -71,7 +73,7 @@ public class BoardServiceAccessEvaluator {
     }
 
     @Before("execution(* de.x1c1b.taskcare.service.core.board.application.BoardService.execute(de.x1c1b.taskcare.service.core.board.application.command.RemoveMemberByIdCommand)) && args(command)")
-    void evaluateRemoveBoardMemberById(RemoveMemberByIdCommand command) {
+    void evaluateRemoveMemberById(RemoveMemberByIdCommand command) {
 
         UserDetails currentPrincipal = extractCurrentPrinciple();
 
@@ -82,7 +84,7 @@ public class BoardServiceAccessEvaluator {
     }
 
     @Before("execution(* de.x1c1b.taskcare.service.core.board.application.BoardService.execute(de.x1c1b.taskcare.service.core.board.application.command.UpdateMemberByIdCommand)) && args(command)")
-    void evaluateUpdateBoardMemberById(UpdateMemberByIdCommand command) {
+    void evaluateUpdateMemberById(UpdateMemberByIdCommand command) {
 
         UserDetails currentPrincipal = extractCurrentPrinciple();
 
@@ -110,6 +112,42 @@ public class BoardServiceAccessEvaluator {
 
         // A user can only load his own list of boards
         if (!currentPrincipal.getUsername().equals(query.getUsername())) {
+            throw new AccessDeniedException("Permissions are missing for access");
+        }
+    }
+
+    @Before("execution(* de.x1c1b.taskcare.service.core.board.application.BoardService.execute(de.x1c1b.taskcare.service.core.board.application.command.AddTaskByIdCommand)) && args(command)")
+    void evaluateAddTaskById(AddTaskByIdCommand command) {
+
+        UserDetails currentPrincipal = extractCurrentPrinciple();
+
+        // Only board administrators and maintainers can add tasks
+        if (!boardRepository.hasMemberWithAnyRole(command.getId(), currentPrincipal.getUsername(),
+                List.of(Role.ADMINISTRATOR, Role.MAINTAINER))) {
+            throw new AccessDeniedException("Permissions are missing for access");
+        }
+    }
+
+    @Before("execution(* de.x1c1b.taskcare.service.core.board.application.BoardService.execute(de.x1c1b.taskcare.service.core.board.application.command.RemoveTaskByIdCommand)) && args(command)")
+    void evaluateRemoveTaskById(RemoveTaskByIdCommand command) {
+
+        UserDetails currentPrincipal = extractCurrentPrinciple();
+
+        // Only board administrators and maintainers can remove tasks
+        if (!boardRepository.hasMemberWithAnyRole(command.getId(), currentPrincipal.getUsername(),
+                List.of(Role.ADMINISTRATOR, Role.MAINTAINER))) {
+            throw new AccessDeniedException("Permissions are missing for access");
+        }
+    }
+
+    @Before("execution(* de.x1c1b.taskcare.service.core.board.application.BoardService.execute(de.x1c1b.taskcare.service.core.board.application.command.UpdateTaskByIdCommand)) && args(command)")
+    void evaluateUpdateTaskById(UpdateTaskByIdCommand command) {
+
+        UserDetails currentPrincipal = extractCurrentPrinciple();
+
+        // Only board administrators, maintainers and users can update tasks
+        if (!boardRepository.hasMemberWithAnyRole(command.getId(), currentPrincipal.getUsername(),
+                List.of(Role.ADMINISTRATOR, Role.MAINTAINER, Role.USER))) {
             throw new AccessDeniedException("Permissions are missing for access");
         }
     }

@@ -13,8 +13,10 @@ import lombok.AllArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @AllArgsConstructor
 public class JpaBoardRepository implements BoardRepository {
@@ -31,6 +33,12 @@ public class JpaBoardRepository implements BoardRepository {
     @Override
     public boolean hasMemberWithRole(UUID id, String username, Role role) {
         return boardEntityRepository.existsByIdAndMembersUserUsernameAndMembersRole(id, username, role.getName());
+    }
+
+    @Override
+    public boolean hasMemberWithAnyRole(UUID id, String username, List<Role> roles) {
+        return boardEntityRepository.existsByIdAndMembersUserUsernameAndMembersRoleIn(id, username,
+                roles.stream().map(Role::getName).collect(Collectors.toList()));
     }
 
     @Override
