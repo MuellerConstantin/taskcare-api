@@ -1,14 +1,10 @@
 package de.x1c1b.taskcare.service.infrastructure.persistence.jpa.entity;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "users")
@@ -39,4 +35,10 @@ public class UserEntity {
 
     @Column(name = "locked", nullable = false)
     private boolean locked;
+
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
+    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE)
+    @Builder.Default
+    private Set<MemberEntity> memberships = new HashSet<>();
 }

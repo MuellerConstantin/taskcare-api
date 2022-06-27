@@ -36,6 +36,9 @@ public class MemberEntity {
         this.board = board;
         this.user = user;
         this.role = role;
+
+        board.getMembers().add(this);
+        user.getMemberships().add(this);
     }
 
     @Embeddable

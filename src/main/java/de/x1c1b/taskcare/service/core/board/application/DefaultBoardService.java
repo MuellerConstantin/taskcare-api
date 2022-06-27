@@ -114,9 +114,11 @@ public class DefaultBoardService implements BoardService {
             throw new BoardMustBeAdministrableException();
         }
 
-        if (null == board.getMembers() || board.getMembers().removeIf(member -> member.getUsername().equals(command.getUsername()))) {
+        if (!board.getMembers().removeIf(member -> member.getUsername().equals(command.getUsername()))) {
             throw new EntityNotFoundException();
         }
+
+        boardRepository.save(board);
     }
 
     @Override

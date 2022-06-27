@@ -12,7 +12,6 @@ import de.x1c1b.taskcare.service.infrastructure.persistence.jpa.JpaUserRepositor
 import de.x1c1b.taskcare.service.infrastructure.persistence.jpa.entity.mapper.BoardEntityMapper;
 import de.x1c1b.taskcare.service.infrastructure.persistence.jpa.entity.mapper.UserEntityMapper;
 import de.x1c1b.taskcare.service.infrastructure.persistence.jpa.repository.BoardEntityRepository;
-import de.x1c1b.taskcare.service.infrastructure.persistence.jpa.repository.MemberEntityRepository;
 import de.x1c1b.taskcare.service.infrastructure.persistence.jpa.repository.UserEntityRepository;
 import de.x1c1b.taskcare.service.infrastructure.security.spring.SpringSecretEncoder;
 import org.springframework.context.annotation.Bean;
@@ -39,10 +38,9 @@ public class DomainConfig {
 
     @Bean
     BoardRepository jpaBoardRepository(BoardEntityRepository boardEntityRepository,
-                                       MemberEntityRepository memberEntityRepository,
                                        UserEntityRepository userEntityRepository,
                                        BoardEntityMapper boardEntityMapper) {
-        return new JpaBoardRepository(boardEntityRepository, memberEntityRepository, userEntityRepository, boardEntityMapper);
+        return new JpaBoardRepository(boardEntityRepository, userEntityRepository, boardEntityMapper);
     }
 
     @Bean

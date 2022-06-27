@@ -3,7 +3,6 @@ package de.x1c1b.taskcare.service.infrastructure.persistence.jpa;
 import de.x1c1b.taskcare.service.infrastructure.persistence.jpa.entity.mapper.BoardEntityMapper;
 import de.x1c1b.taskcare.service.infrastructure.persistence.jpa.entity.mapper.BoardEntityMapperImpl;
 import de.x1c1b.taskcare.service.infrastructure.persistence.jpa.repository.BoardEntityRepository;
-import de.x1c1b.taskcare.service.infrastructure.persistence.jpa.repository.MemberEntityRepository;
 import de.x1c1b.taskcare.service.infrastructure.persistence.jpa.repository.UserEntityRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -36,10 +35,9 @@ class JpaBoardRepositoryTest {
 
         @Bean
         JpaBoardRepository jpaBoardRepository(BoardEntityRepository boardEntityRepository,
-                                              MemberEntityRepository memberEntityRepository,
                                               UserEntityRepository userEntityRepository,
                                               BoardEntityMapper boardEntityMapper) {
-            return new JpaBoardRepository(boardEntityRepository, memberEntityRepository, userEntityRepository, boardEntityMapper);
+            return new JpaBoardRepository(boardEntityRepository, userEntityRepository, boardEntityMapper);
         }
     }
 }

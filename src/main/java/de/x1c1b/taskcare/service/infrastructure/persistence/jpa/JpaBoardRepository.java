@@ -10,7 +10,6 @@ import de.x1c1b.taskcare.service.infrastructure.persistence.jpa.entity.MemberEnt
 import de.x1c1b.taskcare.service.infrastructure.persistence.jpa.entity.UserEntity;
 import de.x1c1b.taskcare.service.infrastructure.persistence.jpa.entity.mapper.BoardEntityMapper;
 import de.x1c1b.taskcare.service.infrastructure.persistence.jpa.repository.BoardEntityRepository;
-import de.x1c1b.taskcare.service.infrastructure.persistence.jpa.repository.MemberEntityRepository;
 import de.x1c1b.taskcare.service.infrastructure.persistence.jpa.repository.UserEntityRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -23,18 +22,17 @@ import java.util.UUID;
 public class JpaBoardRepository implements BoardRepository {
 
     private final BoardEntityRepository boardEntityRepository;
-    private final MemberEntityRepository memberEntityRepository;
     private final UserEntityRepository userEntityRepository;
     private final BoardEntityMapper boardEntityMapper;
 
     @Override
     public boolean hasMember(UUID id, String username) {
-        return memberEntityRepository.existsByBoardIdAndUserUsername(id, username);
+        return boardEntityRepository.existsByIdAndMembersUserUsername(id, username);
     }
 
     @Override
     public boolean hasMemberWithRole(UUID id, String username, Role role) {
-        return memberEntityRepository.existsByBoardIdAndUserUsernameAndRole(id, username, role.getName());
+        return boardEntityRepository.existsByIdAndMembersUserUsernameAndMembersRole(id, username, role.getName());
     }
 
     @Override
@@ -75,12 +73,14 @@ public class JpaBoardRepository implements BoardRepository {
     @Transactional
     public void save(Board boardAggregate) {
 
-        BoardEntity boardEntity = boardEntityRepository.save(boardEntityMapper.mapToEntity(boardAggregate));
+        BoardEntity boardEntity = boardEntityMapper.mapToEntity(boardAggregate);
 
         boardAggregate.getMembers().forEach(member -> {
             UserEntity userEntity = userEntityRepository.findById(member.getUsername()).orElseThrow();
             MemberEntity memberEntity = new MemberEntity(boardEntity, userEntity, member.getRole().getName());
-            memberEntityRepository.save(memberEntity);
+            boardEntity.getMembers().add(memberEntity);
         });
+
+        boardEntityRepository.save(boardEntity);
     }
 }

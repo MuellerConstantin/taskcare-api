@@ -12,4 +12,8 @@ import java.util.UUID;
 public interface BoardEntityRepository extends PagingAndSortingRepository<BoardEntity, UUID> {
 
     Page<BoardEntity> findAllByMembersUserUsername(String username, Pageable pageable);
+
+    boolean existsByIdAndMembersUserUsername(UUID id, String username);
+
+    boolean existsByIdAndMembersUserUsernameAndMembersRole(UUID id, String username, String role);
 }
