@@ -59,8 +59,8 @@ public class BoardServiceAccessEvaluator {
         }
     }
 
-    @Before("execution(* de.x1c1b.taskcare.service.core.board.application.BoardService.execute(de.x1c1b.taskcare.service.core.board.application.command.AddBoardMemberByIdCommand)) && args(command)")
-    void evaluateAddBoardMemberById(AddBoardMemberByIdCommand command) {
+    @Before("execution(* de.x1c1b.taskcare.service.core.board.application.BoardService.execute(de.x1c1b.taskcare.service.core.board.application.command.AddMemberByIdCommand)) && args(command)")
+    void evaluateAddBoardMemberById(AddMemberByIdCommand command) {
 
         UserDetails currentPrincipal = extractCurrentPrinciple();
 
@@ -70,8 +70,8 @@ public class BoardServiceAccessEvaluator {
         }
     }
 
-    @Before("execution(* de.x1c1b.taskcare.service.core.board.application.BoardService.execute(de.x1c1b.taskcare.service.core.board.application.command.RemoveBoardMemberByIdCommand)) && args(command)")
-    void evaluateRemoveBoardMemberById(RemoveBoardMemberByIdCommand command) {
+    @Before("execution(* de.x1c1b.taskcare.service.core.board.application.BoardService.execute(de.x1c1b.taskcare.service.core.board.application.command.RemoveMemberByIdCommand)) && args(command)")
+    void evaluateRemoveBoardMemberById(RemoveMemberByIdCommand command) {
 
         UserDetails currentPrincipal = extractCurrentPrinciple();
 
@@ -81,8 +81,8 @@ public class BoardServiceAccessEvaluator {
         }
     }
 
-    @Before("execution(* de.x1c1b.taskcare.service.core.board.application.BoardService.execute(de.x1c1b.taskcare.service.core.board.application.command.ChangeBoardMemberRoleByIdCommand)) && args(command)")
-    void evaluateChangeBoardMemberRoleById(ChangeBoardMemberRoleByIdCommand command) {
+    @Before("execution(* de.x1c1b.taskcare.service.core.board.application.BoardService.execute(de.x1c1b.taskcare.service.core.board.application.command.UpdateMemberByIdCommand)) && args(command)")
+    void evaluateUpdateBoardMemberById(UpdateMemberByIdCommand command) {
 
         UserDetails currentPrincipal = extractCurrentPrinciple();
 

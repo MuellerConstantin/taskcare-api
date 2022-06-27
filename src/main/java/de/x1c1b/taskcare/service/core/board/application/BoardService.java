@@ -27,9 +27,15 @@ public interface BoardService {
 
     void execute(DeleteBoardByIdCommand command) throws EntityNotFoundException;
 
-    void execute(@Valid AddBoardMemberByIdCommand command) throws EntityNotFoundException, IsAlreadyMemberOfBoardException;
+    void execute(@Valid AddMemberByIdCommand command) throws EntityNotFoundException, IsAlreadyMemberOfBoardException;
 
-    void execute(@Valid RemoveBoardMemberByIdCommand command) throws EntityNotFoundException;
+    void execute(RemoveMemberByIdCommand command) throws EntityNotFoundException;
 
-    void execute(@Valid ChangeBoardMemberRoleByIdCommand command) throws EntityNotFoundException;
+    void execute(@Valid UpdateMemberByIdCommand command) throws EntityNotFoundException;
+
+    void execute(@Valid AddTaskByIdCommand command) throws EntityNotFoundException;
+
+    void execute(@Valid UpdateTaskByIdCommand command) throws EntityNotFoundException;
+
+    void execute(RemoveTaskByIdCommand command) throws EntityNotFoundException;
 }

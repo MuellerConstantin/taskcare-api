@@ -5,10 +5,7 @@ import de.x1c1b.taskcare.service.core.board.application.query.FindAllBoardsWithM
 import de.x1c1b.taskcare.service.core.board.application.query.FindBoardByIdQuery;
 import de.x1c1b.taskcare.service.core.board.application.query.HasBoardMemberQuery;
 import de.x1c1b.taskcare.service.core.board.application.query.HasBoardMemberWithRoleQuery;
-import de.x1c1b.taskcare.service.core.board.domain.Board;
-import de.x1c1b.taskcare.service.core.board.domain.BoardRepository;
-import de.x1c1b.taskcare.service.core.board.domain.Member;
-import de.x1c1b.taskcare.service.core.board.domain.Role;
+import de.x1c1b.taskcare.service.core.board.domain.*;
 import de.x1c1b.taskcare.service.core.common.application.EntityNotFoundException;
 import de.x1c1b.taskcare.service.core.common.domain.Page;
 import de.x1c1b.taskcare.service.core.common.domain.PageSettings;
@@ -17,6 +14,7 @@ import org.springframework.validation.annotation.Validated;
 
 import javax.validation.Valid;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -84,7 +82,7 @@ public class DefaultBoardService implements BoardService {
     }
 
     @Override
-    public void execute(@Valid AddBoardMemberByIdCommand command) throws EntityNotFoundException, IsAlreadyMemberOfBoardException {
+    public void execute(@Valid AddMemberByIdCommand command) throws EntityNotFoundException, IsAlreadyMemberOfBoardException {
         Board board = boardRepository.findById(command.getId()).orElseThrow(EntityNotFoundException::new);
 
         boolean alreadyContainsMember = board.getMembers().stream()
@@ -104,7 +102,7 @@ public class DefaultBoardService implements BoardService {
     }
 
     @Override
-    public void execute(@Valid RemoveBoardMemberByIdCommand command) throws EntityNotFoundException {
+    public void execute(RemoveMemberByIdCommand command) throws EntityNotFoundException {
         Board board = boardRepository.findById(command.getId()).orElseThrow(EntityNotFoundException::new);
 
         if (board.getMembers().stream().noneMatch(member ->
@@ -122,20 +120,86 @@ public class DefaultBoardService implements BoardService {
     }
 
     @Override
-    public void execute(ChangeBoardMemberRoleByIdCommand command) throws EntityNotFoundException {
+    public void execute(UpdateMemberByIdCommand command) throws EntityNotFoundException {
         Board board = boardRepository.findById(command.getId()).orElseThrow(EntityNotFoundException::new);
 
-        if (board.getMembers().stream().noneMatch(member ->
-                !member.getUsername().equals(command.getUsername()) &&
-                        member.getRole().equals(Role.ADMINISTRATOR))) {
-            // Ensures that the last admin cannot be removed and the board remains administrable
-            throw new BoardMustBeAdministrableException();
+        command.getRole().ifPresent(role -> {
+
+            if (board.getMembers().stream().noneMatch(member ->
+                    !member.getUsername().equals(command.getUsername()) &&
+                            member.getRole().equals(Role.ADMINISTRATOR))) {
+                // Ensures that the last admin cannot be removed and the board remains administrable
+                throw new BoardMustBeAdministrableException();
+            }
+
+            Member member = board.getMembers().stream().filter(m -> m.getUsername().equals(command.getUsername()))
+                    .findFirst().orElseThrow(EntityNotFoundException::new);
+
+            member.setRole(Role.valueOf(role));
+        });
+
+        boardRepository.save(board);
+    }
+
+    @Override
+    public void execute(AddTaskByIdCommand command) throws EntityNotFoundException {
+        Board board = boardRepository.findById(command.getId()).orElseThrow(EntityNotFoundException::new);
+
+        if (null == board.getTasks()) {
+            board.setTasks(new ArrayList<>());
         }
 
-        Member member = board.getMembers().stream().filter(m -> m.getUsername().equals(command.getUsername()))
+        board.getTasks().add(Task.builder()
+                .id(UUID.randomUUID())
+                .name(command.getName())
+                .description(command.getDescription().orElse(null))
+                .createdAt(OffsetDateTime.now())
+                .createdBy(command.getCreator())
+                .status(ProcessingStatus.OPENED)
+                .expiresAt(command.getExpiresAt().orElse(null))
+                .priority(command.getPriority().orElse(null))
+                .responsible(command.getResponsible().orElse(null))
+                .build());
+
+        boardRepository.save(board);
+    }
+
+    @Override
+    public void execute(UpdateTaskByIdCommand command) throws EntityNotFoundException {
+        Board board = boardRepository.findById(command.getId()).orElseThrow(EntityNotFoundException::new);
+
+        Task task = board.getTasks().stream().filter(t -> t.getId().equals(command.getTaskId()))
                 .findFirst().orElseThrow(EntityNotFoundException::new);
 
-        member.setRole(Role.valueOf(command.getRole()));
+        command.getName().ifPresent(task::setName);
+        command.getStatus().ifPresent(status -> task.setStatus(ProcessingStatus.valueOf(status)));
+
+        if (command.getDescription().isPresent() || command.isDescriptionDirty()) {
+            task.setDescription(command.getDescription().orElse(null));
+        }
+
+        if (command.getExpiresAt().isPresent() || command.isExpiresAtDirty()) {
+            task.setExpiresAt(command.getExpiresAt().orElse(null));
+        }
+
+        if (command.getPriority().isPresent() || command.isPriorityDirty()) {
+            task.setPriority(command.getPriority().orElse(null));
+        }
+
+        if (command.getResponsible().isPresent() || command.isResponsibleDirty()) {
+            task.setResponsible(command.getResponsible().orElse(null));
+        }
+
+        boardRepository.save(board);
+    }
+
+    @Override
+    public void execute(RemoveTaskByIdCommand command) throws EntityNotFoundException {
+        Board board = boardRepository.findById(command.getId()).orElseThrow(EntityNotFoundException::new);
+
+        if (!board.getTasks().removeIf(task -> task.getId().equals(command.getTaskId()))) {
+            throw new EntityNotFoundException();
+        }
 
         boardRepository.save(board);
     }
