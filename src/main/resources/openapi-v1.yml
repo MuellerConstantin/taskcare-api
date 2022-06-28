@@ -1,0 +1,1160 @@
+openapi: 3.0.3
+info:
+  title: TaskCare
+  description: >
+    This is the RESTful API of the TaskCare backend service. Via this interface it is possible to call up data from
+    the task management platform synchronously. This includes user management and the management of tasks grouped
+    in boards.
+  version: v1
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  contact:
+    name: "0x1C1B"
+    url: https://github.com/0x1C1B
+servers:
+  - url: http://localhost:8080/v1
+    description: Local Development Server
+tags:
+  - name: User
+    description: Allows user accounts to be managed.
+  - name: Board
+    description: Provides access to the created boards.
+  - name: Task
+    description: Allows access to individual tasks managed in boards.
+  - name: Member
+    description: Lets you manage the memberships of users in a board.
+  - name: Token
+    description: Allows tokens to be managed for authentication purposes.
+paths:
+  /users:
+    get:
+      tags:
+        - User
+      summary: Fetchs all available users
+      description: >
+        Requests a list of all available users. This list is divided into so-called pages via paging in order to let
+        the client deal with large collections.
+      parameters:
+        - name: page
+          in: query
+          description: Zero based index of page to load.
+          required: false
+          schema:
+            type: integer
+            example: 0
+        - name: perPage
+          in: query
+          description: Number of elements per page.
+          required: false
+          schema:
+            type: integer
+            example: 25
+      responses:
+        200:
+          description: Successfully fetched all available users.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserPageDTO"
+              example:
+                page: 0
+                perPage: 25
+                totalElements: 1
+                totalPages: 1
+                content:
+                  - username: maxi123
+                    email: m.mustermann@gmail.com
+                    firstName: Maximilian
+                    lastName: Mustermann
+        401:
+          $ref: "#/components/responses/Unauthenticated"
+    post:
+      tags:
+        - User
+      summary: Creates a new user
+      description: Create a new user account.
+      security: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateUserDTO"
+            example:
+              username: maxi123
+              email: m.mustermann@gmail.com
+              password: Abc123
+              firstName: Maximilian
+              lastName: Mustermann
+      responses:
+        201:
+          description: Successfully created the new user.
+        422:
+          $ref: "#/components/responses/UnprocessableEntity"
+  /users/{username}:
+    get:
+      tags:
+        - User
+      summary: Fetchs a single user
+      description: Allows reading of a single user and their details.
+      parameters:
+        - name: username
+          in: path
+          description: Unique identifier of the user.
+          required: true
+          schema:
+            type: string
+            format: username
+            example: maxi123
+      responses:
+        200:
+          description: Successfully fetched the selected user.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserDTO"
+              example:
+                username: maxi123
+                email: m.mustermann@gmail.com
+                firstName: Maximilian
+                lastName: Mustermann
+        404:
+          $ref: "#/components/responses/NotFound"
+        401:
+          $ref: "#/components/responses/Unauthenticated"
+    patch:
+      tags:
+        - User
+      summary: Updates a single user
+      description: Allows subsequent modification of a single user.
+      parameters:
+        - name: username
+          in: path
+          description: Unique identifier of the user.
+          required: true
+          schema:
+            type: string
+            format: username
+            example: maxi123
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateUserDTO"
+            example:
+              email: m.mustermann@web.de
+      responses:
+        204:
+          description: Successfully updated the selected user.
+        422:
+          $ref: "#/components/responses/UnprocessableEntity"
+        403:
+          $ref: "#/components/responses/AccessDenied"
+        404:
+          $ref: "#/components/responses/NotFound"
+        401:
+          $ref: "#/components/responses/Unauthenticated"
+    delete:
+      tags:
+        - User
+      summary: Deletes a single user
+      description: Allows deleting user accounts.
+      parameters:
+        - name: username
+          in: path
+          description: Unique identifier of the user.
+          required: true
+          schema:
+            type: string
+            format: username
+            example: maxi123
+      responses:
+        204:
+          description: Successfully deleted the selected user.
+        403:
+          $ref: "#/components/responses/AccessDenied"
+        404:
+          $ref: "#/components/responses/NotFound"
+        401:
+          $ref: "#/components/responses/Unauthenticated"
+  /auth/user:
+    get:
+      tags:
+        - User
+      summary: Allows loading of the currently authenticated user.
+      description: Returns the account details of the currently authenticated user.
+      responses:
+        200:
+          description: Successfully fetched tthe authenticated user.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserPageDTO"
+              example:
+                username: maxi123
+                email: m.mustermann@gmail.com
+                firstName: Maximilian
+                lastName: Mustermann
+        401:
+          $ref: "#/components/responses/Unauthenticated"
+  /auth/token:
+    post:
+      tags:
+        - Token
+      summary: Requests an access token
+      description: Requests a JWT access token in exchange for the credentials.
+      security: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CredentialsDTO"
+            example:
+              username: maxi123
+              password: Abc123
+      responses:
+        200:
+          description: Successfully fetched the authenticated user.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TokenDTO"
+              example:
+                type: Bearer
+                token: >
+                  eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJtYXhpMTIzIiwiaWF0IjoxNjU2MzM1ODg2LCJleHAiOjE2NTYzMzY0ODZ9.p4KjWLKOsgly
+                  J4Dqme3fPAkqtsf0jsksPr6Y-0pZe3hPYUdWz18eKius8fmijsQFf-5lxVM4kQLKBI4tmBQ3Dw
+        422:
+          $ref: "#/components/responses/UnprocessableEntity"
+        401:
+          $ref: "#/components/responses/Unauthenticated"
+  /users/{username}/boards:
+    get:
+      tags:
+        - Board
+      summary: Fetchs all boards of a user
+      description: >
+        All of a user's boards can be read out here. However, the security policy only allows reading for your own user.
+        The available collection of all boards the user is a member of supports paging.
+      parameters:
+        - name: username
+          in: path
+          description: Unique identifier of the user.
+          required: true
+          schema:
+            type: string
+            format: username
+            example: maxi123
+        - name: page
+          in: query
+          description: Zero based index of page to load.
+          required: false
+          schema:
+            type: integer
+            example: 0
+        - name: perPage
+          in: query
+          description: Number of elements per page.
+          required: false
+          schema:
+            type: integer
+            example: 25
+      responses:
+        200:
+          description: Successfully fetched all available boards.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BoardPageDTO"
+              example:
+                page: 0
+                perPage: 25
+                totalElements: 1
+                totalPages: 1
+                content:
+                  - id: 3377cf8f-da29-4aa7-9036-91951b8fce87
+                    name: Some board
+                    description: A detailed description.
+                    createdAt: 2022-06-27T15:18:16.706776+02:00
+                    createdBy: maxi123
+        401:
+          $ref: "#/components/responses/Unauthenticated"
+        403:
+          $ref: "#/components/responses/AccessDenied"
+  /boards:
+    post:
+      tags:
+        - Board
+      summary: Creates a new board
+      description: Create a new task board.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateBoardDTO"
+            example:
+              name: Some board
+              description: A detailed description.
+      responses:
+        201:
+          description: Successfully created the new board.
+        422:
+          $ref: "#/components/responses/UnprocessableEntity"
+        401:
+          $ref: "#/components/responses/Unauthenticated"
+  /boards/{boardId}:
+    get:
+      tags:
+        - Board
+      summary: Fetchs a single board
+      description: Allows reading of a single board and its details.
+      parameters:
+        - name: boardId
+          in: path
+          description: Unique identifier of the board.
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 3377cf8f-da29-4aa7-9036-91951b8fce87
+      responses:
+        200:
+          description: Successfully fetched the selected board.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BoardDTO"
+              example:
+                id: 3377cf8f-da29-4aa7-9036-91951b8fce87
+                name: Some board
+                description: A detailed description.
+                createdAt: 2022-06-27T15:18:16.706776+02:00
+                createdBy: maxi123
+        404:
+          $ref: "#/components/responses/NotFound"
+        401:
+          $ref: "#/components/responses/Unauthenticated"
+        403:
+          $ref: "#/components/responses/AccessDenied"
+    patch:
+      tags:
+        - Board
+      summary: Updates a single board
+      description: Allows subsequent modification of a single board.
+      parameters:
+        - name: boardId
+          in: path
+          description: Unique identifier of the board.
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 3377cf8f-da29-4aa7-9036-91951b8fce87
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateBoardDTO"
+            example:
+              description: Some other description.
+      responses:
+        204:
+          description: Successfully updated the selected board.
+        422:
+          $ref: "#/components/responses/UnprocessableEntity"
+        403:
+          $ref: "#/components/responses/AccessDenied"
+        404:
+          $ref: "#/components/responses/NotFound"
+        401:
+          $ref: "#/components/responses/Unauthenticated"
+    delete:
+      tags:
+        - Board
+      summary: Deletes a single board
+      description: Allows deleting boards.
+      parameters:
+        - name: boardId
+          in: path
+          description: Unique identifier of the board.
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 3377cf8f-da29-4aa7-9036-91951b8fce87
+      responses:
+        204:
+          description: Successfully deleted the selected board.
+        403:
+          $ref: "#/components/responses/AccessDenied"
+        404:
+          $ref: "#/components/responses/NotFound"
+        401:
+          $ref: "#/components/responses/Unauthenticated"
+  /boards/{boardId}/tasks:
+    get:
+      tags:
+        - Task
+      summary: Fetchs all tasks of a board
+      description: Allows reading all available tasks of a board.
+      parameters:
+        - name: boardId
+          in: path
+          description: Unique identifier of the board.
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 3377cf8f-da29-4aa7-9036-91951b8fce87
+      responses:
+        200:
+          description: Successfully fetched all tasks.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/BoardDTO"
+              example:
+                - id: e3eb92b8-1f35-4874-aaac-22d0c0f8f62f
+                  name: Some task
+                  status: OPENED
+                  createdAt: 2022-06-27T15:18:16.706776+02:00
+                  createdBy: maxi123
+        404:
+          $ref: "#/components/responses/NotFound"
+        401:
+          $ref: "#/components/responses/Unauthenticated"
+        403:
+          $ref: "#/components/responses/AccessDenied"
+    post:
+      tags:
+        - Task
+      summary: Creates a new task for a board
+      description: Create a new task and associate it with a board.
+      parameters:
+        - name: boardId
+          in: path
+          description: Unique identifier of the board.
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 3377cf8f-da29-4aa7-9036-91951b8fce87
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateTaskDTO"
+            example:
+              name: Some task
+      responses:
+        201:
+          description: Successfully created the new task.
+        422:
+          $ref: "#/components/responses/UnprocessableEntity"
+        401:
+          $ref: "#/components/responses/Unauthenticated"
+        403:
+          $ref: "#/components/responses/AccessDenied"
+  /boards/{boardId}/tasks/{taskId}:
+    get:
+      tags:
+        - Task
+      summary: Fetchs a single task of a board
+      description: Allows reading a single task of a board.
+      parameters:
+        - name: boardId
+          in: path
+          description: Unique identifier of the board.
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 3377cf8f-da29-4aa7-9036-91951b8fce87
+        - name: taskId
+          in: path
+          description: Unique identifier of the task.
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: e3eb92b8-1f35-4874-aaac-22d0c0f8f62f
+      responses:
+        200:
+          description: Successfully fetched the selected task.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TaskDTO"
+              example:
+                id: e3eb92b8-1f35-4874-aaac-22d0c0f8f62f
+                name: Some task
+                status: OPENED
+                createdAt: 2022-06-27T15:18:16.706776+02:00
+                createdBy: maxi123
+        404:
+          $ref: "#/components/responses/NotFound"
+        401:
+          $ref: "#/components/responses/Unauthenticated"
+        403:
+          $ref: "#/components/responses/AccessDenied"
+    patch:
+      tags:
+        - Task
+      summary: Updates a single task of a board
+      description: Allows subsequent modification of a single task.
+      parameters:
+        - name: boardId
+          in: path
+          description: Unique identifier of the board.
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 3377cf8f-da29-4aa7-9036-91951b8fce87
+        - name: taskId
+          in: path
+          description: Unique identifier of the task.
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: e3eb92b8-1f35-4874-aaac-22d0c0f8f62f
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateTaskDTO"
+            example:
+              status: FINISHED
+      responses:
+        204:
+          description: Successfully updated the selected task.
+        422:
+          $ref: "#/components/responses/UnprocessableEntity"
+        403:
+          $ref: "#/components/responses/AccessDenied"
+        404:
+          $ref: "#/components/responses/NotFound"
+        401:
+          $ref: "#/components/responses/Unauthenticated"
+    delete:
+      tags:
+        - Task
+      summary: Deletes a single task of a board
+      description: Allows deleting tasks.
+      parameters:
+        - name: boardId
+          in: path
+          description: Unique identifier of the board.
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 3377cf8f-da29-4aa7-9036-91951b8fce87
+        - name: taskId
+          in: path
+          description: Unique identifier of the task.
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: e3eb92b8-1f35-4874-aaac-22d0c0f8f62f
+      responses:
+        204:
+          description: Successfully deleted the selected task.
+        403:
+          $ref: "#/components/responses/AccessDenied"
+        404:
+          $ref: "#/components/responses/NotFound"
+        401:
+          $ref: "#/components/responses/Unauthenticated"
+  /boards/{boardId}/members:
+    get:
+      tags:
+        - Member
+      summary: Fetchs all members of a board
+      description: Allows reading all available members of a board.
+      parameters:
+        - name: boardId
+          in: path
+          description: Unique identifier of the board.
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 3377cf8f-da29-4aa7-9036-91951b8fce87
+      responses:
+        200:
+          description: Successfully fetched all members.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MemberDTO"
+              example:
+                - username: maxi123
+                  role: ADMINISTRATOR
+        404:
+          $ref: "#/components/responses/NotFound"
+        401:
+          $ref: "#/components/responses/Unauthenticated"
+        403:
+          $ref: "#/components/responses/AccessDenied"
+    post:
+      tags:
+        - Member
+      summary: Creates a new member for a board
+      description: Create a new member for a board.
+      parameters:
+        - name: boardId
+          in: path
+          description: Unique identifier of the board.
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 3377cf8f-da29-4aa7-9036-91951b8fce87
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateMemberDTO"
+            example:
+              username: maxi123
+              role: ADMINISTRATOR
+      responses:
+        201:
+          description: Successfully created the new member.
+        422:
+          $ref: "#/components/responses/UnprocessableEntity"
+        401:
+          $ref: "#/components/responses/Unauthenticated"
+        403:
+          $ref: "#/components/responses/AccessDenied"
+  /boards/{boardId}/members/{username}:
+    get:
+      tags:
+        - Member
+      summary: Fetchs a single member of a board
+      description: Allows reading a single member of a board.
+      parameters:
+        - name: boardId
+          in: path
+          description: Unique identifier of the board.
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 3377cf8f-da29-4aa7-9036-91951b8fce87
+        - name: username
+          in: path
+          description: Unique identifier of the member.
+          required: true
+          schema:
+            type: string
+            format: username
+            example: maxi123
+      responses:
+        200:
+          description: Successfully fetched the selected member.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MemberDTO"
+              example:
+                username: maxi123
+                role: ADMINISTRATOR
+        404:
+          $ref: "#/components/responses/NotFound"
+        401:
+          $ref: "#/components/responses/Unauthenticated"
+        403:
+          $ref: "#/components/responses/AccessDenied"
+    patch:
+      tags:
+        - Member
+      summary: Updates a single member of a board
+      description: Allows subsequent modification of a single member.
+      parameters:
+        - name: boardId
+          in: path
+          description: Unique identifier of the member.
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 3377cf8f-da29-4aa7-9036-91951b8fce87
+        - name: username
+          in: path
+          description: Unique identifier of the member.
+          required: true
+          schema:
+            type: string
+            format: username
+            example: maxi123
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateMemberDTO"
+            example:
+              role: MAINTAINER
+      responses:
+        204:
+          description: Successfully updated the selected member.
+        422:
+          $ref: "#/components/responses/UnprocessableEntity"
+        403:
+          $ref: "#/components/responses/AccessDenied"
+        404:
+          $ref: "#/components/responses/NotFound"
+        401:
+          $ref: "#/components/responses/Unauthenticated"
+    delete:
+      tags:
+        - Member
+      summary: Deletes a single member of a board
+      description: Allows deleting board members.
+      parameters:
+        - name: boardId
+          in: path
+          description: Unique identifier of the board.
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 3377cf8f-da29-4aa7-9036-91951b8fce87
+        - name: username
+          in: path
+          description: Unique identifier of the member.
+          required: true
+          schema:
+            type: string
+            format: username
+            example: maxi123
+      responses:
+        204:
+          description: Successfully deleted the selected member.
+        403:
+          $ref: "#/components/responses/AccessDenied"
+        404:
+          $ref: "#/components/responses/NotFound"
+        401:
+          $ref: "#/components/responses/Unauthenticated"
+components:
+  schemas:
+    ErrorDTO:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The human-readable error message.
+        status:
+          type: integer
+          description: The HTTP status code number.
+        timestamp:
+          type: string
+          format: date-time
+          description: The time the error occurred.
+        path:
+          type: string
+          description: The endpoint path on which the error occurred.
+        details:
+          description: Further information on the error or its cause.
+          type: array
+          items:
+            type: object
+            properties:
+              message:
+                type: string
+                description: Details of the error.
+    PageDTO:
+      type: object
+      properties:
+        page:
+          type: integer
+          description: Zero-based index of the current page.
+        perPage:
+          type: integer
+          description: Number of elements per page.
+        totalElements:
+          type: integer
+          description: Number of all elements of the collection.
+        totalPages:
+          type: integer
+          description: Number of all pages into which the collection was divided.
+      required:
+        - page
+        - perPage
+        - totalElements
+        - totalPages
+    UserDTO:
+      type: object
+      properties:
+        username:
+          type: string
+          format: username
+          description: Unique username of user.
+        email:
+          type: string
+          format: email
+          description: Unique email to contact.
+        firstName:
+          type: string
+          description: The user's first name.
+        lastName:
+          type: string
+          description: The user's last name.
+      required:
+        - username
+        - email
+    UserPageDTO:
+      allOf:
+        - $ref: "#/components/schemas/PageDTO"
+        - type: object
+          properties:
+            content:
+              type: array
+              items:
+                $ref: "#/components/schemas/UserDTO"
+          required:
+            - content
+    CreateUserDTO:
+      type: object
+      properties:
+        username:
+          type: string
+          format: username
+          description: Unique username of user.
+          maxLength: 15
+          pattern: ^[a-zA-Z]([_\-a-zA-Z0-9]){3,13}[a-zA-Z0-9]$
+        email:
+          type: string
+          format: email
+          description: Unique email to contact.
+          maxLength: 1024
+        password:
+          type: string
+          description: The user's password.
+          maxLength: 256
+          pattern: ^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{6,}$
+        firstName:
+          type: string
+          description: The user's first name.
+          maxLength: 100
+          minLength: 1
+        lastName:
+          type: string
+          description: The user's last name.
+          maxLength: 100
+          minLength: 1
+      required:
+        - username
+        - email
+        - password
+    UpdateUserDTO:
+      type: object
+      properties:
+        username:
+          type: string
+          format: username
+          description: Unique username of user.
+          maxLength: 15
+          pattern: ^[a-zA-Z]([_\-a-zA-Z0-9]){3,13}[a-zA-Z0-9]$
+        email:
+          type: string
+          format: email
+          description: Unique email to contact.
+          maxLength: 1024
+        password:
+          type: string
+          description: The user's password.
+          maxLength: 256
+          pattern: ^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{6,}$
+        firstName:
+          type: string
+          description: The user's first name.
+          maxLength: 100
+          minLength: 1
+        lastName:
+          type: string
+          description: The user's last name.
+          maxLength: 100
+          minLength: 1
+    CredentialsDTO:
+      type: object
+      properties:
+        username:
+          type: string
+          format: username
+          description: The name of the user to log in.
+          maxLength: 15
+          pattern: ^[a-zA-Z]([_\-a-zA-Z0-9]){3,13}[a-zA-Z0-9]$
+        password:
+          type: string
+          description: The user's password.
+          maxLength: 256
+          pattern: ^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{6,}$
+      required:
+        - username
+        - password
+    TokenDTO:
+      type: object
+      properties:
+        type:
+          type: string
+          description: Type of returned token.
+        token:
+          type: string
+          description: The actual token.
+      required:
+        - type
+        - token
+    BoardDTO:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier of board.
+        name:
+          type: string
+          description: Name of the board.
+        description:
+          type: string
+          description: Brief description of the board.
+        createdAt:
+          type: string
+          format: date-time
+          description: Time of creation of the board.
+        createdBy:
+          type: string
+          format: username
+          description: Creator username.
+      required:
+        - id
+        - name
+        - createdAt
+        - createdBy
+    BoardPageDTO:
+      allOf:
+        - $ref: "#/components/schemas/PageDTO"
+        - type: object
+          properties:
+            content:
+              type: array
+              items:
+                $ref: "#/components/schemas/BoardDTO"
+          required:
+            - content
+    CreateBoardDTO:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the board.
+          maxLength: 100
+        description:
+          type: string
+          description: Brief description of the board.
+          maxLength: 2000
+      required:
+        - name
+    UpdateBoardDTO:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the board.
+          maxLength: 100
+        description:
+          type: string
+          description: Brief description of the board.
+          maxLength: 2000
+    TaskDTO:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier of task.
+        name:
+          type: string
+          description: Name of the task.
+        description:
+          type: string
+          description: Brief description of the task.
+        createdAt:
+          type: string
+          format: date-time
+          description: Time of creation of the task.
+        createdBy:
+          type: string
+          format: username
+          description: Creator username.
+        priority:
+          type: integer
+          description: Priority of the task on a scale from 1 to 10.
+        expiresAt:
+          type: string
+          format: date-time
+          description: Time by which the task must be completed.
+        status:
+          type: string
+          enum: [ OPENED, IN_PROGRESS, FINISHED ]
+          description: Processing status of the task.
+        responsible:
+          type: string
+          format: username
+          description: Username of responsible user.
+      required:
+        - id
+        - name
+        - createdAt
+        - createdBy
+        - status
+    CreateTaskDTO:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the task.
+          maxLength: 100
+        description:
+          type: string
+          description: Brief description of the task.
+          maxLength: 2000
+        priority:
+          type: integer
+          description: Priority of the task on a scale from 1 to 10.
+          minimum: 0
+          maximum: 10
+        expiresAt:
+          type: string
+          format: date-time
+          description: Time by which the task must be completed.
+        responsible:
+          type: string
+          format: username
+          description: Username of responsible user.
+          maxLength: 15
+          pattern: ^[a-zA-Z]([_\-a-zA-Z0-9]){3,13}[a-zA-Z0-9]$
+      required:
+        - name
+    UpdateTaskDTO:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the task.
+          maxLength: 100
+        description:
+          type: string
+          description: Brief description of the task.
+          maxLength: 2000
+        priority:
+          type: integer
+          description: Priority of the task on a scale from 1 to 10.
+          minimum: 0
+          maximum: 10
+        expiresAt:
+          type: string
+          format: date-time
+          description: Time by which the task must be completed.
+        status:
+          type: string
+          enum: [ OPENED, IN_PROGRESS, FINISHED ]
+          description: Processing status of the task.
+        responsible:
+          type: string
+          format: username
+          description: Username of responsible user.
+          maxLength: 15
+          pattern: ^[a-zA-Z]([_\-a-zA-Z0-9]){3,13}[a-zA-Z0-9]$
+    MemberDTO:
+      type: object
+      properties:
+        username:
+          type: string
+          format: username
+          description: Username of member.
+        role:
+          type: string
+          enum: [ ADMINISTRATOR, MAINTAINER, USER, VISITOR ]
+          description: The user's role within a board.
+      required:
+        - username
+        - role
+    CreateMemberDTO:
+      type: object
+      properties:
+        username:
+          type: string
+          format: username
+          description: Username of member.
+          maxLength: 15
+          pattern: ^[a-zA-Z]([_\-a-zA-Z0-9]){3,13}[a-zA-Z0-9]$
+        role:
+          type: string
+          enum: [ ADMINISTRATOR, MAINTAINER, USER, VISITOR ]
+          description: The user's role within a board.
+      required:
+        - username
+        - role
+    UpdateMemberDTO:
+      type: object
+      properties:
+        role:
+          type: string
+          enum: [ ADMINISTRATOR, MAINTAINER, USER, VISITOR ]
+          description: The user's role within a board.
+  responses:
+    InternalError:
+      description: An internal error has occurred on the server side.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorDTO"
+    NotFound:
+      description: The specified resource was not found.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorDTO"
+    UnprocessableEntity:
+      description: User input validation failed.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorDTO"
+    AccessDenied:
+      description: Access was denied due to insufficient rights.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorDTO"
+    Unauthenticated:
+      description: The access has been authenticated.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorDTO"
+  securitySchemes:
+    jwt:
+      type: http
+      scheme: bearer
+      bearerFormat: jwt
+security:
+  - jwt: [ ]
