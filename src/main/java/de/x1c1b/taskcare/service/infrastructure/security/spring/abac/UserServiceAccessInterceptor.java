@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 
 @Aspect
 @Component
-public class UserServiceAccessEvaluator {
+public class UserServiceAccessInterceptor {
 
     private static UserDetails extractCurrentPrinciple() {
 

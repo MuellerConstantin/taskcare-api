@@ -227,8 +227,6 @@ paths:
                 token: >
                   eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJtYXhpMTIzIiwiaWF0IjoxNjU2MzM1ODg2LCJleHAiOjE2NTYzMzY0ODZ9.p4KjWLKOsgly
                   J4Dqme3fPAkqtsf0jsksPr6Y-0pZe3hPYUdWz18eKius8fmijsQFf-5lxVM4kQLKBI4tmBQ3Dw
-        422:
-          $ref: "#/components/responses/UnprocessableEntity"
         401:
           $ref: "#/components/responses/Unauthenticated"
   /users/{username}/boards:

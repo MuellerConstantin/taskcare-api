@@ -1,10 +1,9 @@
 package de.x1c1b.taskcare.service.infrastructure.security.spring.jwt;
 
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import lombok.AllArgsConstructor;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -14,32 +13,21 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
+@AllArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     public static final String TOKEN_TYPE = "Bearer";
 
-    private final UserDetailsService userDetailsService;
-    private final JwtTokenProvider jwtTokenProvider;
-
-    public JwtAuthenticationFilter(UserDetailsService userDetailsService, JwtTokenProvider jwtTokenProvider) {
-        this.userDetailsService = userDetailsService;
-        this.jwtTokenProvider = jwtTokenProvider;
-    }
+    private final AuthenticationManager authenticationManager;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
         String jwt = parseToken(request);
 
-        if (null != jwt && jwtTokenProvider.validateToken(jwt)) {
+        if (null != jwt) {
 
-            String username = jwtTokenProvider.getSubjectFromToken(jwt);
-
-            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-            UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                    userDetails, null, userDetails.getAuthorities());
-            authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
+            Authentication authentication = authenticationManager.authenticate(new JwtAuthenticationToken(jwt));
             SecurityContextHolder.getContext().setAuthentication(authentication);
         }
 

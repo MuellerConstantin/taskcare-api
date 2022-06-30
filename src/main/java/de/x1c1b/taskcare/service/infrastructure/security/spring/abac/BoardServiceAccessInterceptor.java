@@ -19,12 +19,12 @@ import java.util.List;
 
 @Aspect
 @Component
-public class BoardServiceAccessEvaluator {
+public class BoardServiceAccessInterceptor {
 
     private final BoardRepository boardRepository;
 
     @Autowired
-    public BoardServiceAccessEvaluator(BoardRepository boardRepository) {
+    public BoardServiceAccessInterceptor(BoardRepository boardRepository) {
         this.boardRepository = boardRepository;
     }
 

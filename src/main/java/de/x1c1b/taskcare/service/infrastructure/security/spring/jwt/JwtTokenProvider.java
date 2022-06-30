@@ -1,6 +1,5 @@
 package de.x1c1b.taskcare.service.infrastructure.security.spring.jwt;
 
-import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,12 +34,7 @@ public class JwtTokenProvider {
         return Jwts.parser().setSigningKey(jwtProperties.getSecret()).parseClaimsJws(token).getBody().getSubject();
     }
 
-    public boolean validateToken(String token) {
-        try {
-            Jwts.parser().setSigningKey(jwtProperties.getSecret()).parseClaimsJws(token);
-            return true;
-        } catch (JwtException exc) {
-            return false;
-        }
+    public void validateToken(String token) {
+        Jwts.parser().setSigningKey(jwtProperties.getSecret()).parseClaimsJws(token);
     }
 }
