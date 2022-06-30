@@ -2,9 +2,13 @@ package de.x1c1b.taskcare.service.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.x1c1b.taskcare.service.infrastructure.security.spring.ajax.AjaxAuthenticationProcessingFilterConfigurer;
-import de.x1c1b.taskcare.service.infrastructure.security.spring.jwt.JwtAuthenticationFilterConfigurer;
-import de.x1c1b.taskcare.service.infrastructure.security.spring.jwt.JwtAuthenticationProvider;
-import de.x1c1b.taskcare.service.infrastructure.security.spring.jwt.JwtTokenProvider;
+import de.x1c1b.taskcare.service.infrastructure.security.spring.token.AccessToken;
+import de.x1c1b.taskcare.service.infrastructure.security.spring.token.RefreshToken;
+import de.x1c1b.taskcare.service.infrastructure.security.spring.token.TokenProvider;
+import de.x1c1b.taskcare.service.infrastructure.security.spring.token.auth.AccessTokenAuthenticationProvider;
+import de.x1c1b.taskcare.service.infrastructure.security.spring.token.auth.RefreshTokenAuthenticationProvider;
+import de.x1c1b.taskcare.service.infrastructure.security.spring.token.filter.AccessTokenAuthenticationFilterConfigurer;
+import de.x1c1b.taskcare.service.infrastructure.security.spring.token.filter.RefreshTokenAuthenticationProcessingFilterConfigurer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -38,19 +42,25 @@ public class SecurityConfig {
                                            ObjectMapper objectMapper,
                                            UserDetailsService userDetailsService,
                                            PasswordEncoder passwordEncoder,
-                                           JwtTokenProvider jwtTokenProvider) throws Exception {
+                                           TokenProvider<AccessToken> accessTokenProvider,
+                                           TokenProvider<RefreshToken> refreshTokenProvider) throws Exception {
 
         DaoAuthenticationProvider daoAuthenticationProvider = new DaoAuthenticationProvider();
         daoAuthenticationProvider.setUserDetailsService(userDetailsService);
         daoAuthenticationProvider.setPasswordEncoder(passwordEncoder);
 
-        JwtAuthenticationProvider jwtAuthenticationProvider = new JwtAuthenticationProvider();
-        jwtAuthenticationProvider.setUserDetailsService(userDetailsService);
-        jwtAuthenticationProvider.setJwtTokenProvider(jwtTokenProvider);
+        AccessTokenAuthenticationProvider accessTokenAuthenticationProvider = new AccessTokenAuthenticationProvider();
+        accessTokenAuthenticationProvider.setUserDetailsService(userDetailsService);
+        accessTokenAuthenticationProvider.setAccessTokenProvider(accessTokenProvider);
+
+        RefreshTokenAuthenticationProvider refreshTokenAuthenticationProvider = new RefreshTokenAuthenticationProvider();
+        refreshTokenAuthenticationProvider.setUserDetailsService(userDetailsService);
+        refreshTokenAuthenticationProvider.setRefreshTokenProvider(refreshTokenProvider);
 
         AuthenticationManagerBuilder authenticationManagerBuilder = http.getSharedObject(AuthenticationManagerBuilder.class);
         authenticationManagerBuilder.authenticationProvider(daoAuthenticationProvider);
-        authenticationManagerBuilder.authenticationProvider(jwtAuthenticationProvider);
+        authenticationManagerBuilder.authenticationProvider(accessTokenAuthenticationProvider);
+        authenticationManagerBuilder.authenticationProvider(refreshTokenAuthenticationProvider);
 
         AuthenticationManager authenticationManager = authenticationManagerBuilder.build();
 
@@ -70,15 +80,19 @@ public class SecurityConfig {
                 .authorizeRequests()
                 .antMatchers(HttpMethod.POST, "/v1/users")
                 .permitAll()
-                .antMatchers(HttpMethod.POST, "/v1/auth/token")
-                .permitAll()
                 .anyRequest()
                 .authenticated()
                 .and()
-                .apply(new JwtAuthenticationFilterConfigurer())
+                .apply(new AccessTokenAuthenticationFilterConfigurer())
                 .and()
                 .apply(new AjaxAuthenticationProcessingFilterConfigurer())
                 .requestMatcher(new AntPathRequestMatcher("/v1/auth/token", HttpMethod.POST.name()))
+                .authenticationFailureHandler(authenticationFailureHandler)
+                .authenticationSuccessHandler(authenticationSuccessHandler)
+                .objectMapper(objectMapper)
+                .and()
+                .apply(new RefreshTokenAuthenticationProcessingFilterConfigurer())
+                .requestMatcher(new AntPathRequestMatcher("/v1/auth/refresh", HttpMethod.POST.name()))
                 .authenticationFailureHandler(authenticationFailureHandler)
                 .authenticationSuccessHandler(authenticationSuccessHandler)
                 .objectMapper(objectMapper);

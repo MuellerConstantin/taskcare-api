@@ -1,5 +1,6 @@
-package de.x1c1b.taskcare.service.infrastructure.security.spring.jwt;
+package de.x1c1b.taskcare.service.infrastructure.security.spring.token.filter;
 
+import de.x1c1b.taskcare.service.infrastructure.security.spring.token.auth.AccessTokenAuthenticationToken;
 import lombok.AllArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
@@ -14,7 +15,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 @AllArgsConstructor
-public class JwtAuthenticationFilter extends OncePerRequestFilter {
+public class AccessTokenAuthenticationFilter extends OncePerRequestFilter {
 
     public static final String TOKEN_TYPE = "Bearer";
 
@@ -27,7 +28,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         if (null != jwt) {
 
-            Authentication authentication = authenticationManager.authenticate(new JwtAuthenticationToken(jwt));
+            Authentication authentication = authenticationManager.authenticate(new AccessTokenAuthenticationToken(jwt));
             SecurityContextHolder.getContext().setAuthentication(authentication);
         }
 

@@ -24,8 +24,8 @@ tags:
     description: Allows access to individual tasks managed in boards.
   - name: Member
     description: Lets you manage the memberships of users in a board.
-  - name: Token
-    description: Allows tokens to be managed for authentication purposes.
+  - name: Auth
+    description: Allows the client to authenticate themselves.
 paths:
   /users:
     get:
@@ -182,7 +182,7 @@ paths:
   /auth/user:
     get:
       tags:
-        - User
+        - Auth
       summary: Allows loading of the currently authenticated user.
       description: Returns the account details of the currently authenticated user.
       responses:
@@ -202,7 +202,7 @@ paths:
   /auth/token:
     post:
       tags:
-        - Token
+        - Auth
       summary: Requests an access token
       description: Requests a JWT access token in exchange for the credentials.
       security: [ ]
@@ -224,9 +224,46 @@ paths:
                 $ref: "#/components/schemas/TokenDTO"
               example:
                 type: Bearer
-                token: >
+                principal: maxi123
+                refreshToken: Z2xFlZIH8mw32hXYhmidIA==
+                accessToken: >
                   eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJtYXhpMTIzIiwiaWF0IjoxNjU2MzM1ODg2LCJleHAiOjE2NTYzMzY0ODZ9.p4KjWLKOsgly
                   J4Dqme3fPAkqtsf0jsksPr6Y-0pZe3hPYUdWz18eKius8fmijsQFf-5lxVM4kQLKBI4tmBQ3Dw
+                accessExpiresIn: 300000
+                refreshExpiresIn: 7200000
+        401:
+          $ref: "#/components/responses/Unauthenticated"
+  /auth/refresh:
+    post:
+      tags:
+        - Auth
+      summary: Renews the authentication
+      description: Renews authentication by requesting a new access token.
+      security: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RefreshSessionDTO"
+            example:
+              refreshToken: /QwSXxYuhkPmdwqSZQ4wjQ==
+      responses:
+        200:
+          description: Successfully fetched the authenticated user.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TokenDTO"
+              example:
+                type: Bearer
+                principal: maxi123
+                refreshToken: Z2xFlZIH8mw32hXYhmidIA==
+                accessToken: >
+                  eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJtYXhpMTIzIiwiaWF0IjoxNjU2MzM1ODg2LCJleHAiOjE2NTYzMzY0ODZ9.p4KjWLKOsgly
+                  J4Dqme3fPAkqtsf0jsksPr6Y-0pZe3hPYUdWz18eKius8fmijsQFf-5lxVM4kQLKBI4tmBQ3Dw
+                accessExpiresIn: 300000
+                refreshExpiresIn: 7200000
         401:
           $ref: "#/components/responses/Unauthenticated"
   /users/{username}/boards:
@@ -898,28 +935,49 @@ components:
           type: string
           format: username
           description: The name of the user to log in.
-          maxLength: 15
-          pattern: ^[a-zA-Z]([_\-a-zA-Z0-9]){3,13}[a-zA-Z0-9]$
         password:
           type: string
           description: The user's password.
-          maxLength: 256
-          pattern: ^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{6,}$
       required:
         - username
         - password
+    RefreshSessionDTO:
+      type: object
+      properties:
+        refreshToken:
+          type: string
+          description: A valid refresh token.
+      required:
+        - refreshToken
     TokenDTO:
       type: object
       properties:
         type:
           type: string
           description: Type of returned token.
-        token:
+        principal:
           type: string
-          description: The actual token.
+          format: username
+          description: The authenticated user.
+        accessToken:
+          type: string
+          description: The actual access token.
+        accessExpiresIn:
+          type: integer
+          description: Number of milliseconds for which the token is still valid.
+        refreshToken:
+          type: string
+          description: The actual refresh token.
+        refreshExpiresIn:
+          type: integer
+          description: Number of milliseconds for which the token is still valid.
       required:
         - type
-        - token
+        - principal
+        - accessToken
+        - refreshToken
+        - accessExpiresIn
+        - refreshExpiresIn
     BoardDTO:
       type: object
       properties:

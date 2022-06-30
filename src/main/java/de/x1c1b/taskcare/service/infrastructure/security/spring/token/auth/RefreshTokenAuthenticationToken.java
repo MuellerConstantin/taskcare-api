@@ -1,4 +1,4 @@
-package de.x1c1b.taskcare.service.infrastructure.security.spring.jwt;
+package de.x1c1b.taskcare.service.infrastructure.security.spring.token.auth;
 
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
@@ -6,28 +6,28 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 
-public class JwtAuthenticationToken extends AbstractAuthenticationToken {
+public class RefreshTokenAuthenticationToken extends AbstractAuthenticationToken {
 
-    private final String jwt;
+    private final String rawToken;
     private final UserDetails userDetails;
 
-    public JwtAuthenticationToken(String jwt) {
+    public RefreshTokenAuthenticationToken(String rawToken) {
         super(null);
-        this.jwt = jwt;
+        this.rawToken = rawToken;
         this.userDetails = null;
         this.setAuthenticated(false);
     }
 
-    public JwtAuthenticationToken(UserDetails userDetails, String jwt, Collection<? extends GrantedAuthority> authorities) {
+    public RefreshTokenAuthenticationToken(UserDetails userDetails, String rawToken, Collection<? extends GrantedAuthority> authorities) {
         super(authorities);
-        this.jwt = jwt;
+        this.rawToken = rawToken;
         this.userDetails = userDetails;
         super.setAuthenticated(true);
     }
 
     @Override
     public Object getCredentials() {
-        return jwt;
+        return rawToken;
     }
 
     @Override

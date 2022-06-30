@@ -1,4 +1,4 @@
-package de.x1c1b.taskcare.service.infrastructure.security.spring.ajax;
+package de.x1c1b.taskcare.service.infrastructure.security.spring.token.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -9,52 +9,46 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 
-public class AjaxAuthenticationProcessingFilterConfigurer extends AbstractHttpConfigurer<AjaxAuthenticationProcessingFilterConfigurer, HttpSecurity> {
+public class RefreshTokenAuthenticationProcessingFilterConfigurer extends AbstractHttpConfigurer<RefreshTokenAuthenticationProcessingFilterConfigurer, HttpSecurity> {
 
     private RequestMatcher requestMatcher;
     private AuthenticationSuccessHandler authenticationSuccessHandler;
     private AuthenticationFailureHandler authenticationFailureHandler;
     private ObjectMapper objectMapper;
-    private String usernameField = "username";
-    private String passwordField = "password";
+    private String refreshTokenField = "refreshToken";
 
     @Override
     public void configure(HttpSecurity http) {
         AuthenticationManager authenticationManager = http.getSharedObject(AuthenticationManager.class);
-        AjaxAuthenticationProcessingFilter filter = new AjaxAuthenticationProcessingFilter(requestMatcher,
+        RefreshTokenAuthenticationProcessingFilter filter = new RefreshTokenAuthenticationProcessingFilter(requestMatcher,
                 authenticationSuccessHandler, authenticationFailureHandler, objectMapper,
-                usernameField, passwordField, authenticationManager);
+                refreshTokenField, authenticationManager);
 
         http.addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class);
     }
 
-    public AjaxAuthenticationProcessingFilterConfigurer requestMatcher(RequestMatcher requestMatcher) {
+    public RefreshTokenAuthenticationProcessingFilterConfigurer requestMatcher(RequestMatcher requestMatcher) {
         this.requestMatcher = requestMatcher;
         return this;
     }
 
-    public AjaxAuthenticationProcessingFilterConfigurer authenticationSuccessHandler(AuthenticationSuccessHandler authenticationSuccessHandler) {
+    public RefreshTokenAuthenticationProcessingFilterConfigurer authenticationSuccessHandler(AuthenticationSuccessHandler authenticationSuccessHandler) {
         this.authenticationSuccessHandler = authenticationSuccessHandler;
         return this;
     }
 
-    public AjaxAuthenticationProcessingFilterConfigurer authenticationFailureHandler(AuthenticationFailureHandler authenticationFailureHandler) {
+    public RefreshTokenAuthenticationProcessingFilterConfigurer authenticationFailureHandler(AuthenticationFailureHandler authenticationFailureHandler) {
         this.authenticationFailureHandler = authenticationFailureHandler;
         return this;
     }
 
-    public AjaxAuthenticationProcessingFilterConfigurer objectMapper(ObjectMapper objectMapper) {
+    public RefreshTokenAuthenticationProcessingFilterConfigurer objectMapper(ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
         return this;
     }
 
-    public AjaxAuthenticationProcessingFilterConfigurer usernameField(String usernameField) {
-        this.usernameField = usernameField;
-        return this;
-    }
-
-    public AjaxAuthenticationProcessingFilterConfigurer passwordField(String passwordField) {
-        this.passwordField = passwordField;
+    public RefreshTokenAuthenticationProcessingFilterConfigurer refreshTokenField(String refreshTokenField) {
+        this.refreshTokenField = refreshTokenField;
         return this;
     }
 }
