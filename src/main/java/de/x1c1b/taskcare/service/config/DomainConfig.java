@@ -1,11 +1,14 @@
 package de.x1c1b.taskcare.service.config;
 
 import de.x1c1b.taskcare.service.core.board.application.BoardService;
+import de.x1c1b.taskcare.service.core.board.application.BoardServiceAccessInterceptor;
 import de.x1c1b.taskcare.service.core.board.application.DefaultBoardService;
 import de.x1c1b.taskcare.service.core.board.domain.BoardRepository;
-import de.x1c1b.taskcare.service.core.common.application.SecretEncoder;
+import de.x1c1b.taskcare.service.core.common.application.security.PrincipalDetailsContext;
+import de.x1c1b.taskcare.service.core.common.application.security.SecretEncoder;
 import de.x1c1b.taskcare.service.core.user.application.DefaultUserService;
 import de.x1c1b.taskcare.service.core.user.application.UserService;
+import de.x1c1b.taskcare.service.core.user.application.UserServiceAccessInterceptor;
 import de.x1c1b.taskcare.service.core.user.domain.UserRepository;
 import de.x1c1b.taskcare.service.infrastructure.persistence.jpa.JpaBoardRepository;
 import de.x1c1b.taskcare.service.infrastructure.persistence.jpa.JpaUserRepository;
@@ -13,6 +16,7 @@ import de.x1c1b.taskcare.service.infrastructure.persistence.jpa.entity.mapper.Bo
 import de.x1c1b.taskcare.service.infrastructure.persistence.jpa.entity.mapper.UserEntityMapper;
 import de.x1c1b.taskcare.service.infrastructure.persistence.jpa.repository.BoardEntityRepository;
 import de.x1c1b.taskcare.service.infrastructure.persistence.jpa.repository.UserEntityRepository;
+import de.x1c1b.taskcare.service.infrastructure.security.spring.SpringPrincipalDetailsContext;
 import de.x1c1b.taskcare.service.infrastructure.security.spring.SpringSecretEncoder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -27,6 +31,11 @@ public class DomainConfig {
     }
 
     @Bean
+    PrincipalDetailsContext springPrincipalDetailsContext() {
+        return new SpringPrincipalDetailsContext();
+    }
+
+    @Bean
     UserRepository jpaUserRepository(UserEntityRepository userEntityRepository, UserEntityMapper userEntityMapper) {
         return new JpaUserRepository(userEntityRepository, userEntityMapper);
     }
@@ -34,6 +43,11 @@ public class DomainConfig {
     @Bean
     UserService defaultUserService(UserRepository userRepository, SecretEncoder secretEncoder) {
         return new DefaultUserService(userRepository, secretEncoder);
+    }
+
+    @Bean
+    UserServiceAccessInterceptor userServiceAccessInterceptor(PrincipalDetailsContext principalDetailsContext) {
+        return new UserServiceAccessInterceptor(principalDetailsContext);
     }
 
     @Bean
@@ -46,5 +60,11 @@ public class DomainConfig {
     @Bean
     BoardService defaultBoardService(BoardRepository boardRepository) {
         return new DefaultBoardService(boardRepository);
+    }
+
+    @Bean
+    BoardServiceAccessInterceptor boardServiceAccessInterceptor(PrincipalDetailsContext principalDetailsContext,
+                                                                BoardRepository boardRepository) {
+        return new BoardServiceAccessInterceptor(principalDetailsContext, boardRepository);
     }
 }

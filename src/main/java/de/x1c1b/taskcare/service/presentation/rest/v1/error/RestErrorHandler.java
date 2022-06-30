@@ -3,6 +3,7 @@ package de.x1c1b.taskcare.service.presentation.rest.v1.error;
 import de.x1c1b.taskcare.service.core.board.application.BoardMustBeAdministrableException;
 import de.x1c1b.taskcare.service.core.board.application.IsAlreadyMemberOfBoardException;
 import de.x1c1b.taskcare.service.core.common.application.EntityNotFoundException;
+import de.x1c1b.taskcare.service.core.common.application.security.InsufficientPermissionsException;
 import de.x1c1b.taskcare.service.core.user.application.EmailAlreadyInUseException;
 import de.x1c1b.taskcare.service.core.user.application.UsernameAlreadyInUseException;
 import org.slf4j.Logger;
@@ -382,6 +383,20 @@ public class RestErrorHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<Object> handleAccessDenied(AccessDeniedException exc,
                                                      WebRequest request) {
+
+        RestError restError = RestError.builder()
+                .message("Permissions for access are missing.")
+                .timestamp(OffsetDateTime.now())
+                .status(HttpStatus.FORBIDDEN.value())
+                .path(((ServletWebRequest) request).getRequest().getServletPath())
+                .build();
+
+        return new ResponseEntity<>(restError, new HttpHeaders(), HttpStatus.valueOf(restError.getStatus()));
+    }
+
+    @ExceptionHandler(InsufficientPermissionsException.class)
+    public ResponseEntity<Object> handleInsufficientPermissions(InsufficientPermissionsException exc,
+                                                                WebRequest request) {
 
         RestError restError = RestError.builder()
                 .message("Permissions for access are missing.")

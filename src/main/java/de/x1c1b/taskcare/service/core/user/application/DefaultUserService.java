@@ -1,7 +1,7 @@
 package de.x1c1b.taskcare.service.core.user.application;
 
 import de.x1c1b.taskcare.service.core.common.application.EntityNotFoundException;
-import de.x1c1b.taskcare.service.core.common.application.SecretEncoder;
+import de.x1c1b.taskcare.service.core.common.application.security.SecretEncoder;
 import de.x1c1b.taskcare.service.core.common.domain.Page;
 import de.x1c1b.taskcare.service.core.common.domain.PageSettings;
 import de.x1c1b.taskcare.service.core.user.application.command.CreateUserCommand;
