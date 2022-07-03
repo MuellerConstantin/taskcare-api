@@ -89,10 +89,12 @@ public class SecurityConfig {
                 .authorizeRequests()
                 .antMatchers(HttpMethod.POST, "/v1/users")
                 .permitAll()
+                .antMatchers(HttpMethod.POST, "/v1/auth/token")
+                .permitAll()
+                .antMatchers(HttpMethod.POST, "/v1/auth/refresh")
+                .permitAll()
                 .anyRequest()
                 .authenticated()
-                .and()
-                .apply(new AccessTokenAuthenticationFilterConfigurer())
                 .and()
                 .apply(new AjaxAuthenticationProcessingFilterConfigurer())
                 .requestMatcher(new AntPathRequestMatcher("/v1/auth/token", HttpMethod.POST.name()))
@@ -104,7 +106,9 @@ public class SecurityConfig {
                 .requestMatcher(new AntPathRequestMatcher("/v1/auth/refresh", HttpMethod.POST.name()))
                 .authenticationFailureHandler(authenticationFailureHandler)
                 .authenticationSuccessHandler(authenticationSuccessHandler)
-                .objectMapper(objectMapper);
+                .objectMapper(objectMapper)
+                .and()
+                .apply(new AccessTokenAuthenticationFilterConfigurer());
 
         return http.build();
     }
