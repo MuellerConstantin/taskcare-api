@@ -48,7 +48,7 @@ public class DefaultBoardService implements BoardService {
     }
 
     @Override
-    public void execute(CreateBoardCommand command) {
+    public void execute(@Valid CreateBoardCommand command) {
         Board board = Board.builder()
                 .id(UUID.randomUUID())
                 .name(command.getName())
@@ -120,7 +120,7 @@ public class DefaultBoardService implements BoardService {
     }
 
     @Override
-    public void execute(UpdateMemberByIdCommand command) throws EntityNotFoundException {
+    public void execute(@Valid UpdateMemberByIdCommand command) throws EntityNotFoundException {
         Board board = boardRepository.findById(command.getId()).orElseThrow(EntityNotFoundException::new);
 
         command.getRole().ifPresent(role -> {
@@ -142,7 +142,7 @@ public class DefaultBoardService implements BoardService {
     }
 
     @Override
-    public void execute(AddTaskByIdCommand command) throws EntityNotFoundException {
+    public void execute(@Valid AddTaskByIdCommand command) throws EntityNotFoundException {
         Board board = boardRepository.findById(command.getId()).orElseThrow(EntityNotFoundException::new);
 
         if (null == board.getTasks()) {
@@ -165,7 +165,7 @@ public class DefaultBoardService implements BoardService {
     }
 
     @Override
-    public void execute(UpdateTaskByIdCommand command) throws EntityNotFoundException {
+    public void execute(@Valid UpdateTaskByIdCommand command) throws EntityNotFoundException {
         Board board = boardRepository.findById(command.getId()).orElseThrow(EntityNotFoundException::new);
 
         Task task = board.getTasks().stream().filter(t -> t.getId().equals(command.getTaskId()))

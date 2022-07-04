@@ -14,8 +14,16 @@ import java.util.List;
 public class PageDTO<T> {
 
     private List<T> content;
-    private int page;
-    private int perPage;
-    private long totalElements;
-    private long totalPages;
+    private PageInfoDTO info;
+
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Data
+    @Builder
+    public static class PageInfoDTO {
+        private int page;
+        private int perPage;
+        private long totalElements;
+        private long totalPages;
+    }
 }

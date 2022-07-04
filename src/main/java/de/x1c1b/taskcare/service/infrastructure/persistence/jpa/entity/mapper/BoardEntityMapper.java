@@ -32,8 +32,10 @@ public abstract class BoardEntityMapper {
     @Mapping(target = "createdAt", source = "boardEntity", qualifiedByName = "createdAtFromBoardEntity")
     public abstract Board mapToDomain(BoardEntity boardEntity);
 
-    @Mapping(source = "number", target = "page")
-    @Mapping(source = "size", target = "perPage")
+    @Mapping(source = "number", target = "info.page")
+    @Mapping(source = "size", target = "info.perPage")
+    @Mapping(source = "totalElements", target = "info.totalElements")
+    @Mapping(source = "totalPages", target = "info.totalPages")
     @Mapping(source = "content", target = "content", defaultExpression = "java(new ArrayList<>())")
     public abstract Page<Board> mapToDomain(org.springframework.data.domain.Page<BoardEntity> page);
 

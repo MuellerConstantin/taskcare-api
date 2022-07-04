@@ -20,8 +20,16 @@ import java.util.List;
 public class Page<E> {
 
     private List<E> content;
-    private int page;
-    private int perPage;
-    private long totalElements;
-    private long totalPages;
+    private PageInfo info;
+
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Data
+    @Builder
+    public static class PageInfo {
+        private int page;
+        private int perPage;
+        private long totalElements;
+        private long totalPages;
+    }
 }

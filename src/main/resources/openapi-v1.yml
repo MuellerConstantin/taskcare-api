@@ -818,23 +818,29 @@ components:
     PageDTO:
       type: object
       properties:
-        page:
-          type: integer
-          description: Zero-based index of the current page.
-        perPage:
-          type: integer
-          description: Number of elements per page.
-        totalElements:
-          type: integer
-          description: Number of all elements of the collection.
-        totalPages:
-          type: integer
-          description: Number of all pages into which the collection was divided.
+        info:
+          type: object
+          description: Contains the page information.
+          properties:
+            page:
+              type: integer
+              description: Zero-based index of the current page.
+            perPage:
+              type: integer
+              description: Number of elements per page.
+            totalElements:
+              type: integer
+              description: Number of all elements of the collection.
+            totalPages:
+              type: integer
+              description: Number of all pages into which the collection was divided.
+          required:
+            - page
+            - perPage
+            - totalElements
+            - totalPages
       required:
-        - page
-        - perPage
-        - totalElements
-        - totalPages
+        - info
     UserDTO:
       type: object
       properties:

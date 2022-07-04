@@ -14,8 +14,10 @@ public interface UserEntityMapper {
 
     User mapToDomain(UserEntity userEntity);
 
-    @Mapping(source = "number", target = "page")
-    @Mapping(source = "size", target = "perPage")
+    @Mapping(source = "number", target = "info.page")
+    @Mapping(source = "size", target = "info.perPage")
+    @Mapping(source = "totalElements", target = "info.totalElements")
+    @Mapping(source = "totalPages", target = "info.totalPages")
     @Mapping(source = "content", target = "content", defaultExpression = "java(new ArrayList<>())")
     Page<User> mapToDomain(org.springframework.data.domain.Page<UserEntity> page);
 }
