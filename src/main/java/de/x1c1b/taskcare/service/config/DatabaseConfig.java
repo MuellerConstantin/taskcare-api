@@ -18,6 +18,8 @@ public class DatabaseConfig {
         redisStandaloneConfiguration.setHostName(redisProperties.getHost());
         redisStandaloneConfiguration.setPort(redisProperties.getPort());
         redisStandaloneConfiguration.setDatabase(redisProperties.getDatabase());
+        redisStandaloneConfiguration.setUsername(redisProperties.getUsername());
+        redisStandaloneConfiguration.setPassword(redisProperties.getPassword());
 
         return new JedisConnectionFactory(redisStandaloneConfiguration);
     }
