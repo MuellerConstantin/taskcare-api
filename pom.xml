@@ -19,6 +19,7 @@
         <java.version>17</java.version>
         <mapstruct.version>1.5.2.Final</mapstruct.version>
         <jjwt.version>0.9.1</jjwt.version>
+        <rsql.version>2.1.0</rsql.version>
     </properties>
 
 	<dependencies>
@@ -86,6 +87,11 @@
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt</artifactId>
             <version>${jjwt.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>cz.jirutka.rsql</groupId>
+            <artifactId>rsql-parser</artifactId>
+            <version>${rsql.version}</version>
         </dependency>
 
         <dependency>

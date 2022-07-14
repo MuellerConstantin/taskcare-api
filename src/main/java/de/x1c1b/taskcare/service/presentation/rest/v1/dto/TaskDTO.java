@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.ser.OffsetDateTimeSerializer;
-import de.x1c1b.taskcare.service.core.board.domain.ProcessingStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -39,7 +38,7 @@ public class TaskDTO {
     @JsonSerialize(using = OffsetDateTimeSerializer.class)
     private OffsetDateTime expiresAt;
 
-    private ProcessingStatus status;
+    private String status;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String responsible;

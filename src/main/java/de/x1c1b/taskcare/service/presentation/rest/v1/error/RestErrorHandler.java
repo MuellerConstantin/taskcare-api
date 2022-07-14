@@ -1,5 +1,6 @@
 package de.x1c1b.taskcare.service.presentation.rest.v1.error;
 
+import cz.jirutka.rsql.parser.RSQLParserException;
 import de.x1c1b.taskcare.service.core.board.application.BoardMustBeAdministrableException;
 import de.x1c1b.taskcare.service.core.board.application.IsAlreadyMemberOfBoardException;
 import de.x1c1b.taskcare.service.core.common.application.EntityNotFoundException;
@@ -430,6 +431,19 @@ public class RestErrorHandler extends ResponseEntityExceptionHandler {
                 .message("The last remaining admin of a board cannot be removed.")
                 .timestamp(OffsetDateTime.now())
                 .status(HttpStatus.CONFLICT.value())
+                .path(((ServletWebRequest) request).getRequest().getServletPath())
+                .build();
+
+        return new ResponseEntity<>(restError, new HttpHeaders(), HttpStatus.valueOf(restError.getStatus()));
+    }
+
+    @ExceptionHandler(RSQLParserException.class)
+    public ResponseEntity<Object> handleRSQLParse(RSQLParserException exc, WebRequest request) {
+
+        RestError restError = RestError.builder()
+                .message("The filter to be applied has errors.")
+                .timestamp(OffsetDateTime.now())
+                .status(HttpStatus.BAD_REQUEST.value())
                 .path(((ServletWebRequest) request).getRequest().getServletPath())
                 .build();
 

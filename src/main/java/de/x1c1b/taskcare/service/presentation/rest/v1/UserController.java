@@ -1,5 +1,6 @@
 package de.x1c1b.taskcare.service.presentation.rest.v1;
 
+import de.x1c1b.taskcare.service.core.common.application.validation.NullOrNotEmpty;
 import de.x1c1b.taskcare.service.core.common.domain.Page;
 import de.x1c1b.taskcare.service.core.user.application.UserService;
 import de.x1c1b.taskcare.service.core.user.application.command.CreateUserCommand;
@@ -38,8 +39,9 @@ public class UserController {
 
     @GetMapping("/users")
     PageDTO<UserDTO> findAll(@RequestParam(required = false, defaultValue = "0") @Min(0) int page,
-                             @RequestParam(required = false, defaultValue = "25") @Min(0) int perPage) {
-        FindAllUsersQuery query = new FindAllUsersQuery(page, perPage);
+                             @RequestParam(required = false, defaultValue = "25") @Min(0) int perPage,
+                             @RequestParam(required = false) @NullOrNotEmpty String filter) {
+        FindAllUsersQuery query = new FindAllUsersQuery(page, perPage, filter);
         Page<User> result = userService.query(query);
         return userDTOMapper.mapToDTO(result);
     }

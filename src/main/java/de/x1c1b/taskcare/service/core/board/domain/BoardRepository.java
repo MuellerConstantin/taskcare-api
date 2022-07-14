@@ -1,5 +1,6 @@
 package de.x1c1b.taskcare.service.core.board.domain;
 
+import de.x1c1b.taskcare.service.core.common.domain.FilterSettings;
 import de.x1c1b.taskcare.service.core.common.domain.Page;
 import de.x1c1b.taskcare.service.core.common.domain.PageSettings;
 import de.x1c1b.taskcare.service.core.common.domain.Repository;
@@ -15,5 +16,5 @@ public interface BoardRepository extends Repository<UUID, Board> {
 
     boolean hasMemberWithAnyRole(UUID id, String username, List<Role> roles);
 
-    Page<Board> findAllWithMembership(String username, PageSettings pageSettings);
+    Page<Board> findAllWithMembership(String username, FilterSettings filterSettings, PageSettings pageSettings);
 }

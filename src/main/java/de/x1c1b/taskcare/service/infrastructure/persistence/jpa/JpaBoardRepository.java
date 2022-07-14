@@ -1,16 +1,21 @@
 package de.x1c1b.taskcare.service.infrastructure.persistence.jpa;
 
+import cz.jirutka.rsql.parser.RSQLParser;
+import cz.jirutka.rsql.parser.ast.Node;
 import de.x1c1b.taskcare.service.core.board.domain.Board;
 import de.x1c1b.taskcare.service.core.board.domain.BoardRepository;
 import de.x1c1b.taskcare.service.core.board.domain.Role;
+import de.x1c1b.taskcare.service.core.common.domain.FilterSettings;
 import de.x1c1b.taskcare.service.core.common.domain.Page;
 import de.x1c1b.taskcare.service.core.common.domain.PageSettings;
 import de.x1c1b.taskcare.service.infrastructure.persistence.jpa.entity.BoardEntity;
 import de.x1c1b.taskcare.service.infrastructure.persistence.jpa.entity.mapper.BoardEntityMapper;
 import de.x1c1b.taskcare.service.infrastructure.persistence.jpa.repository.BoardEntityRepository;
 import de.x1c1b.taskcare.service.infrastructure.persistence.jpa.repository.UserEntityRepository;
+import de.x1c1b.taskcare.service.infrastructure.persistence.jpa.rsql.JpaRSQLVisitor;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -42,9 +47,17 @@ public class JpaBoardRepository implements BoardRepository {
     }
 
     @Override
-    public Page<Board> findAllWithMembership(String username, PageSettings pageSettings) {
+    public Page<Board> findAllWithMembership(String username, FilterSettings filterSettings, PageSettings pageSettings) {
         var pageRequest = PageRequest.of(pageSettings.getPage(), pageSettings.getPerPage());
-        return boardEntityMapper.mapToDomain(boardEntityRepository.findAllByMembersUserUsername(username, pageRequest));
+
+        if (null != filterSettings.getFilter()) {
+            Node rootNode = new RSQLParser().parse(filterSettings.getFilter());
+            Specification<BoardEntity> specification = rootNode.accept(new JpaRSQLVisitor<>());
+
+            return boardEntityMapper.mapToDomain(boardEntityRepository.findAllByMembersUserUsername(username, specification, pageRequest));
+        } else {
+            return boardEntityMapper.mapToDomain(boardEntityRepository.findAllByMembersUserUsername(username, pageRequest));
+        }
     }
 
     @Override
@@ -54,9 +67,17 @@ public class JpaBoardRepository implements BoardRepository {
     }
 
     @Override
-    public Page<Board> findAll(PageSettings pageSettings) {
+    public Page<Board> findAll(FilterSettings filterSettings, PageSettings pageSettings) {
         var pageRequest = PageRequest.of(pageSettings.getPage(), pageSettings.getPerPage());
-        return boardEntityMapper.mapToDomain(boardEntityRepository.findAll(pageRequest));
+
+        if (null != filterSettings.getFilter()) {
+            Node rootNode = new RSQLParser().parse(filterSettings.getFilter());
+            Specification<BoardEntity> specification = rootNode.accept(new JpaRSQLVisitor<>());
+
+            return boardEntityMapper.mapToDomain(boardEntityRepository.findAll(specification, pageRequest));
+        } else {
+            return boardEntityMapper.mapToDomain(boardEntityRepository.findAll(pageRequest));
+        }
     }
 
     @Override

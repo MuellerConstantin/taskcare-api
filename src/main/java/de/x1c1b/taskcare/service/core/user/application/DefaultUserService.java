@@ -2,6 +2,7 @@ package de.x1c1b.taskcare.service.core.user.application;
 
 import de.x1c1b.taskcare.service.core.common.application.EntityNotFoundException;
 import de.x1c1b.taskcare.service.core.common.application.security.SecretEncoder;
+import de.x1c1b.taskcare.service.core.common.domain.FilterSettings;
 import de.x1c1b.taskcare.service.core.common.domain.Page;
 import de.x1c1b.taskcare.service.core.common.domain.PageSettings;
 import de.x1c1b.taskcare.service.core.user.application.command.CreateUserCommand;
@@ -42,10 +43,13 @@ public class DefaultUserService implements UserService {
 
     @Override
     public Page<User> query(FindAllUsersQuery query) {
-        return userRepository.findAll(PageSettings.builder()
-                .page(query.getPage())
-                .perPage(query.getPerPage())
-                .build());
+        return userRepository.findAll(FilterSettings.builder()
+                        .filter(query.getFilter())
+                        .build(),
+                PageSettings.builder()
+                        .page(query.getPage())
+                        .perPage(query.getPerPage())
+                        .build());
     }
 
     @Override

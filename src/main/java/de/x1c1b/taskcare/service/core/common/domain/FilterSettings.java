@@ -1,21 +1,18 @@
-package de.x1c1b.taskcare.service.core.user.application.query;
+package de.x1c1b.taskcare.service.core.common.domain;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Controls filter settings when accessing a collection.
+ */
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
 @Builder
-public class FindAllUsersQuery {
-
-    @Builder.Default
-    private int page = 0;
-
-    @Builder.Default
-    private int perPage = 25;
+public class FilterSettings {
 
     private String filter;
 }

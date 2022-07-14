@@ -12,7 +12,7 @@ public interface Repository<ID, E> {
 
     Optional<E> findById(ID id);
 
-    Page<E> findAll(PageSettings pageSettings);
+    Page<E> findAll(FilterSettings filterSettings, PageSettings pageSettings);
 
     boolean existsById(ID id);
 

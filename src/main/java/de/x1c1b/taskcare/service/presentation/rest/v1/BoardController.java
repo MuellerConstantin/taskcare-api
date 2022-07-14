@@ -7,6 +7,7 @@ import de.x1c1b.taskcare.service.core.board.application.command.UpdateBoardByIdC
 import de.x1c1b.taskcare.service.core.board.application.query.FindAllBoardsWithMembershipQuery;
 import de.x1c1b.taskcare.service.core.board.application.query.FindBoardByIdQuery;
 import de.x1c1b.taskcare.service.core.board.domain.Board;
+import de.x1c1b.taskcare.service.core.common.application.validation.NullOrNotEmpty;
 import de.x1c1b.taskcare.service.core.common.domain.Page;
 import de.x1c1b.taskcare.service.presentation.rest.v1.dto.BoardDTO;
 import de.x1c1b.taskcare.service.presentation.rest.v1.dto.CreateBoardDTO;
@@ -40,8 +41,9 @@ public class BoardController {
     @GetMapping("/users/{username}/boards")
     PageDTO<BoardDTO> findAllByMembership(@PathVariable("username") String username,
                                           @RequestParam(required = false, defaultValue = "0") @Min(0) int page,
-                                          @RequestParam(required = false, defaultValue = "25") @Min(0) int perPage) {
-        FindAllBoardsWithMembershipQuery query = new FindAllBoardsWithMembershipQuery(page, perPage, username);
+                                          @RequestParam(required = false, defaultValue = "25") @Min(0) int perPage,
+                                          @RequestParam(required = false) @NullOrNotEmpty String filter) {
+        FindAllBoardsWithMembershipQuery query = new FindAllBoardsWithMembershipQuery(page, perPage, filter, username);
         Page<Board> result = boardService.query(query);
         return boardDTOMapper.mapToDTO(result);
     }

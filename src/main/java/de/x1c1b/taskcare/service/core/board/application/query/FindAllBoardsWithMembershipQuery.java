@@ -17,5 +17,7 @@ public class FindAllBoardsWithMembershipQuery {
     @Builder.Default
     private int perPage = 25;
 
+    private String filter;
+
     private String username;
 }

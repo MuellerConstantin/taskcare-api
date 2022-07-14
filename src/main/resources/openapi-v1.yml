@@ -34,7 +34,7 @@ paths:
       summary: Fetchs all available users
       description: >
         Requests a list of all available users. This list is divided into so-called pages via paging in order to let
-        the client deal with large collections.
+        the client deal with large collections. In addition, RSQL/FIQL based query filtering is supported.
       parameters:
         - name: page
           in: query
@@ -50,6 +50,13 @@ paths:
           schema:
             type: integer
             example: 25
+        - name: filter
+          in: query
+          description: RSQL based query filter.
+          required: false
+          schema:
+            type: string
+            example: username==maxi*
       responses:
         200:
           description: Successfully fetched all available users.
@@ -273,7 +280,8 @@ paths:
       summary: Fetchs all boards of a user
       description: >
         All of a user's boards can be read out here. However, the security policy only allows reading for your own user.
-        The available collection of all boards the user is a member of supports paging.
+        The available collection of all boards the user is a member of supports paging. In addition, RSQL/FIQL based
+        query filtering is supported.
       parameters:
         - name: username
           in: path
@@ -297,6 +305,13 @@ paths:
           schema:
             type: integer
             example: 25
+        - name: filter
+          in: query
+          description: RSQL based query filter.
+          required: false
+          schema:
+            type: string
+            example: name==Building*
       responses:
         200:
           description: Successfully fetched all available boards.

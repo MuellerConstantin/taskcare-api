@@ -7,6 +7,7 @@ import de.x1c1b.taskcare.service.core.board.application.query.HasBoardMemberQuer
 import de.x1c1b.taskcare.service.core.board.application.query.HasBoardMemberWithRoleQuery;
 import de.x1c1b.taskcare.service.core.board.domain.*;
 import de.x1c1b.taskcare.service.core.common.application.EntityNotFoundException;
+import de.x1c1b.taskcare.service.core.common.domain.FilterSettings;
 import de.x1c1b.taskcare.service.core.common.domain.Page;
 import de.x1c1b.taskcare.service.core.common.domain.PageSettings;
 import lombok.AllArgsConstructor;
@@ -41,10 +42,13 @@ public class DefaultBoardService implements BoardService {
 
     @Override
     public Page<Board> query(FindAllBoardsWithMembershipQuery query) {
-        return boardRepository.findAllWithMembership(query.getUsername(), PageSettings.builder()
-                .page(query.getPage())
-                .perPage(query.getPerPage())
-                .build());
+        return boardRepository.findAllWithMembership(query.getUsername(), FilterSettings.builder()
+                        .filter(query.getFilter())
+                        .build(),
+                PageSettings.builder()
+                        .page(query.getPage())
+                        .perPage(query.getPerPage())
+                        .build());
     }
 
     @Override
