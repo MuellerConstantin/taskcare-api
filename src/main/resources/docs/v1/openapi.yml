@@ -12,8 +12,11 @@ info:
   contact:
     name: "0x1C1B"
     url: https://github.com/0x1C1B
+  x-logo:
+    url: /docs/logo.svg
+    altText: "Logo"
 servers:
-  - url: http://localhost:8080/v1
+  - url: http://localhost:8080/api/v1
     description: Local Development Server
 tags:
   - name: User
@@ -692,6 +695,8 @@ paths:
           $ref: "#/components/responses/Unauthenticated"
         403:
           $ref: "#/components/responses/AccessDenied"
+        409:
+          $ref: "#/components/responses/Conflict"
   /boards/{boardId}/members/{username}:
     get:
       tags:
@@ -772,6 +777,8 @@ paths:
           $ref: "#/components/responses/NotFound"
         401:
           $ref: "#/components/responses/Unauthenticated"
+        409:
+          $ref: "#/components/responses/Conflict"
     delete:
       tags:
         - Member
@@ -803,6 +810,8 @@ paths:
           $ref: "#/components/responses/NotFound"
         401:
           $ref: "#/components/responses/Unauthenticated"
+        409:
+          $ref: "#/components/responses/Conflict"
 components:
   schemas:
     ErrorDTO:
@@ -1224,6 +1233,12 @@ components:
             $ref: "#/components/schemas/ErrorDTO"
     Unauthenticated:
       description: The access has been authenticated.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorDTO"
+    Conflict:
+      description: There was a resource conflict.
       content:
         application/json:
           schema:

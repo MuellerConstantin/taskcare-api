@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.constraints.Min;
 
 @RestController
-@RequestMapping("/v1")
+@RequestMapping("/api/v1")
 @Validated
 public class UserController {
 

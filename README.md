@@ -43,7 +43,7 @@ can be exchanged as desired.
 In the infrastructure layer, various Spring projects support the design of the application. For persistence, the JPA is
 used with Hibernate as the ORM. In addition, access control is carried out using Spring Security. The interface to the
 outside is represented by the presentation layer with a static RESTful interface according to OAS 3 standards,
-documented [here](src/main/resources/openapi-v1.yml), and a dynamic web socket interface.
+documented [here](src/main/resources/docs/v1/openapi.yml), and a dynamic web socket interface.
 
 ## Deployment
 
