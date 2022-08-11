@@ -472,7 +472,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/BoardDTO"
+                  $ref: "#/components/schemas/TaskDTO"
               example:
                 - id: e3eb92b8-1f35-4874-aaac-22d0c0f8f62f
                   name: Some task
@@ -599,6 +599,8 @@ paths:
           $ref: "#/components/responses/NotFound"
         401:
           $ref: "#/components/responses/Unauthenticated"
+        409:
+          $ref: "#/components/responses/Conflict"
     delete:
       tags:
         - Task

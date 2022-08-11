@@ -3,6 +3,7 @@ package de.x1c1b.taskcare.service.presentation.rest.v1.error;
 import cz.jirutka.rsql.parser.RSQLParserException;
 import de.x1c1b.taskcare.service.core.board.application.BoardMustBeAdministrableException;
 import de.x1c1b.taskcare.service.core.board.application.IsAlreadyMemberOfBoardException;
+import de.x1c1b.taskcare.service.core.board.application.MustBeMemberOfBoardException;
 import de.x1c1b.taskcare.service.core.common.application.EntityNotFoundException;
 import de.x1c1b.taskcare.service.core.common.application.security.InsufficientPermissionsException;
 import de.x1c1b.taskcare.service.core.user.application.EmailAlreadyInUseException;
@@ -429,6 +430,20 @@ public class RestErrorHandler extends ResponseEntityExceptionHandler {
 
         RestError restError = RestError.builder()
                 .message("The last remaining admin of a board cannot be removed.")
+                .timestamp(OffsetDateTime.now())
+                .status(HttpStatus.CONFLICT.value())
+                .path(((ServletWebRequest) request).getRequest().getServletPath())
+                .build();
+
+        return new ResponseEntity<>(restError, new HttpHeaders(), HttpStatus.valueOf(restError.getStatus()));
+    }
+
+    @ExceptionHandler(MustBeMemberOfBoardException.class)
+    public ResponseEntity<Object> handleMustBeMemberOfBoard(MustBeMemberOfBoardException exc,
+                                                            WebRequest request) {
+
+        RestError restError = RestError.builder()
+                .message("The user must be a member to be designated as responsible.")
                 .timestamp(OffsetDateTime.now())
                 .status(HttpStatus.CONFLICT.value())
                 .path(((ServletWebRequest) request).getRequest().getServletPath())

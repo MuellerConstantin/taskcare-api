@@ -191,6 +191,10 @@ public class DefaultBoardService implements BoardService {
         }
 
         if (command.getResponsible().isPresent() || command.isResponsibleDirty()) {
+            if (board.getMembers().stream().noneMatch((member) -> member.getUsername().equals(command.getResponsible().orElse(null)))) {
+                throw new MustBeMemberOfBoardException();
+            }
+
             task.setResponsible(command.getResponsible().orElse(null));
         }
 

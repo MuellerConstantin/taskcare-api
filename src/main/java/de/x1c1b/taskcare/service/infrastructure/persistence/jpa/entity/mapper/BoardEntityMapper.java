@@ -67,6 +67,7 @@ public abstract class BoardEntityMapper {
                     .createdAtOffset(timestampToOffset(task.getCreatedAt()))
                     .expiresAt(timestampToInstant(task.getExpiresAt()))
                     .expiresAtOffset(timestampToOffset(task.getExpiresAt()))
+                    .responsible(task.getResponsible())
                     .build();
 
             boardEntity.getTasks().add(taskEntity);
