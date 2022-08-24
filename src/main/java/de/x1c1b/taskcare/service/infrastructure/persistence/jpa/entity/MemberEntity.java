@@ -5,6 +5,8 @@ import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -31,6 +33,11 @@ public class MemberEntity {
     @Column(name = "role")
     private String role;
 
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
+    @OneToMany(mappedBy = "responsible", fetch = FetchType.LAZY)
+    private Set<TaskEntity> responsibilities = new HashSet<>();
+
     public MemberEntity(BoardEntity board, UserEntity user, String role) {
         this.id = new MemberEntityId(board.getId(), user.getUsername());
         this.board = board;
@@ -54,5 +61,12 @@ public class MemberEntity {
 
         @Column(name = "username")
         private String username;
+    }
+
+    @PreRemove
+    private void clearAssociations() {
+        for (TaskEntity taskEntity : responsibilities) {
+            taskEntity.setResponsible(null);
+        }
     }
 }

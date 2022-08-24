@@ -38,9 +38,6 @@ public class TaskEntity {
     @Column(name = "priority")
     private Integer priority;
 
-    @Column(name = "responsible")
-    private String responsible;
-
     @Column(name = "status")
     private String status;
 
@@ -55,4 +52,11 @@ public class TaskEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "board_id")
     private BoardEntity board;
+
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "responsible_board_id", referencedColumnName = "board_id")
+    @JoinColumn(name = "responsible_username", referencedColumnName = "username")
+    private MemberEntity responsible;
 }

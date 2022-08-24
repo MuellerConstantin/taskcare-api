@@ -44,6 +44,7 @@ public abstract class BoardEntityMapper {
 
     @Mapping(target = "createdAt", source = "taskEntity", qualifiedByName = "createdAtFromTaskEntity")
     @Mapping(target = "expiresAt", source = "taskEntity", qualifiedByName = "expiresAtFromTaskEntity")
+    @Mapping(target = "responsible", source = "responsible.id.username")
     public abstract Task mapToDomain(TaskEntity taskEntity);
 
     @AfterMapping
@@ -55,7 +56,8 @@ public abstract class BoardEntityMapper {
         });
 
         boardAggregate.getTasks().forEach(task -> {
-            TaskEntity taskEntity = TaskEntity.builder()
+
+            TaskEntity.TaskEntityBuilder taskEntityBuilder = TaskEntity.builder()
                     .id(task.getId())
                     .name(task.getName())
                     .board(boardEntity)
@@ -66,11 +68,23 @@ public abstract class BoardEntityMapper {
                     .createdAt(timestampToInstant(task.getCreatedAt()))
                     .createdAtOffset(timestampToOffset(task.getCreatedAt()))
                     .expiresAt(timestampToInstant(task.getExpiresAt()))
-                    .expiresAtOffset(timestampToOffset(task.getExpiresAt()))
-                    .responsible(task.getResponsible())
-                    .build();
+                    .expiresAtOffset(timestampToOffset(task.getExpiresAt()));
 
-            boardEntity.getTasks().add(taskEntity);
+            if (null != task.getResponsible()) {
+                MemberEntity memberEntity = boardAggregate.getMembers().stream()
+                        .filter(member -> member.getUsername().equals(task.getResponsible()))
+                        .findFirst()
+                        .map(member -> {
+                            UserEntity userEntity = userEntityRepository.findById(member.getUsername()).orElseThrow();
+                            return new MemberEntity(boardEntity, userEntity, member.getRole().getName());
+                        }).orElse(null);
+
+                taskEntityBuilder.responsible(memberEntity);
+            } else {
+                taskEntityBuilder.responsible(null);
+            }
+
+            boardEntity.getTasks().add(taskEntityBuilder.build());
         });
     }
 
