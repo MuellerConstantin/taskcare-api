@@ -276,6 +276,25 @@ paths:
                 refreshExpiresIn: 7200000
         401:
           $ref: "#/components/responses/Unauthenticated"
+  /auth/ticket:
+    post:
+      tags:
+        - Auth
+      summary: Issues tickets for websocket authentication
+      description: >
+        Issues tickets for one-time authentication via websockets. This is particularly necessary when establishing a
+        connection where no authorization header and therefore no access tokens can be used.
+      responses:
+        200:
+          description: Successfully created a new ticket.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TicketDTO"
+              example:
+                principal: maxi123
+                ticket: f8m0Snri9ZI=
+                expiresIn: 60000
   /users/{username}/boards:
     get:
       tags:
@@ -1010,6 +1029,24 @@ components:
         - refreshToken
         - accessExpiresIn
         - refreshExpiresIn
+    TicketDTO:
+      type: object
+      properties:
+        principal:
+          type: string
+          format: username
+          description: The authenticated user.
+        ticket:
+          type: string
+          description: The actual ticket.
+        expiresIn:
+          type: integer
+          description: Number of milliseconds for which the ticket is still valid.
+      required:
+        - principal
+        - ticket
+        - refreshToken
+        - expiresIn
     BoardDTO:
       type: object
       properties:

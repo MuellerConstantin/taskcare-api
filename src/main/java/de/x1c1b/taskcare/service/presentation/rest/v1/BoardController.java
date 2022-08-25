@@ -28,7 +28,6 @@ import java.util.UUID;
 @RequestMapping("/api/v1")
 @Validated
 public class BoardController {
-
     private final BoardService boardService;
     private final BoardDTOMapper boardDTOMapper;
 
