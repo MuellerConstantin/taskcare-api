@@ -99,8 +99,6 @@ public class SecurityConfig {
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeRequests()
-                .antMatchers("/docs/**")
-                .permitAll()
                 .antMatchers(HttpMethod.POST, "/api/v1/users")
                 .permitAll()
                 .antMatchers(HttpMethod.POST, "/api/v1/auth/token")

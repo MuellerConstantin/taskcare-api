@@ -1,0 +1,338 @@
+asyncapi: 2.4.0
+info:
+  title: TaskCare
+  version: v1
+  description: >
+    This is the WebSocket STOMP API of the TaskCare backend service. Via this
+    interface it is possible to be informed in real time about changes within
+    a board. It enables collaboration on the same content at the same time. The
+    interface does not provide any data, it only provides information about
+    events. The associated data must be obtained via the RESTful interface.
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  contact:
+    name: "0x1C1B"
+    url: https://github.com/0x1C1B
+servers:
+  development:
+    url: ws://localhost:8080/ws
+    description: Local Development Server
+    protocol: stomp
+    security:
+      - ticket: [ ]
+defaultContentType: application/json
+tags:
+  - name: Board
+    description: Enables you to be informed about changes to a board.
+channels:
+  /topic/board.board-created:
+    description: Notifies about the newly created board.
+    subscribe:
+      security:
+        - ticket: [ ]
+      message:
+        $ref: "#/components/messages/BoardCreated"
+  /topic/board.{boardId}.board-updated:
+    description: Notifies about updated board information.
+    parameters:
+      boardId:
+        schema:
+          type: string
+          description: Unique identifier of the board.
+          format: uuid
+          example: 3377cf8f-da29-4aa7-9036-91951b8fce87
+    subscribe:
+      security:
+        - ticket: [ ]
+      message:
+        $ref: "#/components/messages/BoardUpdated"
+  /topic/board.{boardId}.board-deleted:
+    description: Informs about the deletion of the board.
+    parameters:
+      boardId:
+        schema:
+          type: string
+          description: Unique identifier of the board.
+          format: uuid
+          example: 3377cf8f-da29-4aa7-9036-91951b8fce87
+    subscribe:
+      security:
+        - ticket: [ ]
+      message:
+        $ref: "#/components/messages/BoardDeleted"
+  /topic/board.{boardId}.task-created:
+    description: Notifies about a task creation.
+    parameters:
+      boardId:
+        schema:
+          type: string
+          description: Unique identifier of the board.
+          format: uuid
+          example: 3377cf8f-da29-4aa7-9036-91951b8fce87
+    subscribe:
+      security:
+        - ticket: [ ]
+      message:
+        $ref: "#/components/messages/TaskCreated"
+  /topic/board.{boardId}.task-updated:
+    description: Notifies about the update of a task.
+    parameters:
+      boardId:
+        schema:
+          type: string
+          description: Unique identifier of the board.
+          format: uuid
+          example: 3377cf8f-da29-4aa7-9036-91951b8fce87
+    subscribe:
+      security:
+        - ticket: [ ]
+      message:
+        $ref: "#/components/messages/TaskUpdated"
+  /topic/board.{boardId}.task-deleted:
+    description: Notifies about the deletion of a task.
+    parameters:
+      boardId:
+        schema:
+          type: string
+          description: Unique identifier of the board.
+          format: uuid
+          example: 3377cf8f-da29-4aa7-9036-91951b8fce87
+    subscribe:
+      security:
+        - ticket: [ ]
+      message:
+        $ref: "#/components/messages/TaskDeleted"
+  /topic/board.{boardId}.member-created:
+    description: Notifies about a member creation.
+    parameters:
+      boardId:
+        schema:
+          type: string
+          description: Unique identifier of the board.
+          format: uuid
+          example: 3377cf8f-da29-4aa7-9036-91951b8fce87
+    subscribe:
+      security:
+        - ticket: [ ]
+      message:
+        $ref: "#/components/messages/MemberCreated"
+  /topic/board.{boardId}.member-updated:
+    description: Notifies about the update of a member.
+    parameters:
+      boardId:
+        schema:
+          type: string
+          description: Unique identifier of the board.
+          format: uuid
+          example: 3377cf8f-da29-4aa7-9036-91951b8fce87
+    subscribe:
+      security:
+        - ticket: [ ]
+      message:
+        $ref: "#/components/messages/MemberUpdated"
+  /topic/board.{boardId}.member-deleted:
+    description: Notifies about the deletion of a member.
+    parameters:
+      boardId:
+        schema:
+          type: string
+          description: Unique identifier of the board.
+          format: uuid
+          example: 3377cf8f-da29-4aa7-9036-91951b8fce87
+    subscribe:
+      security:
+        - ticket: [ ]
+      message:
+        $ref: "#/components/messages/MemberDeleted"
+components:
+  securitySchemes:
+    ticket:
+      type: httpApiKey
+      name: ticket
+      in: query
+      description: Authentication using a one-time use API key requested via the RESTful interface.
+  messages:
+    BoardCreated:
+      payload:
+        type: object
+        properties:
+          boardId:
+            type: string
+            description: Unique identifier of the created board.
+            format: uuid
+            example: 3377cf8f-da29-4aa7-9036-91951b8fce87
+          channel:
+            type: string
+            description: Name of the channel in which the message was published.
+            example: board.3377cf8f-da29-4aa7-9036-91951b8fce87.board-created
+          raisedAt:
+            type: string
+            format: date-time
+            description: Time at which the message was published.
+    BoardUpdated:
+      payload:
+        type: object
+        properties:
+          boardId:
+            type: string
+            description: Unique identifier of the updated board.
+            format: uuid
+            example: 3377cf8f-da29-4aa7-9036-91951b8fce87
+          channel:
+            type: string
+            description: Name of the channel in which the message was published.
+            example: board.3377cf8f-da29-4aa7-9036-91951b8fce87.board-updated
+          raisedAt:
+            type: string
+            format: date-time
+            description: Time at which the message was published.
+    BoardDeleted:
+      payload:
+        type: object
+        properties:
+          boardId:
+            type: string
+            description: Unique identifier of the deleted board.
+            format: uuid
+            example: 3377cf8f-da29-4aa7-9036-91951b8fce87
+          channel:
+            type: string
+            description: Name of the channel in which the message was published.
+            example: board.3377cf8f-da29-4aa7-9036-91951b8fce87.board-deleted
+          raisedAt:
+            type: string
+            format: date-time
+            description: Time at which the message was published.
+    TaskCreated:
+      payload:
+        type: object
+        properties:
+          boardId:
+            type: string
+            description: Unique identifier of the board.
+            format: uuid
+            example: 3377cf8f-da29-4aa7-9036-91951b8fce87
+          taskId:
+            type: string
+            description: Unique identifier of the created task.
+            format: uuid
+            example: e3eb92b8-1f35-4874-aaac-22d0c0f8f62f
+          channel:
+            type: string
+            description: Name of the channel in which the message was published.
+            example: board.3377cf8f-da29-4aa7-9036-91951b8fce87.task-created
+          raisedAt:
+            type: string
+            format: date-time
+            description: Time at which the message was published.
+    TaskUpdated:
+      payload:
+        type: object
+        properties:
+          boardId:
+            type: string
+            description: Unique identifier of the board.
+            format: uuid
+            example: 3377cf8f-da29-4aa7-9036-91951b8fce87
+          taskId:
+            type: string
+            description: Unique identifier of the updated task.
+            format: uuid
+            example: e3eb92b8-1f35-4874-aaac-22d0c0f8f62f
+          channel:
+            type: string
+            description: Name of the channel in which the message was published.
+            example: board.3377cf8f-da29-4aa7-9036-91951b8fce87.task-updated
+          raisedAt:
+            type: string
+            format: date-time
+            description: Time at which the message was published.
+    TaskDeleted:
+      payload:
+        type: object
+        properties:
+          boardId:
+            type: string
+            description: Unique identifier of the board.
+            format: uuid
+            example: 3377cf8f-da29-4aa7-9036-91951b8fce87
+          taskId:
+            type: string
+            description: Unique identifier of the deleted task.
+            format: uuid
+            example: e3eb92b8-1f35-4874-aaac-22d0c0f8f62f
+          channel:
+            type: string
+            description: Name of the channel in which the message was published.
+            example: board.3377cf8f-da29-4aa7-9036-91951b8fce87.task-deleted
+          raisedAt:
+            type: string
+            format: date-time
+            description: Time at which the message was published.
+    MemberCreated:
+      payload:
+        type: object
+        properties:
+          boardId:
+            type: string
+            description: Unique identifier of the board.
+            format: uuid
+            example: 3377cf8f-da29-4aa7-9036-91951b8fce87
+          username:
+            type: string
+            description: Unique identifier of the created member.
+            format: uuid
+            example: maxi123
+          channel:
+            type: string
+            description: Name of the channel in which the message was published.
+            example: board.3377cf8f-da29-4aa7-9036-91951b8fce87.member-created
+          raisedAt:
+            type: string
+            format: date-time
+            description: Time at which the message was published.
+    MemberUpdated:
+      payload:
+        type: object
+        properties:
+          boardId:
+            type: string
+            description: Unique identifier of the board.
+            format: uuid
+            example: 3377cf8f-da29-4aa7-9036-91951b8fce87
+          username:
+            type: string
+            description: Unique identifier of the updated member.
+            format: uuid
+            example: maxi123
+          channel:
+            type: string
+            description: Name of the channel in which the message was published.
+            example: board.3377cf8f-da29-4aa7-9036-91951b8fce87.member-updated
+          raisedAt:
+            type: string
+            format: date-time
+            description: Time at which the message was published.
+    MemberDeleted:
+      payload:
+        type: object
+        properties:
+          boardId:
+            type: string
+            description: Unique identifier of the board.
+            format: uuid
+            example: 3377cf8f-da29-4aa7-9036-91951b8fce87
+          username:
+            type: string
+            description: Unique identifier of the deleted member.
+            format: uuid
+            example: maxi123
+          channel:
+            type: string
+            description: Name of the channel in which the message was published.
+            example: board.3377cf8f-da29-4aa7-9036-91951b8fce87.member-deleted
+          raisedAt:
+            type: string
+            format: date-time
+            description: Time at which the message was published.

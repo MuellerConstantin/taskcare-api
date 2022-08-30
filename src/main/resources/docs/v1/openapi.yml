@@ -12,9 +12,6 @@ info:
   contact:
     name: "0x1C1B"
     url: https://github.com/0x1C1B
-  x-logo:
-    url: /docs/logo.svg
-    altText: "Logo"
 servers:
   - url: http://localhost:8080/api/v1
     description: Local Development Server

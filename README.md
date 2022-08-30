@@ -43,7 +43,9 @@ can be exchanged as desired.
 In the infrastructure layer, various Spring projects support the design of the application. For persistence, the JPA is
 used with Hibernate as the ORM. In addition, access control is carried out using Spring Security. The interface to the
 outside is represented by the presentation layer with a static RESTful interface according to OAS 3 standards,
-documented [here](src/main/resources/docs/v1/openapi.yml), and a dynamic web socket interface.
+documented [here](src/main/resources/docs/v1/openapi.yml), and a dynamic web socket interface based on STOMP, documented
+[here](src/main/resources/docs/v1/asyncapi.yml). An external RabbitMQ message broker is used for Websocket communication
+and to enable horizontal scaling.
 
 ## Deployment
 
@@ -103,6 +105,10 @@ via external configuration. Settings relevant to the application are listed belo
 | taskcare.security.token.access.expiresIn  | TASKCARE_SECURITY_TOKEN_ACCESS_EXPIRESIN  | The duration in milliseconds after which the access token expires.                 | false    |
 | taskcare.security.token.refresh.length    | TASKCARE_SECURITY_TOKEN_REFRESH_LENGTH    | The length of the opaque refresh token.                                            | false    |
 | taskcare.security.token.refresh.expiresIn | TASKCARE_SECURITY_TOKEN_REFRESH_EXPIRESIN | The duration in milliseconds after which the refresh token expires.                | false    |
+| taskcar.websocket.broker.host             | TASKCARE_WEBSOCKET_BROKER_HOST            | The host of the websocket message broker.                                          | true     |
+| taskcare.websocket.broker.port            | TASKCARE_WEBSOCKET_BROKER_PORT            | The port of the websocket message broker.                                          | true     |
+| taskcare.websocket.broker.username        | TASKCARE_WEBSOCKET_BROKER_USERNAME        | The broker user with which access is made.                                         | false    |
+| taskcare.websocket.broker.password        | TASKCARE_WEBSOCKET_BROKER_PASSWORD        | An optional password associated with the broker user.                              | false    |
 
 ¹In principle, any JPA/Hibernate capable relational database can be used. For this, however, the application must also
 have the corresponding drivers as a dependency in the Java Classpath. By default, only the MySQL drivers are included
