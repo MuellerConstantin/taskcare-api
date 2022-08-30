@@ -1,8 +1,8 @@
 package de.x1c1b.taskcare.service.presentation.rest.v1;
 
 import de.x1c1b.taskcare.service.core.board.application.BoardService;
-import de.x1c1b.taskcare.service.core.board.application.command.AddMemberByIdCommand;
-import de.x1c1b.taskcare.service.core.board.application.command.RemoveMemberByIdCommand;
+import de.x1c1b.taskcare.service.core.board.application.command.CreateMemberByIdCommand;
+import de.x1c1b.taskcare.service.core.board.application.command.DeleteMemberByIdCommand;
 import de.x1c1b.taskcare.service.core.board.application.command.UpdateMemberByIdCommand;
 import de.x1c1b.taskcare.service.core.board.application.query.FindBoardByIdQuery;
 import de.x1c1b.taskcare.service.core.board.domain.Board;
@@ -58,14 +58,14 @@ public class MemberController {
     @PostMapping("/boards/{id}/members")
     @ResponseStatus(HttpStatus.CREATED)
     void addMember(@PathVariable("id") UUID id, @RequestBody CreateMemberDTO dto) {
-        AddMemberByIdCommand command = memberDTOMapper.mapToCommand(dto, id);
+        CreateMemberByIdCommand command = memberDTOMapper.mapToCommand(dto, id);
         boardService.execute(command);
     }
 
     @DeleteMapping("/boards/{id}/members/{username}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     void removeMember(@PathVariable("id") UUID id, @PathVariable("username") String username) {
-        RemoveMemberByIdCommand command = new RemoveMemberByIdCommand(id, username);
+        DeleteMemberByIdCommand command = new DeleteMemberByIdCommand(id, username);
         boardService.execute(command);
     }
 }

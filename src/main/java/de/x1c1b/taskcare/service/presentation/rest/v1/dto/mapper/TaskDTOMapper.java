@@ -1,6 +1,6 @@
 package de.x1c1b.taskcare.service.presentation.rest.v1.dto.mapper;
 
-import de.x1c1b.taskcare.service.core.board.application.command.AddTaskByIdCommand;
+import de.x1c1b.taskcare.service.core.board.application.command.CreateTaskByIdCommand;
 import de.x1c1b.taskcare.service.core.board.application.command.UpdateTaskByIdCommand;
 import de.x1c1b.taskcare.service.core.board.domain.Task;
 import de.x1c1b.taskcare.service.presentation.rest.v1.dto.CreateTaskDTO;
@@ -18,7 +18,7 @@ public interface TaskDTOMapper {
 
     List<TaskDTO> mapToDTO(List<Task> taskAggregateList);
 
-    AddTaskByIdCommand mapToCommand(CreateTaskDTO createTaskDTO, UUID id, String creator);
+    CreateTaskByIdCommand mapToCommand(CreateTaskDTO createTaskDTO, UUID id, String creator);
 
     UpdateTaskByIdCommand mapToCommand(UpdateTaskDTO updateTaskDTO, UUID id, UUID taskId);
 }

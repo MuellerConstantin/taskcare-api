@@ -16,7 +16,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @Data
 @Builder
-public class AddTaskByIdCommand {
+public class CreateTaskByIdCommand {
 
     private UUID id;
 

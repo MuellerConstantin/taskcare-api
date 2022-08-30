@@ -1,8 +1,8 @@
 package de.x1c1b.taskcare.service.presentation.rest.v1;
 
 import de.x1c1b.taskcare.service.core.board.application.BoardService;
-import de.x1c1b.taskcare.service.core.board.application.command.AddTaskByIdCommand;
-import de.x1c1b.taskcare.service.core.board.application.command.RemoveTaskByIdCommand;
+import de.x1c1b.taskcare.service.core.board.application.command.CreateTaskByIdCommand;
+import de.x1c1b.taskcare.service.core.board.application.command.DeleteTaskByIdCommand;
 import de.x1c1b.taskcare.service.core.board.application.command.UpdateTaskByIdCommand;
 import de.x1c1b.taskcare.service.core.board.application.query.FindBoardByIdQuery;
 import de.x1c1b.taskcare.service.core.board.domain.Board;
@@ -61,14 +61,14 @@ public class TaskController {
     @ResponseStatus(HttpStatus.CREATED)
     void addMember(@PathVariable("id") UUID id, @RequestBody CreateTaskDTO createTaskDTO,
                    @AuthenticationPrincipal UserDetails userDetails) {
-        AddTaskByIdCommand command = taskDTOMapper.mapToCommand(createTaskDTO, id, userDetails.getUsername());
+        CreateTaskByIdCommand command = taskDTOMapper.mapToCommand(createTaskDTO, id, userDetails.getUsername());
         boardService.execute(command);
     }
 
     @DeleteMapping("/boards/{id}/tasks/{taskId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     void removeMember(@PathVariable("id") UUID id, @PathVariable("taskId") UUID taskId) {
-        RemoveTaskByIdCommand command = new RemoveTaskByIdCommand(id, taskId);
+        DeleteTaskByIdCommand command = new DeleteTaskByIdCommand(id, taskId);
         boardService.execute(command);
     }
 }

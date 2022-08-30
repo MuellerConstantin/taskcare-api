@@ -4,12 +4,14 @@ import de.x1c1b.taskcare.service.core.board.application.BoardService;
 import de.x1c1b.taskcare.service.core.board.application.BoardServiceAccessInterceptor;
 import de.x1c1b.taskcare.service.core.board.application.DefaultBoardService;
 import de.x1c1b.taskcare.service.core.board.domain.BoardRepository;
+import de.x1c1b.taskcare.service.core.common.application.event.DomainEventPublisher;
 import de.x1c1b.taskcare.service.core.common.application.security.PrincipalDetailsContext;
 import de.x1c1b.taskcare.service.core.common.application.security.SecretEncoder;
 import de.x1c1b.taskcare.service.core.user.application.DefaultUserService;
 import de.x1c1b.taskcare.service.core.user.application.UserService;
 import de.x1c1b.taskcare.service.core.user.application.UserServiceAccessInterceptor;
 import de.x1c1b.taskcare.service.core.user.domain.UserRepository;
+import de.x1c1b.taskcare.service.infrastructure.event.simp.SimpDomainEventPublisher;
 import de.x1c1b.taskcare.service.infrastructure.persistence.jpa.JpaBoardRepository;
 import de.x1c1b.taskcare.service.infrastructure.persistence.jpa.JpaUserRepository;
 import de.x1c1b.taskcare.service.infrastructure.persistence.jpa.entity.mapper.BoardEntityMapper;
@@ -20,6 +22,7 @@ import de.x1c1b.taskcare.service.infrastructure.security.spring.SpringPrincipalD
 import de.x1c1b.taskcare.service.infrastructure.security.spring.SpringSecretEncoder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Configuration
@@ -33,6 +36,11 @@ public class DomainConfig {
     @Bean
     PrincipalDetailsContext springPrincipalDetailsContext() {
         return new SpringPrincipalDetailsContext();
+    }
+
+    @Bean
+    DomainEventPublisher simpDomainEventPublisher(SimpMessagingTemplate simpMessagingTemplate) {
+        return new SimpDomainEventPublisher(simpMessagingTemplate);
     }
 
     @Bean
@@ -58,8 +66,8 @@ public class DomainConfig {
     }
 
     @Bean
-    BoardService defaultBoardService(BoardRepository boardRepository) {
-        return new DefaultBoardService(boardRepository);
+    BoardService defaultBoardService(BoardRepository boardRepository, DomainEventPublisher domainEventPublisher) {
+        return new DefaultBoardService(boardRepository, domainEventPublisher);
     }
 
     @Bean

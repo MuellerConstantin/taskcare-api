@@ -16,7 +16,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @Data
 @Builder
-public class AddMemberByIdCommand {
+public class CreateMemberByIdCommand {
 
     private UUID id;
 

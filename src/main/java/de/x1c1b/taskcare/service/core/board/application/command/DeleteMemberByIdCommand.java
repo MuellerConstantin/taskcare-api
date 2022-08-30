@@ -11,7 +11,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @Data
 @Builder
-public class RemoveMemberByIdCommand {
+public class DeleteMemberByIdCommand {
 
     private UUID id;
     private String username;

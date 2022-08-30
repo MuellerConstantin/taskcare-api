@@ -11,7 +11,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @Data
 @Builder
-public class RemoveTaskByIdCommand {
+public class DeleteTaskByIdCommand {
 
     private UUID id;
     private UUID taskId;

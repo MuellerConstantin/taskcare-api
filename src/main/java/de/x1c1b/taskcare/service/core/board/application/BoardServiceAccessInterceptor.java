@@ -47,8 +47,8 @@ public class BoardServiceAccessInterceptor {
         }
     }
 
-    @Before("execution(* de.x1c1b.taskcare.service.core.board.application.BoardService.execute(de.x1c1b.taskcare.service.core.board.application.command.AddMemberByIdCommand)) && args(command)")
-    void evaluateAddMemberById(AddMemberByIdCommand command) {
+    @Before("execution(* de.x1c1b.taskcare.service.core.board.application.BoardService.execute(de.x1c1b.taskcare.service.core.board.application.command.CreateMemberByIdCommand)) && args(command)")
+    void evaluateAddMemberById(CreateMemberByIdCommand command) {
 
         PrincipalDetails principalDetails = principalDetailsContext.getAuthenticatedPrincipal();
 
@@ -58,8 +58,8 @@ public class BoardServiceAccessInterceptor {
         }
     }
 
-    @Before("execution(* de.x1c1b.taskcare.service.core.board.application.BoardService.execute(de.x1c1b.taskcare.service.core.board.application.command.RemoveMemberByIdCommand)) && args(command)")
-    void evaluateRemoveMemberById(RemoveMemberByIdCommand command) {
+    @Before("execution(* de.x1c1b.taskcare.service.core.board.application.BoardService.execute(de.x1c1b.taskcare.service.core.board.application.command.DeleteMemberByIdCommand)) && args(command)")
+    void evaluateRemoveMemberById(DeleteMemberByIdCommand command) {
 
         PrincipalDetails principalDetails = principalDetailsContext.getAuthenticatedPrincipal();
 
@@ -102,8 +102,8 @@ public class BoardServiceAccessInterceptor {
         }
     }
 
-    @Before("execution(* de.x1c1b.taskcare.service.core.board.application.BoardService.execute(de.x1c1b.taskcare.service.core.board.application.command.AddTaskByIdCommand)) && args(command)")
-    void evaluateAddTaskById(AddTaskByIdCommand command) {
+    @Before("execution(* de.x1c1b.taskcare.service.core.board.application.BoardService.execute(de.x1c1b.taskcare.service.core.board.application.command.CreateTaskByIdCommand)) && args(command)")
+    void evaluateAddTaskById(CreateTaskByIdCommand command) {
 
         PrincipalDetails principalDetails = principalDetailsContext.getAuthenticatedPrincipal();
 
@@ -114,8 +114,8 @@ public class BoardServiceAccessInterceptor {
         }
     }
 
-    @Before("execution(* de.x1c1b.taskcare.service.core.board.application.BoardService.execute(de.x1c1b.taskcare.service.core.board.application.command.RemoveTaskByIdCommand)) && args(command)")
-    void evaluateRemoveTaskById(RemoveTaskByIdCommand command) {
+    @Before("execution(* de.x1c1b.taskcare.service.core.board.application.BoardService.execute(de.x1c1b.taskcare.service.core.board.application.command.DeleteTaskByIdCommand)) && args(command)")
+    void evaluateRemoveTaskById(DeleteTaskByIdCommand command) {
 
         PrincipalDetails principalDetails = principalDetailsContext.getAuthenticatedPrincipal();
 

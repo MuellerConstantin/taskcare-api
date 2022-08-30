@@ -6,7 +6,9 @@ import de.x1c1b.taskcare.service.core.board.application.query.FindBoardByIdQuery
 import de.x1c1b.taskcare.service.core.board.application.query.HasBoardMemberQuery;
 import de.x1c1b.taskcare.service.core.board.application.query.HasBoardMemberWithRoleQuery;
 import de.x1c1b.taskcare.service.core.board.domain.*;
+import de.x1c1b.taskcare.service.core.board.domain.event.*;
 import de.x1c1b.taskcare.service.core.common.application.EntityNotFoundException;
+import de.x1c1b.taskcare.service.core.common.application.event.DomainEventPublisher;
 import de.x1c1b.taskcare.service.core.common.domain.FilterSettings;
 import de.x1c1b.taskcare.service.core.common.domain.Page;
 import de.x1c1b.taskcare.service.core.common.domain.PageSettings;
@@ -24,6 +26,7 @@ import java.util.UUID;
 @Validated
 public class DefaultBoardService implements BoardService {
     private final BoardRepository boardRepository;
+    private final DomainEventPublisher domainEventPublisher;
 
     @Override
     public Board query(FindBoardByIdQuery query) throws EntityNotFoundException {
@@ -53,8 +56,10 @@ public class DefaultBoardService implements BoardService {
 
     @Override
     public void execute(@Valid CreateBoardCommand command) {
+        UUID boardId = UUID.randomUUID();
+
         Board board = Board.builder()
-                .id(UUID.randomUUID())
+                .id(boardId)
                 .name(command.getName())
                 .description(command.getDescription().orElse(null))
                 .createdAt(OffsetDateTime.now())
@@ -63,6 +68,7 @@ public class DefaultBoardService implements BoardService {
                 .build();
 
         boardRepository.save(board);
+        domainEventPublisher.publishEvent(new BoardCreatedEvent(boardId, OffsetDateTime.now()));
     }
 
     @Override
@@ -76,6 +82,7 @@ public class DefaultBoardService implements BoardService {
         }
 
         boardRepository.save(board);
+        domainEventPublisher.publishEvent(new BoardUpdatedEvent(command.getId(), OffsetDateTime.now()));
     }
 
     @Override
@@ -86,7 +93,7 @@ public class DefaultBoardService implements BoardService {
     }
 
     @Override
-    public void execute(@Valid AddMemberByIdCommand command) throws EntityNotFoundException, IsAlreadyMemberOfBoardException {
+    public void execute(@Valid CreateMemberByIdCommand command) throws EntityNotFoundException, IsAlreadyMemberOfBoardException {
         Board board = boardRepository.findById(command.getId()).orElseThrow(EntityNotFoundException::new);
 
         boolean alreadyContainsMember = board.getMembers().stream()
@@ -103,10 +110,11 @@ public class DefaultBoardService implements BoardService {
         board.getMembers().add(new Member(command.getUsername(), Role.valueOf(command.getRole())));
 
         boardRepository.save(board);
+        domainEventPublisher.publishEvent(new MemberCreatedEvent(command.getId(), command.getUsername(), OffsetDateTime.now()));
     }
 
     @Override
-    public void execute(RemoveMemberByIdCommand command) throws EntityNotFoundException {
+    public void execute(DeleteMemberByIdCommand command) throws EntityNotFoundException {
         Board board = boardRepository.findById(command.getId()).orElseThrow(EntityNotFoundException::new);
 
         if (board.getMembers().stream().noneMatch(member ->
@@ -121,6 +129,7 @@ public class DefaultBoardService implements BoardService {
         }
 
         boardRepository.save(board);
+        domainEventPublisher.publishEvent(new MemberDeletedEvent(command.getId(), command.getUsername(), OffsetDateTime.now()));
     }
 
     @Override
@@ -143,18 +152,21 @@ public class DefaultBoardService implements BoardService {
         });
 
         boardRepository.save(board);
+        domainEventPublisher.publishEvent(new MemberUpdatedEvent(command.getId(), command.getUsername(), OffsetDateTime.now()));
     }
 
     @Override
-    public void execute(@Valid AddTaskByIdCommand command) throws EntityNotFoundException {
+    public void execute(@Valid CreateTaskByIdCommand command) throws EntityNotFoundException {
         Board board = boardRepository.findById(command.getId()).orElseThrow(EntityNotFoundException::new);
 
         if (null == board.getTasks()) {
             board.setTasks(new ArrayList<>());
         }
 
+        UUID taskId = UUID.randomUUID();
+
         board.getTasks().add(Task.builder()
-                .id(UUID.randomUUID())
+                .id(taskId)
                 .name(command.getName())
                 .description(command.getDescription().orElse(null))
                 .createdAt(OffsetDateTime.now())
@@ -166,6 +178,7 @@ public class DefaultBoardService implements BoardService {
                 .build());
 
         boardRepository.save(board);
+        domainEventPublisher.publishEvent(new TaskCreatedEvent(command.getId(), taskId, OffsetDateTime.now()));
     }
 
     @Override
@@ -199,10 +212,11 @@ public class DefaultBoardService implements BoardService {
         }
 
         boardRepository.save(board);
+        domainEventPublisher.publishEvent(new TaskUpdatedEvent(command.getId(), command.getTaskId(), OffsetDateTime.now()));
     }
 
     @Override
-    public void execute(RemoveTaskByIdCommand command) throws EntityNotFoundException {
+    public void execute(DeleteTaskByIdCommand command) throws EntityNotFoundException {
         Board board = boardRepository.findById(command.getId()).orElseThrow(EntityNotFoundException::new);
 
         if (!board.getTasks().removeIf(task -> task.getId().equals(command.getTaskId()))) {
@@ -210,5 +224,6 @@ public class DefaultBoardService implements BoardService {
         }
 
         boardRepository.save(board);
+        domainEventPublisher.publishEvent(new TaskDeletedEvent(command.getId(), command.getTaskId(), OffsetDateTime.now()));
     }
 }

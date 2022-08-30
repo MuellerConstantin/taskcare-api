@@ -1,6 +1,6 @@
 package de.x1c1b.taskcare.service.presentation.rest.v1.dto.mapper;
 
-import de.x1c1b.taskcare.service.core.board.application.command.AddMemberByIdCommand;
+import de.x1c1b.taskcare.service.core.board.application.command.CreateMemberByIdCommand;
 import de.x1c1b.taskcare.service.core.board.application.command.UpdateMemberByIdCommand;
 import de.x1c1b.taskcare.service.core.board.domain.Member;
 import de.x1c1b.taskcare.service.presentation.rest.v1.dto.CreateMemberDTO;
@@ -19,7 +19,7 @@ public interface MemberDTOMapper {
 
     List<MemberDTO> mapToDTO(Set<Member> memberAggregateSet);
 
-    AddMemberByIdCommand mapToCommand(CreateMemberDTO createMemberDTO, UUID id);
+    CreateMemberByIdCommand mapToCommand(CreateMemberDTO createMemberDTO, UUID id);
 
     UpdateMemberByIdCommand mapToCommand(UpdateMemberDTO updateMemberDTO, UUID id, String username);
 }
