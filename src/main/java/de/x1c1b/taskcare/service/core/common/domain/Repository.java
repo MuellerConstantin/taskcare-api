@@ -1,5 +1,6 @@
 package de.x1c1b.taskcare.service.core.common.domain;
 
+import java.io.Serializable;
 import java.util.Optional;
 
 /**
@@ -8,7 +9,7 @@ import java.util.Optional;
  * @param <ID> Type of entity's identifier.
  * @param <E>  Type of entity.
  */
-public interface Repository<ID, E> {
+public interface Repository<ID extends Serializable, E> {
 
     Optional<E> findById(ID id);
 
