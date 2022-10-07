@@ -63,8 +63,9 @@ public class BoardServiceAccessInterceptor {
 
         PrincipalDetails principalDetails = principalDetailsContext.getAuthenticatedPrincipal();
 
-        // Only board administrators can remove board members
-        if (!boardRepository.hasMemberWithRole(command.getId(), principalDetails.getUsername(), Role.ADMINISTRATOR)) {
+        // Only board administrators can remove board members and a board member can remove itself
+        if (!command.getUsername().equals(principalDetails.getUsername()) &&
+                !boardRepository.hasMemberWithRole(command.getId(), principalDetails.getUsername(), Role.ADMINISTRATOR)) {
             throw new InsufficientPermissionsException();
         }
     }
