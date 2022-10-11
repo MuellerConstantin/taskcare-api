@@ -16,7 +16,14 @@ public interface BoardEntityRepository extends PagingAndSortingRepository<BoardE
 
     Page<BoardEntity> findAllByMembersUserUsername(String username, Pageable pageable);
 
-    Page<BoardEntity> findAllByMembersUserUsername(String username, Specification<BoardEntity> specification, Pageable pageable);
+    default Page<BoardEntity> findAllByMembersUserUsername(String username, Specification<BoardEntity> specification, Pageable pageable) {
+        var finalSpecification = specification.and((Specification<BoardEntity>) (root, query, criteriaBuilder) -> {
+            var selectionPath = root.join("members").join("user").get("username");
+            return criteriaBuilder.equal(selectionPath, username);
+        });
+
+        return this.findAll(finalSpecification, pageable);
+    }
 
     boolean existsByIdAndMembersUserUsername(UUID id, String username);
 
