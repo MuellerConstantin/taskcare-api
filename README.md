@@ -6,6 +6,7 @@
 
 - [Introduction](#introduction)
 - [Architecture](#architecture)
+- [Deployment](#deployment)
 - [License](#license)
   - [Forbidden](#forbidden)
 
