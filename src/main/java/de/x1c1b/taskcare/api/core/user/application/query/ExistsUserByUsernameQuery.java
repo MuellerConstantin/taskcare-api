@@ -1,0 +1,15 @@
+package de.x1c1b.taskcare.api.core.user.application.query;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@AllArgsConstructor
+@NoArgsConstructor
+@Data
+@Builder
+public class ExistsUserByUsernameQuery {
+
+    private String username;
+}

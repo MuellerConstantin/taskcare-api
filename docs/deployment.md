@@ -46,7 +46,7 @@ Environment installation on the target system, but an installation of the Docker
 Docker image can be started as follows³:
 
 ```shell
-docker run -p 8080:8080 --name taskcare/service -d taskcare/service:latest
+docker run -p 8080:8080 --name taskcare/api -d taskcare/api:latest
 ```
 
 Even with container deployment, the application still has to be configured. This is basically the same as for standalone
@@ -64,5 +64,5 @@ code, this is also possible. No Java development tools or installations are requ
 in multi-stage operation on a Docker basis. The provided Dockerfile can be used to build:
 
 ```shell
-docker build -t taskcare/service:latest .
+docker build -t taskcare/api:latest .
 ```

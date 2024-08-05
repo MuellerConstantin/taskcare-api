@@ -1,7 +1,7 @@
 FROM eclipse-temurin:17 as build
 
-RUN mkdir -p /usr/local/src/taskcare/service
-WORKDIR /usr/local/src/taskcare/service
+RUN mkdir -p /usr/local/src/taskcare/api
+WORKDIR /usr/local/src/taskcare/api
 
 COPY .mvn/ .mvn
 COPY mvnw ./
@@ -17,11 +17,11 @@ RUN mkdir -p target/dependency && (cd target/dependency; jar -xf ../*.jar)
 
 FROM eclipse-temurin:17
 
-RUN mkdir -p /usr/local/bin/taskcare/service
-WORKDIR /usr/local/bin/taskcare/service
+RUN mkdir -p /usr/local/bin/taskcare/api
+WORKDIR /usr/local/bin/taskcare/api
 
-COPY --from=build /usr/local/src/taskcare/service/target/dependency/BOOT-INF/lib ./lib
-COPY --from=build /usr/local/src/taskcare/service/target/dependency/META-INF ./META-INF
-COPY --from=build /usr/local/src/taskcare/service/target/dependency/BOOT-INF/classes ./
+COPY --from=build /usr/local/src/taskcare/api/target/dependency/BOOT-INF/lib ./lib
+COPY --from=build /usr/local/src/taskcare/api/target/dependency/META-INF ./META-INF
+COPY --from=build /usr/local/src/taskcare/api/target/dependency/BOOT-INF/classes ./
 
-ENTRYPOINT ["java", "-Dspring.profiles.active=prod", "-cp", "./:./lib/*", "de.x1c1b.taskcare.service.TaskCareServiceApplication"]
+ENTRYPOINT ["java", "-Dspring.profiles.active=prod", "-cp", "./:./lib/*", "de.x1c1b.taskcare.api.TaskCareApiApplication"]

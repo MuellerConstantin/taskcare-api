@@ -9,10 +9,10 @@
 		<relativePath/>
 	</parent>
 	<groupId>de.x1c1b.taskcare</groupId>
-	<artifactId>taskcare-service</artifactId>
+	<artifactId>taskcare-api</artifactId>
 	<version>0.1.0</version>
 
-	<name>taskcare-service</name>
+	<name>taskcare-api</name>
 	<description>Collaboration platform for managing tasks in a team.</description>
 
 	<properties>
