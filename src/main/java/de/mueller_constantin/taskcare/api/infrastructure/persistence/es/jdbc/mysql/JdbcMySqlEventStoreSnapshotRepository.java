@@ -1,10 +1,13 @@
 package de.mueller_constantin.taskcare.api.infrastructure.persistence.es.jdbc.mysql;
 
+import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
+import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
+import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import de.mueller_constantin.taskcare.api.core.common.domain.model.Aggregate;
 import de.mueller_constantin.taskcare.api.infrastructure.persistence.es.jdbc.JdbcEventStoreSnapshotRepository;
 import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -17,20 +20,34 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Transactional(propagation = Propagation.MANDATORY)
-@RequiredArgsConstructor
 public class JdbcMySqlEventStoreSnapshotRepository implements JdbcEventStoreSnapshotRepository {
     private final String METADATA_TABLE_NAME = "es_metadata";
     private final String SNAPSHOT_TABLE_NAME = "es_snapshots";
 
     private final NamedParameterJdbcTemplate jdbcTemplate;
     private final ObjectMapper objectMapper;
+    private final ObjectWriter objectWriter;
+
+    public JdbcMySqlEventStoreSnapshotRepository(NamedParameterJdbcTemplate jdbcTemplate, ObjectMapper objectMapper) {
+        this.jdbcTemplate = jdbcTemplate;
+        this.objectMapper = objectMapper;
+
+        this.objectMapper.addMixIn(Aggregate.class, AggregateJsonFilterMixin.class);
+
+        SimpleFilterProvider filterProvider = new SimpleFilterProvider().addFilter("aggregateDataFilter",
+                SimpleBeanPropertyFilter.serializeAllExcept("uncommittedEvents", "committedVersion"));
+
+        this.objectWriter = this.objectMapper.writer(filterProvider);
+    }
 
     @SneakyThrows
     public void createSnapshot(@NonNull Aggregate aggregate) {
         MapSqlParameterSource parameters = new MapSqlParameterSource();
         parameters.addValue("aggregateId", aggregate.getId().toString());
         parameters.addValue("version", aggregate.getVersion(), Types.INTEGER);
-        parameters.addValue("aggregateData", objectMapper.writeValueAsString(aggregate));
+        parameters.addValue("aggregateData", objectWriter.writeValueAsString(aggregate));
+
+        System.out.println(objectWriter.writeValueAsString(aggregate));
 
         jdbcTemplate.update("""
                 INSERT INTO %s (aggregate_id, version, aggregate_data)
@@ -68,5 +85,9 @@ public class JdbcMySqlEventStoreSnapshotRepository implements JdbcEventStoreSnap
         Class<? extends Aggregate> aggregateClass = Class.forName(aggregateType).asSubclass(Aggregate.class);
 
         return objectMapper.readValue(aggregateData, aggregateClass);
+    }
+
+    @JsonFilter("aggregateDataFilter")
+    public static class AggregateJsonFilterMixin {
     }
 }

@@ -1,6 +1,5 @@
 package de.mueller_constantin.taskcare.api.core.common.domain.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
@@ -19,8 +18,6 @@ public abstract class Aggregate {
     private final UUID id;
     private int version;
     private boolean deleted;
-
-    @JsonIgnore
     private final List<Event> uncommittedEvents = new ArrayList<>();
 
     protected Aggregate(UUID id, int version, boolean deleted) {
