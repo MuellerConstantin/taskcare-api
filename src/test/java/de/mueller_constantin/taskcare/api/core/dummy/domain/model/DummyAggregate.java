@@ -1,7 +1,7 @@
-package de.mueller_constantin.taskcare.api.core.dummy.domain;
+package de.mueller_constantin.taskcare.api.core.dummy.domain.model;
 
-import de.mueller_constantin.taskcare.api.core.common.domain.Aggregate;
-import de.mueller_constantin.taskcare.api.core.common.domain.Event;
+import de.mueller_constantin.taskcare.api.core.common.domain.model.Aggregate;
+import de.mueller_constantin.taskcare.api.core.common.domain.model.Event;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;

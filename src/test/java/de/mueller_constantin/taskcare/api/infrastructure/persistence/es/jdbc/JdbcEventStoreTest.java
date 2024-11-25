@@ -1,9 +1,9 @@
 package de.mueller_constantin.taskcare.api.infrastructure.persistence.es.jdbc;
 
-import de.mueller_constantin.taskcare.api.core.common.domain.Event;
-import de.mueller_constantin.taskcare.api.core.dummy.domain.DummyAggregate;
-import de.mueller_constantin.taskcare.api.core.dummy.domain.DummyCreatedEvent;
-import de.mueller_constantin.taskcare.api.core.dummy.domain.DummyUpdatedEvent;
+import de.mueller_constantin.taskcare.api.core.common.domain.model.Event;
+import de.mueller_constantin.taskcare.api.core.dummy.domain.model.DummyAggregate;
+import de.mueller_constantin.taskcare.api.core.dummy.domain.model.DummyCreatedEvent;
+import de.mueller_constantin.taskcare.api.core.dummy.domain.model.DummyUpdatedEvent;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

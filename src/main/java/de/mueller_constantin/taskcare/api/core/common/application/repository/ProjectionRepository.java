@@ -1,8 +1,8 @@
-package de.mueller_constantin.taskcare.api.core.common.repository;
+package de.mueller_constantin.taskcare.api.core.common.application.repository;
 
-import de.mueller_constantin.taskcare.api.core.common.domain.Page;
-import de.mueller_constantin.taskcare.api.core.common.domain.PageInfo;
-import de.mueller_constantin.taskcare.api.core.common.domain.Projection;
+import de.mueller_constantin.taskcare.api.core.common.domain.model.Page;
+import de.mueller_constantin.taskcare.api.core.common.domain.model.PageInfo;
+import de.mueller_constantin.taskcare.api.core.common.domain.model.Projection;
 
 import java.util.List;
 import java.util.Optional;

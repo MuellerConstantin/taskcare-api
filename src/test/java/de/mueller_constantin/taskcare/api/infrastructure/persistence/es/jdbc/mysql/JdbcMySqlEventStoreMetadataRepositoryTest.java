@@ -1,6 +1,6 @@
 package de.mueller_constantin.taskcare.api.infrastructure.persistence.es.jdbc.mysql;
 
-import de.mueller_constantin.taskcare.api.core.dummy.domain.DummyAggregate;
+import de.mueller_constantin.taskcare.api.core.dummy.domain.model.DummyAggregate;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,8 +13,6 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(SpringExtension.class)
 @DataJdbcTest

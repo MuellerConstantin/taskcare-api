@@ -1,6 +1,6 @@
-package de.mueller_constantin.taskcare.api.core.user.domain;
+package de.mueller_constantin.taskcare.api.core.user.domain.model;
 
-import de.mueller_constantin.taskcare.api.core.common.domain.Projection;
+import de.mueller_constantin.taskcare.api.core.common.domain.model.Projection;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 

@@ -1,12 +1,12 @@
 package de.mueller_constantin.taskcare.api.infrastructure.persistence;
 
-import de.mueller_constantin.taskcare.api.core.common.domain.Page;
-import de.mueller_constantin.taskcare.api.core.common.domain.PageInfo;
-import de.mueller_constantin.taskcare.api.core.user.domain.Role;
-import de.mueller_constantin.taskcare.api.core.user.domain.UserAggregate;
-import de.mueller_constantin.taskcare.api.core.user.domain.UserProjection;
-import de.mueller_constantin.taskcare.api.core.user.repository.UserAggregateRepository;
-import de.mueller_constantin.taskcare.api.core.user.repository.UserProjectionRepository;
+import de.mueller_constantin.taskcare.api.core.common.domain.model.Page;
+import de.mueller_constantin.taskcare.api.core.common.domain.model.PageInfo;
+import de.mueller_constantin.taskcare.api.core.user.domain.model.Role;
+import de.mueller_constantin.taskcare.api.core.user.domain.model.UserAggregate;
+import de.mueller_constantin.taskcare.api.core.user.domain.model.UserProjection;
+import de.mueller_constantin.taskcare.api.core.user.application.repository.UserAggregateRepository;
+import de.mueller_constantin.taskcare.api.core.user.application.repository.UserProjectionRepository;
 import de.mueller_constantin.taskcare.api.infrastructure.persistence.es.EventStore;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;

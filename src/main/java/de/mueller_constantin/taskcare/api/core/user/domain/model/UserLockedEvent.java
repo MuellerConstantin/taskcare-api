@@ -1,6 +1,6 @@
-package de.mueller_constantin.taskcare.api.core.user.domain;
+package de.mueller_constantin.taskcare.api.core.user.domain.model;
 
-import de.mueller_constantin.taskcare.api.core.common.domain.Event;
+import de.mueller_constantin.taskcare.api.core.common.domain.model.Event;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
@@ -12,12 +12,12 @@ import java.util.UUID;
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
 @SuperBuilder
-public class UserDeletedEvent extends Event {
-    public UserDeletedEvent() {
+public class UserLockedEvent extends Event {
+    public UserLockedEvent() {
         this(UUID.randomUUID(), 0);
     }
 
-    public UserDeletedEvent(UUID aggregateId, int version) {
+    public UserLockedEvent(UUID aggregateId, int version) {
         super(aggregateId, version);
     }
 }

@@ -1,4 +1,4 @@
-package de.mueller_constantin.taskcare.api.core.common.domain;
+package de.mueller_constantin.taskcare.api.core.common.domain.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.EqualsAndHashCode;

@@ -1,6 +1,6 @@
 package de.mueller_constantin.taskcare.api.infrastructure.persistence.es.jdbc;
 
-import de.mueller_constantin.taskcare.api.core.common.domain.Aggregate;
+import de.mueller_constantin.taskcare.api.core.common.domain.model.Aggregate;
 import jakarta.annotation.Nullable;
 import lombok.NonNull;
 

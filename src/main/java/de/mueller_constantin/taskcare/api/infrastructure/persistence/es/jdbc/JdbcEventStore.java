@@ -1,6 +1,7 @@
 package de.mueller_constantin.taskcare.api.infrastructure.persistence.es.jdbc;
 
-import de.mueller_constantin.taskcare.api.core.common.domain.*;
+import de.mueller_constantin.taskcare.api.core.common.domain.model.Aggregate;
+import de.mueller_constantin.taskcare.api.core.common.domain.model.Event;
 import de.mueller_constantin.taskcare.api.infrastructure.persistence.es.EventStore;
 import lombok.*;
 import org.springframework.transaction.annotation.Transactional;
