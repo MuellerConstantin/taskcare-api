@@ -36,7 +36,6 @@ class JdbcMySqlEventStoreMetadataRepositoryTest {
 
     @TestConfiguration
     static class JdbcMySqlEventStoreMetadataRepositoryTestConfig {
-
         @Bean
         JdbcMySqlEventStoreMetadataRepository jdbcEventStoreMetadataRepository(NamedParameterJdbcTemplate jdbcTemplate) {
             return new JdbcMySqlEventStoreMetadataRepository(jdbcTemplate);
