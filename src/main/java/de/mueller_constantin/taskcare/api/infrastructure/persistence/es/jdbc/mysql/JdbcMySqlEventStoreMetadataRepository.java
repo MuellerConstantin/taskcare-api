@@ -10,8 +10,6 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Types;
-import java.util.List;
-import java.util.UUID;
 
 @Transactional(propagation = Propagation.MANDATORY)
 @RequiredArgsConstructor
@@ -44,45 +42,5 @@ public class JdbcMySqlEventStoreMetadataRepository implements JdbcEventStoreMeta
                 SET version = :version, deleted = :deleted
                 WHERE aggregate_id = :aggregateId
                 """.formatted(METADATA_TABLE_NAME), parameters);
-    }
-
-    public List<UUID> loadAllAggregateIds(@NonNull Class<? extends Aggregate> aggregateClass,
-                                          Integer limit, Integer offset) {
-        MapSqlParameterSource parameters = new MapSqlParameterSource();
-        parameters.addValue("aggregateType", aggregateClass.getName());
-
-        if(limit != null && offset != null) {
-            parameters.addValue("limit", limit, Types.INTEGER);
-            parameters.addValue("offset", offset, Types.INTEGER);
-
-            return jdbcTemplate.queryForList("""
-                    SELECT aggregate_id
-                    FROM %s
-                    WHERE aggregate_type = :aggregateType AND deleted = false
-                    ORDER BY aggregate_id
-                    LIMIT :limit
-                    OFFSET :offset
-                    """.formatted(METADATA_TABLE_NAME), parameters, UUID.class);
-        } else {
-            return jdbcTemplate.queryForList("""
-                    SELECT aggregate_id
-                    FROM %s
-                    WHERE aggregate_type = :aggregateType AND deleted = false
-                    ORDER BY aggregate_id
-                    """.formatted(METADATA_TABLE_NAME), parameters, UUID.class);
-        }
-    }
-
-    public int countAllAggregates(@NonNull Class<? extends Aggregate> aggregateClass) {
-        MapSqlParameterSource parameters = new MapSqlParameterSource();
-        parameters.addValue("aggregateType", aggregateClass.getName());
-
-        Integer count = jdbcTemplate.queryForObject("""
-                SELECT COUNT(*)
-                FROM %s
-                WHERE aggregate_type = :aggregateType AND deleted = false
-                """.formatted(METADATA_TABLE_NAME), parameters, Integer.class);
-
-        return count == null ? 0 : count;
     }
 }

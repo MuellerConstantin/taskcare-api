@@ -14,9 +14,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import java.util.List;
-import java.util.UUID;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(SpringExtension.class)
@@ -35,29 +32,6 @@ class JdbcMySqlEventStoreMetadataRepositoryTest {
         dummyAggregate.create("value1", "value2");
 
         jdbcMySqlEventStoreMetadataRepository.createMetadata(dummyAggregate);
-
-        int count = jdbcMySqlEventStoreMetadataRepository.countAllAggregates(DummyAggregate.class);
-
-        assertEquals(3, count);
-
-        List<UUID> aggregateIds = jdbcMySqlEventStoreMetadataRepository.loadAllAggregateIds(DummyAggregate.class, null, null);
-
-        assertEquals(3, aggregateIds.size());
-        assertTrue(aggregateIds.contains(dummyAggregate.getId()));
-    }
-
-    @Test
-    void countAllAggregates() {
-        int count = jdbcMySqlEventStoreMetadataRepository.countAllAggregates(DummyAggregate.class);
-
-        assertEquals(2, count);
-    }
-
-    @Test
-    void loadAllAggregateIds() {
-        List<UUID> aggregateIds = jdbcMySqlEventStoreMetadataRepository.loadAllAggregateIds(DummyAggregate.class, null, null);
-
-        assertEquals(2, aggregateIds.size());
     }
 
     @TestConfiguration

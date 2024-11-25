@@ -11,9 +11,4 @@ public interface JdbcEventStoreMetadataRepository {
     void createMetadata(@NonNull Aggregate aggregate);
 
     void updateMetadata(@NonNull Aggregate aggregate);
-
-    List<UUID> loadAllAggregateIds(@NonNull Class<? extends Aggregate> aggregateClass,
-                                   @Nullable Integer limit, @Nullable Integer offset);
-
-    int countAllAggregates(@NonNull Class<? extends Aggregate> aggregateClass);
 }
