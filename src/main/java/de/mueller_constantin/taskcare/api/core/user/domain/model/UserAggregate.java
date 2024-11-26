@@ -42,13 +42,15 @@ public class UserAggregate extends Aggregate {
             return;
         } else if(event instanceof UserLockedEvent) {
             this.setLocked(true);
+            return;
         } else if(event instanceof UserUnlockedEvent) {
             this.setLocked(false);
+            return;
         } else if(event instanceof UserDeletedEvent) {
             return;
         }
 
-        throw new IllegalArgumentException("Unknown event type");
+        throw new IllegalArgumentException("Unknown event type: %s".formatted(event.getClass()));
     }
 
     private void setUsername(String username) {
