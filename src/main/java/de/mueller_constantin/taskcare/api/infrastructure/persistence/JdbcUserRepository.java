@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.ResultSet;
@@ -20,6 +21,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+@Component
 @Transactional
 @RequiredArgsConstructor
 public class JdbcUserRepository implements UserAggregateRepository, UserProjectionRepository {
