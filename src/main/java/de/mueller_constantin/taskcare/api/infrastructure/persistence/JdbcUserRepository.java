@@ -50,7 +50,7 @@ public class JdbcUserRepository implements UserAggregateRepository, UserProjecti
             parameters.addValue("username", aggregate.getUsername());
             parameters.addValue("password", aggregate.getPassword());
             parameters.addValue("displayName", aggregate.getDisplayName());
-            parameters.addValue("role", aggregate.getRole());
+            parameters.addValue("role", aggregate.getRole().toString());
             parameters.addValue("locked", aggregate.isLocked(), Types.BOOLEAN);
 
             jdbcTemplate.update("""
