@@ -18,7 +18,7 @@ public class UserService implements ApplicationService {
     private final UserProjectionRepository userProjectionRepository;
     private final CredentialsEncoder credentialsEncoder;
 
-    void handle(CreateUserCommand command) {
+    public void handle(CreateUserCommand command) {
         boolean usernameInUse = userProjectionRepository.existsByUsername(command.getUsername());
 
         if (usernameInUse) {
@@ -33,7 +33,33 @@ public class UserService implements ApplicationService {
         userAggregateRepository.save(userAggregate);
     }
 
-    void handle(UpdateUserByIdCommand command) {
+    public void handle(SyncDefaultAdminCommand command) {
+        boolean defaultAdminExists = userProjectionRepository.existsByUsername(UserAggregate.DEFAULT_ADMIN_USERNAME);
+
+        if(!defaultAdminExists) {
+            UserAggregate userAggregate = new UserAggregate();
+
+            String hashedPassword = credentialsEncoder.encode(command.getPassword());
+
+            userAggregate.create(UserAggregate.DEFAULT_ADMIN_USERNAME, hashedPassword, null, Role.ADMINISTRATOR);
+            userAggregateRepository.save(userAggregate);
+        } else {
+            UserProjection userProjection = userProjectionRepository.findByUsername(UserAggregate.DEFAULT_ADMIN_USERNAME)
+                    .orElseThrow(NoSuchEntityException::new);
+
+            if(!credentialsEncoder.matches(command.getPassword(), userProjection.getPassword())) {
+                String hashedPassword = credentialsEncoder.encode(command.getPassword());
+
+                UserAggregate userAggregate = userAggregateRepository.load(userProjection.getId())
+                        .orElseThrow(NoSuchEntityException::new);
+
+                userAggregate.update(hashedPassword, null, Role.ADMINISTRATOR);
+                userAggregateRepository.save(userAggregate);
+            }
+        }
+    }
+
+    public void handle(UpdateUserByIdCommand command) {
         UserProjection userProjection = userProjectionRepository.findById(command.getId())
                 .orElseThrow(NoSuchEntityException::new);
 
@@ -56,7 +82,7 @@ public class UserService implements ApplicationService {
         userAggregateRepository.save(userAggregate);
     }
 
-    void handle(DeleteUserByIdCommand command) {
+    public void handle(DeleteUserByIdCommand command) {
         UserAggregate userAggregate = userAggregateRepository.load(command.getId())
                 .orElseThrow(NoSuchEntityException::new);
 
@@ -64,7 +90,7 @@ public class UserService implements ApplicationService {
         userAggregateRepository.save(userAggregate);
     }
 
-    void handle(LockUserByIdCommand command) {
+    public void handle(LockUserByIdCommand command) {
         UserAggregate userAggregate = userAggregateRepository.load(command.getId())
                 .orElseThrow(NoSuchEntityException::new);
 
@@ -72,7 +98,7 @@ public class UserService implements ApplicationService {
         userAggregateRepository.save(userAggregate);
     }
 
-    void handle(UnlockUserByIdCommand command) {
+    public void handle(UnlockUserByIdCommand command) {
         UserAggregate userAggregate = userAggregateRepository.load(command.getId())
                 .orElseThrow(NoSuchEntityException::new);
 
@@ -80,17 +106,17 @@ public class UserService implements ApplicationService {
         userAggregateRepository.save(userAggregate);
     }
 
-    UserProjection handle(FindUserByIdQuery query) {
+    public UserProjection handle(FindUserByIdQuery query) {
         return userProjectionRepository.findById(query.getId())
                 .orElseThrow(NoSuchEntityException::new);
     }
 
-    UserProjection handle(FindUserByUsernameQuery query) {
+    public UserProjection handle(FindUserByUsernameQuery query) {
         return userProjectionRepository.findByUsername(query.getUsername())
                 .orElseThrow(NoSuchEntityException::new);
     }
 
-    Page<UserProjection> handle(FindAllUsersQuery query) {
+    public Page<UserProjection> handle(FindAllUsersQuery query) {
         return userProjectionRepository.findAll(PageInfo.builder()
                 .page(query.getPage())
                 .perPage(query.getPerPage())

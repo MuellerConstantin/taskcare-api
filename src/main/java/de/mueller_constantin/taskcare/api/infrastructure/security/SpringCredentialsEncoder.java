@@ -14,4 +14,9 @@ public class SpringCredentialsEncoder implements CredentialsEncoder {
     public String encode(String credential) {
         return passwordEncoder.encode(credential);
     }
+
+    @Override
+    public boolean matches(String credential, String encodedCredential) {
+        return passwordEncoder.matches(credential, encodedCredential);
+    }
 }
