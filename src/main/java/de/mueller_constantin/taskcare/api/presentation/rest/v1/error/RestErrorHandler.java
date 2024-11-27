@@ -1,6 +1,7 @@
-package de.mueller_constantin.taskcare.api.presentation.api.v1.error;
+package de.mueller_constantin.taskcare.api.presentation.rest.v1.error;
 
-import de.mueller_constantin.taskcare.api.presentation.api.v1.dto.ErrorDto;
+import de.mueller_constantin.taskcare.api.infrastructure.security.token.InvalidTokenException;
+import de.mueller_constantin.taskcare.api.presentation.rest.v1.dto.ErrorDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -21,6 +22,20 @@ import java.time.OffsetDateTime;
 @RestControllerAdvice
 @Slf4j
 public class RestErrorHandler {
+    @ExceptionHandler(InvalidTokenException.class)
+    public ResponseEntity<Object> handleAuthentication(InvalidTokenException exc,
+                                                       WebRequest request) {
+
+        ErrorDto dto = ErrorDto.builder()
+                .error("InvalidTokenError")
+                .timestamp(OffsetDateTime.now())
+                .status(HttpStatus.UNAUTHORIZED.value())
+                .path(((ServletWebRequest) request).getRequest().getServletPath())
+                .build();
+
+        return new ResponseEntity<>(dto, new HttpHeaders(), HttpStatus.valueOf(dto.getStatus()));
+    }
+
     @ExceptionHandler(UsernameNotFoundException.class)
     public ResponseEntity<Object> handleUsernameNotFound(UsernameNotFoundException exc,
                                                          WebRequest request) {

@@ -25,7 +25,6 @@ public class AccessTokenAuthenticationFilter extends OncePerRequestFilter {
         String jwt = parseToken(request);
 
         if (null != jwt) {
-
             Authentication authentication = authenticationManager.authenticate(new AccessTokenAuthenticationToken(jwt));
             SecurityContextHolder.getContext().setAuthentication(authentication);
         }

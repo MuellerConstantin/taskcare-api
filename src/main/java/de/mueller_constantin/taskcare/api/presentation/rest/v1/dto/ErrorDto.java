@@ -1,4 +1,4 @@
-package de.mueller_constantin.taskcare.api.presentation.api.v1.dto;
+package de.mueller_constantin.taskcare.api.presentation.rest.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
