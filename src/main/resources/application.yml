@@ -1,3 +1,7 @@
 spring:
   application:
     name: taskcare-api
+  messages:
+    basename: messages/validation
+    encoding: UTF-8
+    fallback-to-system-locale: false

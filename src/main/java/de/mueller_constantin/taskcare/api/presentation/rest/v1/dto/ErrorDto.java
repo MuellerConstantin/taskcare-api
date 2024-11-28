@@ -36,4 +36,22 @@ public class ErrorDto {
             return this;
         }
     }
+
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Data
+    @Builder
+    public static class ValidationErrorDetails {
+        private String field;
+        private String message;
+    }
+
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Data
+    @Builder
+    public static class InvalidParameterErrorDetails {
+        private String parameter;
+        private String message;
+    }
 }
