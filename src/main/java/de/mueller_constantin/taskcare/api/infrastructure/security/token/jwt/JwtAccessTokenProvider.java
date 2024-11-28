@@ -65,4 +65,9 @@ public class JwtAccessTokenProvider implements TokenProvider<AccessToken> {
             throw new InvalidTokenException("Invalid token", exc);
         }
     }
+
+    @Override
+    public void invalidateToken(String rawToken) {
+        throw new UnsupportedOperationException();
+    }
 }

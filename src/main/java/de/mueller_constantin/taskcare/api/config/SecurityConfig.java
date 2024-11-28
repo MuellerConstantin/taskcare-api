@@ -1,11 +1,14 @@
 package de.mueller_constantin.taskcare.api.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import de.mueller_constantin.taskcare.api.infrastructure.security.token.RefreshToken;
 import de.mueller_constantin.taskcare.api.infrastructure.security.ajax.AjaxAuthenticationProcessingFilterConfigurer;
 import de.mueller_constantin.taskcare.api.infrastructure.security.token.AccessToken;
 import de.mueller_constantin.taskcare.api.infrastructure.security.token.TokenProvider;
 import de.mueller_constantin.taskcare.api.infrastructure.security.token.auth.AccessTokenAuthenticationProvider;
+import de.mueller_constantin.taskcare.api.infrastructure.security.token.auth.RefreshTokenAuthenticationProvider;
 import de.mueller_constantin.taskcare.api.infrastructure.security.token.filter.AccessTokenAuthenticationFilterConfigurer;
+import de.mueller_constantin.taskcare.api.infrastructure.security.token.filter.RefreshTokenAuthenticationProcessingFilterConfigurer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -51,6 +54,9 @@ public class SecurityConfig {
     private TokenProvider<AccessToken> accessTokenProvider;
 
     @Autowired
+    private TokenProvider<RefreshToken> refreshTokenProvider;
+
+    @Autowired
     private ObjectMapper objectMapper;
 
     @Bean
@@ -69,6 +75,12 @@ public class SecurityConfig {
 
         httpSecurity.apply(new AjaxAuthenticationProcessingFilterConfigurer())
                 .requestMatcher(new AntPathRequestMatcher("/api/v1/auth/token", HttpMethod.POST.name()))
+                .authenticationFailureHandler(authenticationFailureHandler)
+                .authenticationSuccessHandler(authenticationSuccessHandler)
+                .objectMapper(objectMapper)
+                .and()
+                .apply(new RefreshTokenAuthenticationProcessingFilterConfigurer())
+                .requestMatcher(new AntPathRequestMatcher("/api/v1/auth/refresh", HttpMethod.POST.name()))
                 .authenticationFailureHandler(authenticationFailureHandler)
                 .authenticationSuccessHandler(authenticationSuccessHandler)
                 .objectMapper(objectMapper)
@@ -118,9 +130,14 @@ public class SecurityConfig {
         accessTokenAuthenticationProvider.setUserDetailsService(userDetailsService);
         accessTokenAuthenticationProvider.setAccessTokenProvider(accessTokenProvider);
 
+        RefreshTokenAuthenticationProvider refreshTokenAuthenticationProvider = new RefreshTokenAuthenticationProvider();
+        refreshTokenAuthenticationProvider.setUserDetailsService(userDetailsService);
+        refreshTokenAuthenticationProvider.setRefreshTokenProvider(refreshTokenProvider);
+
         AuthenticationManagerBuilder authenticationManagerBuilder = httpSecurity.getSharedObject(AuthenticationManagerBuilder.class);
         authenticationManagerBuilder.authenticationProvider(daoAuthenticationProvider);
         authenticationManagerBuilder.authenticationProvider(accessTokenAuthenticationProvider);
+        authenticationManagerBuilder.authenticationProvider(refreshTokenAuthenticationProvider);
         AuthenticationManager authenticationManager = authenticationManagerBuilder.build();
 
         httpSecurity.authenticationManager(authenticationManager);
@@ -128,7 +145,7 @@ public class SecurityConfig {
 
     protected void authorizeRequests(HttpSecurity httpSecurity) throws Exception {
         httpSecurity.authorizeHttpRequests((authorizeRequests) -> authorizeRequests
-                .requestMatchers(HttpMethod.POST, "/api/v1/auth/token")
+                .requestMatchers(HttpMethod.POST, "/api/v1/auth/token", "/api/v1/auth/refresh")
                 .permitAll()
                 .anyRequest().authenticated());
     }

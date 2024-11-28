@@ -2,6 +2,7 @@ package de.mueller_constantin.taskcare.api.infrastructure.security.token;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import de.mueller_constantin.taskcare.api.infrastructure.security.token.auth.RefreshTokenAuthenticationToken;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,26 +19,34 @@ import java.util.Map;
 
 @Component
 @Primary
-public class AccessTokenAuthenticationSuccessHandler implements AuthenticationSuccessHandler {
+public class TokenAuthenticationSuccessHandler implements AuthenticationSuccessHandler {
     private final ObjectMapper objectMapper;
     private final TokenProvider<AccessToken> accessTokenTokenProvider;
+    private final TokenProvider<RefreshToken> refreshTokenTokenProvider;
 
     @Autowired
-    public AccessTokenAuthenticationSuccessHandler(ObjectMapper objectMapper,
-                                             TokenProvider<AccessToken> accessTokenTokenProvider) {
+    public TokenAuthenticationSuccessHandler(ObjectMapper objectMapper,
+                                             TokenProvider<AccessToken> accessTokenTokenProvider,
+                                             TokenProvider<RefreshToken> refreshTokenTokenProvider) {
         this.objectMapper = objectMapper;
         this.accessTokenTokenProvider = accessTokenTokenProvider;
+        this.refreshTokenTokenProvider = refreshTokenTokenProvider;
     }
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
         AccessToken accessToken = accessTokenTokenProvider.generateToken(authentication);
+        RefreshToken refreshToken = refreshTokenTokenProvider.generateToken(authentication);
+
+        if(authentication instanceof RefreshTokenAuthenticationToken) {
+            refreshTokenTokenProvider.invalidateToken((String) authentication.getCredentials());
+        }
 
         Map<String, Object> token = new HashMap<>();
-        token.put("type", "Bearer");
         token.put("principal", accessToken.getPrincipal());
         token.put("accessToken", accessToken.getRawToken());
-        token.put("accessExpiresIn", accessToken.getExpiresIn());
+        token.put("refreshToken", refreshToken.getRawToken());
+        token.put("expiresIn", accessToken.getExpiresIn());
 
         response.setStatus(HttpStatus.OK.value());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
