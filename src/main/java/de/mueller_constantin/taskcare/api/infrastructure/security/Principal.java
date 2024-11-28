@@ -17,7 +17,7 @@ public class Principal implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Set.of(new SimpleGrantedAuthority(userProjection.getRole().name()));
+        return Set.of(new SimpleGrantedAuthority("ROLE_" + userProjection.getRole().name()));
     }
 
     @Override

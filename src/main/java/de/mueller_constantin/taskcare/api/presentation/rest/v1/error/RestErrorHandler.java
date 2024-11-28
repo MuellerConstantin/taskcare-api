@@ -1,6 +1,7 @@
 package de.mueller_constantin.taskcare.api.presentation.rest.v1.error;
 
 import de.mueller_constantin.taskcare.api.core.common.application.service.NoSuchEntityException;
+import de.mueller_constantin.taskcare.api.core.user.application.service.UsernameAlreadyInUseException;
 import de.mueller_constantin.taskcare.api.infrastructure.security.token.InvalidTokenException;
 import de.mueller_constantin.taskcare.api.presentation.rest.v1.dto.ErrorDto;
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +15,7 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.LockedException;
@@ -32,7 +34,6 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import javax.naming.AuthenticationException;
-import java.nio.file.AccessDeniedException;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Objects;
@@ -236,6 +237,21 @@ public class RestErrorHandler extends ResponseEntityExceptionHandler {
                 .timestamp(OffsetDateTime.now())
                 .status(HttpStatus.NOT_FOUND.value())
                 .path(((ServletWebRequest) request).getRequest().getServletPath())
+                .build();
+
+        return new ResponseEntity<>(dto, new HttpHeaders(), HttpStatus.valueOf(dto.getStatus()));
+    }
+
+    @ExceptionHandler(UsernameAlreadyInUseException.class)
+    public ResponseEntity<Object> handleUsernameAlreadyInUse(UsernameAlreadyInUseException exc,
+                                                       WebRequest request) {
+        ErrorDto dto = ErrorDto.builder()
+                .error("ValidationError")
+                .timestamp(OffsetDateTime.now())
+                .status(HttpStatus.UNPROCESSABLE_ENTITY.value())
+                .path(((ServletWebRequest) request).getRequest().getServletPath())
+                .detail(new ErrorDto.ValidationErrorDetails("username",
+                        getMessage("de.mueller_constantin.taskcare.api.infrastructure.validation.UniqueUsername.message", null)))
                 .build();
 
         return new ResponseEntity<>(dto, new HttpHeaders(), HttpStatus.valueOf(dto.getStatus()));
