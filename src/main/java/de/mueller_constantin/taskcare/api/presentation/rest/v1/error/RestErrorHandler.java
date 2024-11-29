@@ -1,6 +1,7 @@
 package de.mueller_constantin.taskcare.api.presentation.rest.v1.error;
 
 import de.mueller_constantin.taskcare.api.core.common.application.service.NoSuchEntityException;
+import de.mueller_constantin.taskcare.api.core.user.application.service.IllegalDefaultAdminAlterationException;
 import de.mueller_constantin.taskcare.api.core.user.application.service.UsernameAlreadyInUseException;
 import de.mueller_constantin.taskcare.api.infrastructure.security.token.InvalidTokenException;
 import de.mueller_constantin.taskcare.api.presentation.rest.v1.dto.ErrorDto;
@@ -252,6 +253,19 @@ public class RestErrorHandler extends ResponseEntityExceptionHandler {
                 .path(((ServletWebRequest) request).getRequest().getServletPath())
                 .detail(new ErrorDto.ValidationErrorDetails("username",
                         getMessage("de.mueller_constantin.taskcare.api.infrastructure.validation.UniqueUsername.message", null)))
+                .build();
+
+        return new ResponseEntity<>(dto, new HttpHeaders(), HttpStatus.valueOf(dto.getStatus()));
+    }
+
+    @ExceptionHandler(IllegalDefaultAdminAlterationException.class)
+    public ResponseEntity<Object> handleIllegalDefaultAdminAlteration(IllegalDefaultAdminAlterationException exc,
+                                                       WebRequest request) {
+        ErrorDto dto = ErrorDto.builder()
+                .error("IllegalDefaultAdminAlterationError")
+                .timestamp(OffsetDateTime.now())
+                .status(HttpStatus.CONFLICT.value())
+                .path(((ServletWebRequest) request).getRequest().getServletPath())
                 .build();
 
         return new ResponseEntity<>(dto, new HttpHeaders(), HttpStatus.valueOf(dto.getStatus()));
