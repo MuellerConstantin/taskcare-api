@@ -43,6 +43,7 @@ public class ErrorDto {
     @Builder
     public static class ValidationErrorDetails {
         private String field;
+        private String code;
         private String message;
     }
 

@@ -20,6 +20,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.LockedException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
@@ -34,7 +35,6 @@ import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-import javax.naming.AuthenticationException;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Objects;
@@ -61,7 +61,7 @@ public class RestErrorHandler extends ResponseEntityExceptionHandler {
             HttpStatusCode status,
             WebRequest request) {
         List<Object> details = exc.getBindingResult().getFieldErrors().stream()
-                .map(error -> new ErrorDto.ValidationErrorDetails(error.getField(), error.getDefaultMessage()))
+                .map(error -> new ErrorDto.ValidationErrorDetails(error.getField(), error.getCode(), error.getDefaultMessage()))
                 .collect(Collectors.toList());
 
         ErrorDto dto = ErrorDto.builder()
@@ -251,7 +251,7 @@ public class RestErrorHandler extends ResponseEntityExceptionHandler {
                 .timestamp(OffsetDateTime.now())
                 .status(HttpStatus.UNPROCESSABLE_ENTITY.value())
                 .path(((ServletWebRequest) request).getRequest().getServletPath())
-                .detail(new ErrorDto.ValidationErrorDetails("username",
+                .detail(new ErrorDto.ValidationErrorDetails("username", "UniqueUsername",
                         getMessage("de.mueller_constantin.taskcare.api.infrastructure.validation.UniqueUsername.message", null)))
                 .build();
 
@@ -272,7 +272,7 @@ public class RestErrorHandler extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(InvalidTokenException.class)
-    public ResponseEntity<Object> handleAuthentication(InvalidTokenException exc,
+    public ResponseEntity<Object> handleInvalidToken(InvalidTokenException exc,
                                                        WebRequest request) {
         ErrorDto dto = ErrorDto.builder()
                 .error("InvalidTokenError")
