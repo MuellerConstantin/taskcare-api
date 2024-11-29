@@ -75,19 +75,19 @@ public class SecurityConfig {
         authenticateRequests(httpSecurity);
         authorizeRequests(httpSecurity);
 
-        httpSecurity.apply(new AjaxAuthenticationProcessingFilterConfigurer())
-                .requestMatcher(new AntPathRequestMatcher("/api/v1/auth/token", HttpMethod.POST.name()))
-                .authenticationFailureHandler(authenticationFailureHandler)
-                .authenticationSuccessHandler(authenticationSuccessHandler)
-                .objectMapper(objectMapper)
-                .and()
-                .apply(new RefreshTokenAuthenticationProcessingFilterConfigurer())
-                .requestMatcher(new AntPathRequestMatcher("/api/v1/auth/refresh", HttpMethod.POST.name()))
-                .authenticationFailureHandler(authenticationFailureHandler)
-                .authenticationSuccessHandler(authenticationSuccessHandler)
-                .objectMapper(objectMapper)
-                .and()
-                .apply(new AccessTokenAuthenticationFilterConfigurer());
+        httpSecurity.with(new AjaxAuthenticationProcessingFilterConfigurer(),
+                        (dsl) -> dsl.requestMatcher(
+                                new AntPathRequestMatcher("/api/v1/auth/token", HttpMethod.POST.name()))
+                                .objectMapper(objectMapper)
+                                .authenticationFailureHandler(authenticationFailureHandler)
+                                .authenticationSuccessHandler(authenticationSuccessHandler))
+                .with(new RefreshTokenAuthenticationProcessingFilterConfigurer(),
+                        (dsl) -> dsl.requestMatcher(
+                                new AntPathRequestMatcher("/api/v1/auth/refresh", HttpMethod.POST.name()))
+                                .authenticationFailureHandler(authenticationFailureHandler)
+                                .authenticationSuccessHandler(authenticationSuccessHandler)
+                                .objectMapper(objectMapper))
+                .with(new AccessTokenAuthenticationFilterConfigurer(), (dsl) -> {});
 
         return httpSecurity.build();
     }
