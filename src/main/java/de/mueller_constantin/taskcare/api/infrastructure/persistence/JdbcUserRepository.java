@@ -10,6 +10,7 @@ import de.mueller_constantin.taskcare.api.core.user.application.repository.UserP
 import de.mueller_constantin.taskcare.api.infrastructure.persistence.es.EventStore;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
@@ -76,11 +77,15 @@ public class JdbcUserRepository implements UserAggregateRepository, UserProjecti
         MapSqlParameterSource parameters = new MapSqlParameterSource();
         parameters.addValue("username", username);
 
-        return Optional.ofNullable(jdbcTemplate.queryForObject("""
+        try {
+            return Optional.ofNullable(jdbcTemplate.queryForObject("""
                 SELECT id, username, password, display_name, role, locked
                 FROM %s
                 WHERE username = :username
                 """.formatted(USER_TABLE_NAME), parameters, this::toProjection));
+        } catch (EmptyResultDataAccessException exc) {
+            return Optional.empty();
+        }
     }
 
     @Override
@@ -100,13 +105,17 @@ public class JdbcUserRepository implements UserAggregateRepository, UserProjecti
     @Override
     public Optional<UserProjection> findById(UUID id) {
         MapSqlParameterSource parameters = new MapSqlParameterSource();
-        parameters.addValue("id", id);
+        parameters.addValue("id", id.toString());
 
-        return Optional.ofNullable(jdbcTemplate.queryForObject("""
+        try {
+            return Optional.ofNullable(jdbcTemplate.queryForObject("""
                 SELECT id, username, password, display_name, role, locked
                 FROM %s
                 WHERE id = :id
                 """.formatted(USER_TABLE_NAME), parameters, this::toProjection));
+        } catch (EmptyResultDataAccessException exc) {
+            return Optional.empty();
+        }
     }
 
     @Override
