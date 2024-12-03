@@ -14,6 +14,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -67,12 +68,12 @@ public class SecurityConfig {
     }
 
     @Bean
-    SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
+    SecurityFilterChain filterChain(HttpSecurity httpSecurity, List<AuthenticationProvider> authenticationProviders) throws Exception {
         sessionCreationPolicy(httpSecurity);
         exceptionHandling(httpSecurity);
         csrf(httpSecurity);
         cors(httpSecurity);
-        authenticateRequests(httpSecurity);
+        authenticateRequests(httpSecurity, authenticationProviders);
         authorizeRequests(httpSecurity);
 
         httpSecurity.with(new AjaxAuthenticationProcessingFilterConfigurer(),
@@ -95,6 +96,33 @@ public class SecurityConfig {
     @Bean
     AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
+    }
+
+    @Bean
+    DaoAuthenticationProvider daoAuthenticationProvider() {
+        DaoAuthenticationProvider daoAuthenticationProvider = new DaoAuthenticationProvider();
+        daoAuthenticationProvider.setUserDetailsService(userDetailsService);
+        daoAuthenticationProvider.setPasswordEncoder(bCryptPasswordEncoder());
+
+        return daoAuthenticationProvider;
+    }
+
+    @Bean
+    AccessTokenAuthenticationProvider accessTokenAuthenticationProvider() {
+        AccessTokenAuthenticationProvider accessTokenAuthenticationProvider = new AccessTokenAuthenticationProvider();
+        accessTokenAuthenticationProvider.setUserDetailsService(userDetailsService);
+        accessTokenAuthenticationProvider.setAccessTokenProvider(accessTokenProvider);
+
+        return accessTokenAuthenticationProvider;
+    }
+
+    @Bean
+    RefreshTokenAuthenticationProvider refreshTokenAuthenticationProvider() {
+        RefreshTokenAuthenticationProvider refreshTokenAuthenticationProvider = new RefreshTokenAuthenticationProvider();
+        refreshTokenAuthenticationProvider.setUserDetailsService(userDetailsService);
+        refreshTokenAuthenticationProvider.setRefreshTokenProvider(refreshTokenProvider);
+
+        return refreshTokenAuthenticationProvider;
     }
 
     protected void sessionCreationPolicy(HttpSecurity httpSecurity) throws Exception {
@@ -123,23 +151,9 @@ public class SecurityConfig {
         }));
     }
 
-    protected void authenticateRequests(HttpSecurity httpSecurity) throws Exception {
-        DaoAuthenticationProvider daoAuthenticationProvider = new DaoAuthenticationProvider();
-        daoAuthenticationProvider.setUserDetailsService(userDetailsService);
-        daoAuthenticationProvider.setPasswordEncoder(bCryptPasswordEncoder());
-
-        AccessTokenAuthenticationProvider accessTokenAuthenticationProvider = new AccessTokenAuthenticationProvider();
-        accessTokenAuthenticationProvider.setUserDetailsService(userDetailsService);
-        accessTokenAuthenticationProvider.setAccessTokenProvider(accessTokenProvider);
-
-        RefreshTokenAuthenticationProvider refreshTokenAuthenticationProvider = new RefreshTokenAuthenticationProvider();
-        refreshTokenAuthenticationProvider.setUserDetailsService(userDetailsService);
-        refreshTokenAuthenticationProvider.setRefreshTokenProvider(refreshTokenProvider);
-
+    protected void authenticateRequests(HttpSecurity httpSecurity, List<AuthenticationProvider> authenticationProviders) throws Exception {
         AuthenticationManagerBuilder authenticationManagerBuilder = httpSecurity.getSharedObject(AuthenticationManagerBuilder.class);
-        authenticationManagerBuilder.authenticationProvider(daoAuthenticationProvider);
-        authenticationManagerBuilder.authenticationProvider(accessTokenAuthenticationProvider);
-        authenticationManagerBuilder.authenticationProvider(refreshTokenAuthenticationProvider);
+        authenticationProviders.forEach(authenticationManagerBuilder::authenticationProvider);
         AuthenticationManager authenticationManager = authenticationManagerBuilder.build();
 
         httpSecurity.authenticationManager(authenticationManager);
