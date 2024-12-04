@@ -15,14 +15,17 @@ public class UserProjection extends Projection {
     private final String password;
     private final String displayName;
     private final Role role;
+    private final IdentityProvider identityProvider;
     private final boolean locked;
 
-    public UserProjection(UUID id, String username, String password, String displayName, Role role, boolean locked) {
+    public UserProjection(UUID id, String username, String password, String displayName, Role role,
+                          IdentityProvider identityProvider, boolean locked) {
         super(id);
         this.username = username;
         this.password = password;
         this.displayName = displayName;
         this.role = role;
+        this.identityProvider = identityProvider;
         this.locked = locked;
     }
 }

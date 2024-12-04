@@ -1,4 +1,4 @@
-package de.mueller_constantin.taskcare.api.core.user.application.service;
+package de.mueller_constantin.taskcare.api.core.user.domain.model;
 
 public class IllegalDefaultAdminAlterationException extends RuntimeException {
     public IllegalDefaultAdminAlterationException() {

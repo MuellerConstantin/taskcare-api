@@ -17,16 +17,19 @@ public class UserCreatedEvent extends Event {
     private final String password;
     private final String displayName;
     private final Role role;
+    private final IdentityProvider identityProvider;
 
     public UserCreatedEvent() {
-        this(UUID.randomUUID(), 0, null, null, null, null);
+        this(UUID.randomUUID(), 0, null, null, null, null, null);
     }
 
-    public UserCreatedEvent(UUID aggregateId, int version, String username, String password, String displayName, Role role) {
+    public UserCreatedEvent(UUID aggregateId, int version, String username, String password, String displayName,
+                            Role role, IdentityProvider identityProvider) {
         super(aggregateId, version);
         this.username = username;
         this.password = password;
         this.displayName = displayName;
+        this.identityProvider = identityProvider;
         this.role = role;
     }
 }

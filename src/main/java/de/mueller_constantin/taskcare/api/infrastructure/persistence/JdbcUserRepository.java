@@ -2,6 +2,7 @@ package de.mueller_constantin.taskcare.api.infrastructure.persistence;
 
 import de.mueller_constantin.taskcare.api.core.common.domain.model.Page;
 import de.mueller_constantin.taskcare.api.core.common.domain.model.PageInfo;
+import de.mueller_constantin.taskcare.api.core.user.domain.model.IdentityProvider;
 import de.mueller_constantin.taskcare.api.core.user.domain.model.Role;
 import de.mueller_constantin.taskcare.api.core.user.domain.model.UserAggregate;
 import de.mueller_constantin.taskcare.api.core.user.domain.model.UserProjection;
@@ -52,11 +53,12 @@ public class JdbcUserRepository implements UserAggregateRepository, UserProjecti
             parameters.addValue("password", aggregate.getPassword());
             parameters.addValue("displayName", aggregate.getDisplayName());
             parameters.addValue("role", aggregate.getRole().toString());
+            parameters.addValue("identity_provider", aggregate.getIdentityProvider().toString());
             parameters.addValue("locked", aggregate.isLocked(), Types.BOOLEAN);
 
             jdbcTemplate.update("""
-                INSERT INTO %s (id, username, password, display_name, role, locked)
-                VALUES (:id, :username, :password, :displayName, :role, :locked)
+                INSERT INTO %s (id, username, password, display_name, role, identity_provider, locked)
+                VALUES (:id, :username, :password, :displayName, :role, :identity_provider, :locked)
                 ON DUPLICATE KEY UPDATE username = :username, password = :password, display_name = :displayName, role = :role, locked = :locked
                 """.formatted(USER_TABLE_NAME), parameters);
         }
@@ -79,7 +81,7 @@ public class JdbcUserRepository implements UserAggregateRepository, UserProjecti
 
         try {
             return Optional.ofNullable(jdbcTemplate.queryForObject("""
-                SELECT id, username, password, display_name, role, locked
+                SELECT id, username, password, display_name, role, identity_provider, locked
                 FROM %s
                 WHERE username = :username
                 """.formatted(USER_TABLE_NAME), parameters, this::toProjection));
@@ -109,7 +111,7 @@ public class JdbcUserRepository implements UserAggregateRepository, UserProjecti
 
         try {
             return Optional.ofNullable(jdbcTemplate.queryForObject("""
-                SELECT id, username, password, display_name, role, locked
+                SELECT id, username, password, display_name, role, identity_provider, locked
                 FROM %s
                 WHERE id = :id
                 """.formatted(USER_TABLE_NAME), parameters, this::toProjection));
@@ -121,7 +123,7 @@ public class JdbcUserRepository implements UserAggregateRepository, UserProjecti
     @Override
     public List<UserProjection> findAll() {
         return jdbcTemplate.query("""
-                SELECT id, username, password, display_name, role, locked
+                SELECT id, username, password, display_name, role, identity_provider, locked
                 FROM %s
                 """.formatted(USER_TABLE_NAME), this::toProjection);
     }
@@ -140,7 +142,7 @@ public class JdbcUserRepository implements UserAggregateRepository, UserProjecti
         parameters.addValue("perPage", pageInfo.getPerPage());
 
         List<UserProjection> content = jdbcTemplate.query("""
-                SELECT id, username, password, display_name, role, locked
+                SELECT id, username, password, display_name, role, identity_provider, locked
                 FROM %s
                 LIMIT :perPage
                 OFFSET :page
@@ -177,6 +179,7 @@ public class JdbcUserRepository implements UserAggregateRepository, UserProjecti
         String password = resultSet.getString("password");
         String displayName = resultSet.getString("display_name");
         Role role = Role.valueOf(resultSet.getString("role"));
+        IdentityProvider identityProvider = IdentityProvider.valueOf(resultSet.getString("identity_provider"));
         boolean locked = resultSet.getBoolean("locked");
 
         return UserProjection.builder()
@@ -185,6 +188,7 @@ public class JdbcUserRepository implements UserAggregateRepository, UserProjecti
                 .password(password)
                 .displayName(displayName)
                 .role(role)
+                .identityProvider(identityProvider)
                 .locked(locked)
                 .build();
     }

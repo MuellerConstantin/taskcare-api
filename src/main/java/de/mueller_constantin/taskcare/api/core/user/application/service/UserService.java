@@ -7,6 +7,7 @@ import de.mueller_constantin.taskcare.api.core.common.domain.model.PageInfo;
 import de.mueller_constantin.taskcare.api.core.user.application.repository.UserAggregateRepository;
 import de.mueller_constantin.taskcare.api.core.user.application.repository.UserProjectionRepository;
 import de.mueller_constantin.taskcare.api.core.user.application.security.CredentialsEncoder;
+import de.mueller_constantin.taskcare.api.core.user.domain.model.IdentityProvider;
 import de.mueller_constantin.taskcare.api.core.user.domain.model.Role;
 import de.mueller_constantin.taskcare.api.core.user.domain.model.UserAggregate;
 import de.mueller_constantin.taskcare.api.core.user.domain.model.UserProjection;
@@ -29,7 +30,7 @@ public class UserService implements ApplicationService {
 
         String hashedPassword = credentialsEncoder.encode(command.getPassword());
 
-        userAggregate.create(command.getUsername(), hashedPassword, command.getDisplayName(), command.getRole());
+        userAggregate.create(command.getUsername(), hashedPassword, command.getDisplayName(), command.getRole(), command.getIdentityProvider());
         userAggregateRepository.save(userAggregate);
     }
 
@@ -41,7 +42,7 @@ public class UserService implements ApplicationService {
 
             String hashedPassword = credentialsEncoder.encode(command.getPassword());
 
-            userAggregate.create(UserAggregate.DEFAULT_ADMIN_USERNAME, hashedPassword, null, Role.ADMINISTRATOR);
+            userAggregate.create(UserAggregate.DEFAULT_ADMIN_USERNAME, hashedPassword, null, Role.ADMINISTRATOR, IdentityProvider.LOCAL);
             userAggregateRepository.save(userAggregate);
         } else {
             UserProjection userProjection = userProjectionRepository.findByUsername(UserAggregate.DEFAULT_ADMIN_USERNAME)

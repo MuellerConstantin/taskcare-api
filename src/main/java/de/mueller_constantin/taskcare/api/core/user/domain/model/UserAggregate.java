@@ -2,11 +2,11 @@ package de.mueller_constantin.taskcare.api.core.user.domain.model;
 
 import de.mueller_constantin.taskcare.api.core.common.domain.model.Aggregate;
 import de.mueller_constantin.taskcare.api.core.common.domain.model.Event;
-import de.mueller_constantin.taskcare.api.core.user.application.service.IllegalDefaultAdminAlterationException;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 
+import java.util.Objects;
 import java.util.UUID;
 
 @Getter
@@ -19,6 +19,7 @@ public class UserAggregate extends Aggregate {
     private String password;
     private String displayName;
     private Role role;
+    private IdentityProvider identityProvider;
     private boolean locked;
 
     public UserAggregate() {
@@ -36,6 +37,7 @@ public class UserAggregate extends Aggregate {
             this.setPassword(((UserCreatedEvent) event).getPassword());
             this.setDisplayName(((UserCreatedEvent) event).getDisplayName());
             this.setRole(((UserCreatedEvent) event).getRole());
+            this.setIdentityProvider(((UserCreatedEvent) event).getIdentityProvider());
             this.setLocked(false);
             return;
         } else if(event instanceof UserUpdatedEvent) {
@@ -72,6 +74,10 @@ public class UserAggregate extends Aggregate {
         this.role = role;
     }
 
+    private void setIdentityProvider(IdentityProvider identityProvider) {
+        this.identityProvider = identityProvider;
+    }
+
     private void setLocked(boolean locked) {
         this.locked = locked;
     }
@@ -88,7 +94,8 @@ public class UserAggregate extends Aggregate {
                 .build());
     }
 
-    public void create(String username, String password, String displayName, Role role) {
+    public void create(String username, String password, String displayName, Role role,
+                       IdentityProvider identityProvider) {
         this.applyChange(UserCreatedEvent.builder()
                 .aggregateId(this.getId())
                 .version(this.getNextVersion())
@@ -96,17 +103,30 @@ public class UserAggregate extends Aggregate {
                 .password(password)
                 .displayName(displayName)
                 .role(role)
+                .identityProvider(identityProvider)
                 .build()
         );
     }
 
     public void update(String password, String displayName, Role role) {
-        if(this.getUsername().equals(DEFAULT_ADMIN_USERNAME) && role != Role.ADMINISTRATOR) {
-            throw new IllegalDefaultAdminAlterationException("Cannot assign a non-admin role to default admin user");
+        if(this.getUsername().equals(DEFAULT_ADMIN_USERNAME)) {
+            if(role != Role.ADMINISTRATOR) {
+                throw new IllegalDefaultAdminAlterationException("Cannot assign a non-admin role to default admin user");
+            }
+
+            if(displayName != null) {
+                throw new IllegalDefaultAdminAlterationException("Cannot change display name of default admin user");
+            }
         }
 
-        if(this.getUsername().equals(DEFAULT_ADMIN_USERNAME) && displayName != null) {
-            throw new IllegalDefaultAdminAlterationException("Cannot change display name of default admin user");
+        if(this.getIdentityProvider() != IdentityProvider.LOCAL) {
+            if(!Objects.equals(password, this.getPassword())) {
+                throw new IllegalImportedUserAlterationException("Cannot change password of imported user");
+            }
+
+            if(!Objects.equals(displayName, this.getDisplayName())) {
+                throw new IllegalImportedUserAlterationException("Cannot change display name of imported user");
+            }
         }
 
         this.applyChange(UserUpdatedEvent.builder()

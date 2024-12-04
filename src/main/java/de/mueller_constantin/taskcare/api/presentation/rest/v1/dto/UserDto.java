@@ -14,6 +14,7 @@ public class UserDto {
     private String id;
     private String username;
     private String role;
+    private String identityProvider;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String displayName;

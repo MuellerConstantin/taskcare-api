@@ -4,5 +4,6 @@ CREATE TABLE IF NOT EXISTS users (
     password VARCHAR(255) NOT NULL,
     display_name VARCHAR(255),
     role VARCHAR(255) NOT NULL,
+    identity_provider VARCHAR(255) NOT NULL,
     locked BOOLEAN NOT NULL DEFAULT FALSE
 );

@@ -21,6 +21,7 @@ public interface UserDtoMapper {
     UserDto mapToDto(UserProjection userProjection);
 
     @Mapping(source = "displayName", target = "displayName", qualifiedByName = "unwrapOptional")
+    @Mapping(target = "identityProvider", constant = "LOCAL")
     CreateUserCommand mapToCommand(CreateUserDto createUserDto);
 
     @Mapping(source = "updateUserDto.password", target = "password", qualifiedByName = "unwrapOptional")

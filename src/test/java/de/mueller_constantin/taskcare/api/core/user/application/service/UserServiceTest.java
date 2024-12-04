@@ -6,6 +6,7 @@ import de.mueller_constantin.taskcare.api.core.common.domain.model.PageInfo;
 import de.mueller_constantin.taskcare.api.core.user.application.repository.UserAggregateRepository;
 import de.mueller_constantin.taskcare.api.core.user.application.repository.UserProjectionRepository;
 import de.mueller_constantin.taskcare.api.core.user.application.security.CredentialsEncoder;
+import de.mueller_constantin.taskcare.api.core.user.domain.model.IdentityProvider;
 import de.mueller_constantin.taskcare.api.core.user.domain.model.Role;
 import de.mueller_constantin.taskcare.api.core.user.domain.model.UserAggregate;
 import de.mueller_constantin.taskcare.api.core.user.domain.model.UserProjection;
@@ -48,7 +49,7 @@ class UserServiceTest {
 
         this.userAggregate = new UserAggregate(this.id, 0, false);
         this.userAggregate.create("maxi123",
-                "Abc123", "Maximilian Mustermann", Role.USER);
+                "Abc123", "Maximilian Mustermann", Role.USER, IdentityProvider.LOCAL);
 
         this.userProjection = UserProjection.builder()
                 .id(this.id)
