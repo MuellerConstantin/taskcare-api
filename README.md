@@ -5,6 +5,7 @@
 ## Table of contents
 
 - [Introduction](#introduction)
+- [Getting Started](#getting-started)
 - [License](#license)
   - [Forbidden](#forbidden)
 
@@ -14,6 +15,13 @@ This is the backend of the TaskCare platform. TaskCare is a platform, developed 
 tasks within a team. The collaboration platform enables the joint definition of tasks to be completed and the
 continuous monitoring of the processing status, transparently visible to everyone. The architecture and design of the
 platform enables the user to access TaskCare from any device.
+
+## Getting Started
+
+TaskCare is generally operated on-premise. There are a few steps to follow for installation: Firstly, the
+appropriate system environment with its third-party services must be set up (See [Operation](docs/operation.md))
+and secondly, the application must be correctly configured (See [Configuration](docs/configuration.md)). After that,
+TaskCare can then be started and operated on-premise, optionally scaled horizontally.
 
 ## License
 

@@ -5,3 +5,5 @@ spring:
     basename: messages/validation
     encoding: UTF-8
     fallback-to-system-locale: false
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
