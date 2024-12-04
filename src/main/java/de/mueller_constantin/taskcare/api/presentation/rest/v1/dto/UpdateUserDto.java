@@ -1,5 +1,6 @@
 package de.mueller_constantin.taskcare.api.presentation.rest.v1.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import de.mueller_constantin.taskcare.api.core.user.domain.model.Role;
 import de.mueller_constantin.taskcare.api.infrastructure.validation.Enumerated;
 import de.mueller_constantin.taskcare.api.infrastructure.validation.NullOrNotEmpty;
@@ -19,6 +20,14 @@ public class UpdateUserDto {
     private String password;
     private String role;
     private String displayName;
+
+    @JsonIgnore
+    private boolean displayNameTouched;
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
+        this.displayNameTouched = true;
+    }
 
     public Optional<@NullOrNotEmpty @Password String> getPassword() {
         return Optional.ofNullable(this.password);

@@ -67,7 +67,7 @@ public class UserService implements ApplicationService {
         UserAggregate userAggregate = userAggregateRepository.load(command.getId())
                 .orElseThrow(NoSuchEntityException::new);
 
-        String password = command.isPasswordTouched() ?
+        String password = command.getPassword() != null ?
                 credentialsEncoder.encode(command.getPassword()) :
                 userProjection.getPassword();
 
@@ -75,7 +75,7 @@ public class UserService implements ApplicationService {
                 command.getDisplayName() :
                 userProjection.getDisplayName();
 
-        Role role = command.isRoleTouched() ?
+        Role role = command.getRole() != null ?
                 command.getRole() :
                 userProjection.getRole();
 
