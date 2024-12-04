@@ -26,7 +26,7 @@ import java.util.UUID;
 @Component
 @Transactional
 @RequiredArgsConstructor
-public class JdbcUserRepository implements UserAggregateRepository, UserProjectionRepository {
+public class JdbcMySqlUserRepository implements UserAggregateRepository, UserProjectionRepository {
     private final String USER_TABLE_NAME = "users";
 
     private final NamedParameterJdbcTemplate jdbcTemplate;

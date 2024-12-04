@@ -30,16 +30,16 @@ import static org.junit.jupiter.api.Assertions.*;
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @Sql(scripts = {"/sql/ddl/mysql.sql", "/sql/dml/mysql.sql"})
-class JdbcUserRepositoryTest {
+class JdbcMySqlUserRepositoryTest {
     @MockitoBean
     private EventStore eventStore;
 
     @Autowired
-    private JdbcUserRepository jdbcUserRepository;
+    private JdbcMySqlUserRepository jdbcMySqlUserRepository;
 
     @Test
     void findById() {
-        Optional<UserProjection> user = jdbcUserRepository.findById(
+        Optional<UserProjection> user = jdbcMySqlUserRepository.findById(
                 UUID.fromString("8d031fe3-e445-4d51-8c70-ac3e3810da87"));
 
         assertTrue(user.isPresent());
@@ -48,7 +48,7 @@ class JdbcUserRepositoryTest {
 
     @Test
     void findByUsername() {
-        Optional<UserProjection> user = jdbcUserRepository.findByUsername("maxi123");
+        Optional<UserProjection> user = jdbcMySqlUserRepository.findByUsername("maxi123");
 
         assertTrue(user.isPresent());
         assertEquals("maxi123", user.get().getUsername());
@@ -56,7 +56,7 @@ class JdbcUserRepositoryTest {
 
     @Test
     void existsById() {
-        boolean exists = jdbcUserRepository.existsById(
+        boolean exists = jdbcMySqlUserRepository.existsById(
                 UUID.fromString("8d031fe3-e445-4d51-8c70-ac3e3810da87"));
 
         assertTrue(exists);
@@ -64,21 +64,21 @@ class JdbcUserRepositoryTest {
 
     @Test
     void existsByUsername() {
-        boolean exists = jdbcUserRepository.existsByUsername("maxi123");
+        boolean exists = jdbcMySqlUserRepository.existsByUsername("maxi123");
 
         assertTrue(exists);
     }
 
     @Test
     void findAll() {
-        List<UserProjection> users = jdbcUserRepository.findAll();
+        List<UserProjection> users = jdbcMySqlUserRepository.findAll();
 
         assertEquals(2, users.size());
     }
 
     @Test
     void findAllPaged() {
-        Page<UserProjection> page = jdbcUserRepository.findAll(PageInfo.builder()
+        Page<UserProjection> page = jdbcMySqlUserRepository.findAll(PageInfo.builder()
                 .page(0)
                 .perPage(1)
                 .build());
@@ -91,8 +91,8 @@ class JdbcUserRepositoryTest {
     @TestConfiguration
     static class JdbcUserRepositoryTestConfig {
         @Bean
-        JdbcUserRepository jdbcUserRepository(NamedParameterJdbcTemplate jdbcTemplate, EventStore eventStore) {
-            return new JdbcUserRepository(jdbcTemplate, eventStore);
+        JdbcMySqlUserRepository jdbcUserRepository(NamedParameterJdbcTemplate jdbcTemplate, EventStore eventStore) {
+            return new JdbcMySqlUserRepository(jdbcTemplate, eventStore);
         }
     }
 }
