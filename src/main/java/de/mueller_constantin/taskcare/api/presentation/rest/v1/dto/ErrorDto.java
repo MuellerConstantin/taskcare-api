@@ -1,6 +1,8 @@
 package de.mueller_constantin.taskcare.api.presentation.rest.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonView;
+import de.mueller_constantin.taskcare.api.presentation.rest.v1.dto.view.DefaultJsonViews;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,6 +16,7 @@ import java.util.List;
 @NoArgsConstructor
 @Data
 @Builder
+@JsonView(DefaultJsonViews.User.class)
 public class ErrorDto {
     private String error;
     private int status;

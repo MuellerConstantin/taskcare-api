@@ -1,5 +1,6 @@
 package de.mueller_constantin.taskcare.api.presentation.rest.v1;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import de.mueller_constantin.taskcare.api.core.user.application.service.*;
 import de.mueller_constantin.taskcare.api.core.user.domain.model.UserProjection;
 import de.mueller_constantin.taskcare.api.infrastructure.security.CurrentPrincipal;
@@ -8,6 +9,7 @@ import de.mueller_constantin.taskcare.api.presentation.rest.v1.dto.PageDto;
 import de.mueller_constantin.taskcare.api.presentation.rest.v1.dto.UpdateUserDto;
 import de.mueller_constantin.taskcare.api.presentation.rest.v1.dto.UserDto;
 import de.mueller_constantin.taskcare.api.presentation.rest.v1.dto.mapper.UserDtoMapper;
+import de.mueller_constantin.taskcare.api.presentation.rest.v1.dto.view.DefaultJsonViews;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +33,7 @@ public class UserController {
     }
 
     @GetMapping("/user/me")
+    @JsonView(DefaultJsonViews.Me.class)
     UserDto getCurrentUser(@CurrentPrincipal UserDetails userDetails) {
         FindUserByUsernameQuery query = new FindUserByUsernameQuery(userDetails.getUsername());
         UserProjection result = userService.handle(query);
