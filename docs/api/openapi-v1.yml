@@ -1,0 +1,642 @@
+openapi: 3.0.3
+info:
+  title: TaskCare REST API
+  version: v1
+  description: |
+    This is the RESTful API of the TaskCare backend service. TaskCare allows you to
+    manage and organize tasks collaboratively and in Kanban style. Via this interface it is possible
+    to call up data from the task management platform synchronously. This includes
+    data, such as users and their roles, as well as content data like boards and tasks.
+    
+    # Overview
+    
+    The TaskCare API is a machine interface which is RESTful over HTTP. The
+    following specifications apply API-wide and to all endpoints of the interface.
+    
+    ## HTTP Verbs
+    
+    There are a couple of possible HTTP verbs used for the Content API. The following
+    table clearly clarifies their use and meaning within the API.
+    
+    | Verb         | Description                                                       |
+    |--------------|-------------------------------------------------------------------|
+    | HEAD         | Can be ran against any resource to get just the HTTP header info. |
+    | GET          | Used for retrieving resources.                                    |
+    | POST         | Used for creating resources.                                      |
+    | PATCH        | Used for updating resources partially.                            |
+    | PUT          | Used for replacing resources or collections.                      |
+    | DELETE       | Used for deleting resources.                                      |
+    
+    ## Content Negotiation
+    
+    The API does not support any kind of content negotiation. This means that
+    the content type of all responses and requests is always JSON. HTTP headers like `Accept`
+    or `Content-Type` are used, but accept `application/json` exclusive.
+    
+    ## Timestamps
+    
+    Timestamps are returned in [ISO 8601](https://www.iso.org/iso-8601-date-and-time-format.html)
+    format with the time zone offset of the server: `YYYY-MM-DDTHH:mm:ss.sss`.
+    The time stamp is always specified with the offset addition in the server's
+    time zone. Despite the specification of the fractions of the second, inaccuracies
+    can occur with the timestamps in the millisecond range.
+    
+    ## Pagination
+    
+    Some of the queries read from a larger subset of the data set. In these cases,
+    pagination is used to avoid performance problems. In general, the pagination
+    behaviour is controlled by the query parameters `page` and `perPage`. You can
+    specify the page offset with the `page` parameter. For some resources, its is
+    also possible set a custom page size with the `perPage` parameter.
+
+    ```
+    ?page=0&perPage=30
+    ```
+
+    ---
+    **NOTE**
+
+    The offset numbering is zero-based. Omitting the offset parameter sets the
+    requested page to zero by default and returns the first X elements of a
+    collection. Requests that return multiple items will be paginated to 25
+    items by default.
+    ---
+    
+    ## Error Handling
+    
+    All endpoints of the API return a well-defined error response in case of an
+    error. This error response contains among others the `error` field which
+    indicates the exact type of the error, in case the HTTP status code or the
+    `status` field does not provide enough information. The following error types
+    are used combined with the HTTP status code:
+    
+    | Error Type | Status Code | Description |
+    |------------|-------------|-------------|
+    | `InternalError` | 500 | An internal error has occurred on the server side. |
+    | `ValidationError` | 422 | One or more field validation errors occurred in request body. |
+    | `TypeMismatchError` | 422 | One or more field type mismatch errors occurred in request body. |
+    | `IllegalDefaultAdminAlterationError` | 409 | If tried to alter the default admin user. |
+    | `IllegalImportedUserAlterationError` | 409 | If tried to alter an imported user in an invalid way. |
+    | `HttpMediaTypeNotSupportedError` | 406 | Unsupported media type used in request body. |
+    | `HttpRequestMethodNotSupportedError` | 405 | Unsupported request method used in request body. |
+    | `NotFoundError` | 404 | The specified resource was not found. |
+    | `InsufficientPermissionsError` | 403 | Access was denied due to insufficient rights. |
+    | `AuthenticationError` | 401 | The access must be authenticated. |
+    | `InvalidCredentialsError` | 401 | Invalid credentials provided. |
+    | `InvalidTokenError` | 401 | Invalid token provided. |
+    | `AccountLockedError` | 401 | The account is locked. |
+    | `AccountDisabledError` | 401 | The account is disabled. |
+    | `InvalidPayloadFormatError` | 400 | If request body was malformed. |
+    | `MissingPathVariableError` | 400 | If a required path variable is missing. |
+    | `MissingQueryParameterError` | 400 | If a required query parameter is missing. |
+    
+    ### Error Details
+    
+    For some errors, additional details are provided in the `details` field. The following error types
+    have additional details:
+    
+    - `ValidationError`
+    - `TypeMismatchError`
+    - `MissingPathVariableError`
+    - `MissingQueryParameterError`
+    
+    ## Authentication
+    
+    Almost all endpoints of the API require authentication. Authentication
+    is achieved by a stateless token based authentication mechanism that is using
+    the *HTTP Bearer Authentication* scheme most of the time.
+    
+    ```
+    Authorization: Bearer <ACCESS TOKEN>
+    ```
+    
+    So called short-lived *access tokens* are used for authentication. Access tokens
+    are generated by the TaskCare backend service and can be used to authenticate
+    requests to the Content API. Access tokens are stateless and can be used
+    across multiple requests. There are also long-lived *refresh tokens* that
+    can be used to renew the access token after it expires.
+    
+    These *access and refresh tokens* are generated by the TaskCare backend service
+    in exchange for user credentials or third-party authentication.
+  license:
+    name: MIT License
+    url: https://opensource.org/licenses/MIT
+  contact:
+    name: Constantin Müller
+    url: https://www.mueller-constantin.de
+    email: info@mueller-constantin.de
+servers:
+  - url: http://localhost:8080/api/v1
+    description: Development Server
+tags:
+  - name: Auth
+    description: Allows the client to authenticate themselves.
+  - name: User
+    description: Everything about user and account management.
+paths:
+  /auth/token:
+    post:
+      tags:
+        - Auth
+      summary: Signs in a user.
+      description: |
+        Signs in a user stateless by generating an access token and a
+        refresh token in exchange for the credentials. The access token can be
+        used in all further requests for authentication.
+      security: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CredentialsDto"
+            example:
+              email: maxi123
+              password: Abc123
+      responses:
+        200:
+          description: Successfully signed in the user.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TokenDto"
+              example:
+                type: Bearer
+                principal: maxi123
+                refreshToken: Z2xFlZIH8mw32hXYhmidIA==
+                accessToken: |
+                  eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJtYXhpMTIzIiwiaWF0IjoxNjU2MzM1ODg2LCJleHAiOjE2NTYzMzY0ODZ9.p4KjWLKOsgly
+                  J4Dqme3fPAkqtsf0jsksPr6Y-0pZe3hPYUdWz18eKius8fmijsQFf-5lxVM4kQLKBI4tmBQ3Dw
+                expiresIn: 3600000
+        401:
+          $ref: "#/components/responses/401"
+  /auth/refresh:
+    post:
+      tags:
+        - Auth
+      summary: Renews the user's authentication session.
+      description: >
+        Refreshes a user's stateless session by requesting a new access token in
+        exchange for a valid refresh token. Despite the short-lived access token,
+        it is possible for a user to remain logged in for a longer period of time
+        by repeatedly requesting new access tokens.
+      security: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RefreshSessionDto"
+            example:
+              refreshToken: /QwSXxYuhkPmdwqSZQ4wjQ==
+      responses:
+        200:
+          description: Successfully renewed the user's session.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TokenDto"
+              example:
+                principal: maxi123
+                refreshToken: Z2xFlZIH8mw32hXYhmidIA==
+                accessToken: |
+                  eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJtYXhpMTIzIiwiaWF0IjoxNjU2MzM1ODg2LCJleHAiOjE2NTYzMzY0ODZ9.p4KjWLKOsgly
+                  J4Dqme3fPAkqtsf0jsksPr6Y-0pZe3hPYUdWz18eKius8fmijsQFf-5lxVM4kQLKBI4tmBQ3Dw
+                expiresIn: 3600000
+        401:
+          $ref: "#/components/responses/401"
+  /users:
+    get:
+      tags:
+        - User
+      summary: Returns all available users.
+      description: >
+        Returns all user available users of the platform.
+      parameters:
+        - name: page
+          in: query
+          description: Zero based index of page to load.
+          required: false
+          schema:
+            type: integer
+            example: 0
+        - name: perPage
+          in: query
+          description: Number of elements per page.
+          required: false
+          schema:
+            type: integer
+            example: 25
+      responses:
+        200:
+          description: Successfully fetched all available users.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserPageDto"
+              examples:
+                User View:
+                  value:
+                    page: 0
+                    perPage: 25
+                    totalElements: 1
+                    totalPages: 1
+                    content:
+                      - id: 3377cf8f-da29-4aa7-9036-91951b8fce87
+                        username: maxi123
+                        displayName: Maximilian Mustermann
+                Administrator View:
+                  value:
+                    page: 1
+                    perPage: 25
+                    totalElements: 1
+                    totalPages: 1
+                    content:
+                      - id: 3377cf8f-da29-4aa7-9036-91951b8fce87
+                        username: maxi123
+                        displayName: Maximilian Mustermann
+                        role: USER
+                        identityProvider: LOCAL
+        401:
+          $ref: "#/components/responses/401"
+    post:
+      tags:
+        - User
+      summary: Creates a new local user.
+      description: >
+        Creates a new user account for a local user. This is only possible for admin users.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateUserDto"
+            example:
+              username: maxi123
+              displayName: Maximilian Mustermann
+              password: Abc123
+              role: USER
+      responses:
+        201:
+          description: Successfully created the new user.
+        401:
+          $ref: "#/components/responses/401"
+        403:
+          $ref: "#/components/responses/403"
+        422:
+          $ref: "#/components/responses/422"
+  /users/{id}:
+    get:
+      tags:
+        - User
+      summary: Gets a user by its identifier.
+      description: >
+        Gets a user by its identifier.
+      parameters:
+        - name: id
+          in: path
+          description: The identifier of the user.
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        200:
+          description: Successfully retrieved the user's details.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserDto"
+              examples:
+                User View:
+                  value:
+                    id: 3377cf8f-da29-4aa7-9036-91951b8fce87
+                    username: maxi123
+                    displayName: Maximilian Mustermann
+                Administrator View:
+                  value:
+                    id: 3377cf8f-da29-4aa7-9036-91951b8fce87
+                    username: maxi123
+                    displayName: Maximilian Mustermann
+                    role: USER
+                    identityProvider: LOCAL
+        404:
+          $ref: "#/components/responses/404"
+        401:
+          $ref: "#/components/responses/401"
+    patch:
+      tags:
+        - User
+      summary: Updates the details of a single user account.
+      description: >
+        Updates a user's details. Only available for admin users.
+      parameters:
+        - name: id
+          in: path
+          description: Unique identifier of the user.
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 3377cf8f-da29-4aa7-9036-91951b8fce87
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateUserDto"
+            example:
+              password: Def456
+      responses:
+        204:
+          description: Successfully updated the selected user.
+        422:
+          $ref: "#/components/responses/422"
+        403:
+          $ref: "#/components/responses/403"
+        404:
+          $ref: "#/components/responses/404"
+        401:
+          $ref: "#/components/responses/401"
+    delete:
+      tags:
+        - User
+      summary: Deletes a single user.
+      description: >
+        Allows deleting a user account. Only available for admin users.
+      parameters:
+        - name: id
+          in: path
+          description: Unique identifier of the user.
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 3377cf8f-da29-4aa7-9036-91951b8fce87
+      responses:
+        204:
+          description: Successfully deleted the selected user.
+        403:
+          $ref: "#/components/responses/403"
+        404:
+          $ref: "#/components/responses/404"
+        401:
+          $ref: "#/components/responses/401"
+  /user/me:
+    get:
+      tags:
+        - User
+      summary: Retrieves the currently authenticated user.
+      description: |
+        Returns the account of the currently authenticated user.
+        Only the account information of your own authenticated account can be queried.
+      responses:
+        200:
+          description: Successfully fetched the authenticated user.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserDto"
+              example:
+                id: 3377cf8f-da29-4aa7-9036-91951b8fce87
+                username: maxi123
+                displayName: Maximilian Mustermann
+                role: USER
+        401:
+          $ref: "#/components/responses/401"
+components:
+  schemas:
+    ValidationErrorDetailsDto:
+      type: object
+      properties:
+        field:
+          type: string
+          description: The name of the field.
+        message:
+          type: string
+          description: The error message.
+        code:
+          type: string
+          description: The validation error code.
+      required:
+        - field
+        - message
+        - code
+    InvalidParameterErrorDetailsDto:
+      type: object
+      properties:
+        parameter:
+          type: string
+          description: The name of the parameter.
+        message:
+          type: string
+          description: The error message.
+      required:
+        - parameter
+        - message
+    ErrorDto:
+      type: object
+      properties:
+        error:
+          type: string
+          description: The type of error.
+        status:
+          type: integer
+          description: The HTTP status code number.
+        timestamp:
+          type: string
+          format: date-time
+          description: The time the error occurred.
+        path:
+          type: string
+          description: The endpoint path on which the error occurred.
+        details:
+          description: Further information on the error or its cause.
+          type: array
+          items:
+            oneOf:
+              - $ref: "#/components/schemas/ValidationErrorDetailsDto"
+              - $ref: "#/components/schemas/InvalidParameterErrorDetailsDto"
+      required:
+        - error
+        - status
+        - timestamp
+        - path
+    PageDto:
+      type: object
+      properties:
+        page:
+          type: integer
+          description: Zero-based index of the current page.
+        perPage:
+          type: integer
+          description: Number of elements per page.
+        totalElements:
+          type: integer
+          description: Number of all elements of the collection.
+        totalPages:
+          type: integer
+          description: Number of all pages into which the collection was divided.
+      required:
+        - page
+        - perPage
+        - totalElements
+        - totalPages
+    CredentialsDto:
+      type: object
+      properties:
+        username:
+          type: string
+          description: The username of the user.
+        password:
+          type: string
+          description: The user's password.
+      required:
+        - username
+        - password
+    RefreshSessionDto:
+      type: object
+      properties:
+        refreshToken:
+          type: string
+          description: A valid refresh token.
+      required:
+        - refreshToken
+    TokenDto:
+      type: object
+      properties:
+        principal:
+          type: string
+          description: The authenticated user.
+        accessToken:
+          type: string
+          description: The actual access token.
+        expiresIn:
+          type: integer
+          description: Number of milliseconds for which the token is still valid.
+        refreshToken:
+          type: string
+          description: The actual refresh token.
+      required:
+        - principal
+        - accessToken
+        - refreshToken
+        - expiresIn
+    UserDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier of user.
+        username:
+          type: string
+          description: Unique name of user.
+        displayName:
+          type: string
+          description: Display name of user. Only present if set.
+        role:
+          type: string
+          description: |
+            Role of user. Only present for admin users or in case of a user's own account.
+        identityProvider:
+          type: string
+          description: |
+            Name of the identity provider of the user. This indicates if the user was
+            imported from an external source or created by the system. Only present for admin users.
+      required:
+        - id
+        - username
+    UserPageDto:
+      allOf:
+        - $ref: "#/components/schemas/PageDto"
+        - type: object
+          properties:
+            content:
+              type: array
+              items:
+                $ref: "#/components/schemas/UserDto"
+          required:
+            - content
+    CreateUserDto:
+      type: object
+      properties:
+        username:
+          type: string
+          description: Unique username of user.
+          maxLength: 256
+        password:
+          type: string
+          description: The user's password.
+          maxLength: 256
+          pattern: ^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{6,100}$
+        role:
+          type: string
+          description: Role of user.
+          enum:
+            - USER
+            - ADMINISTRATOR
+        displayName:
+          type: string
+          description: Display name of user.
+          maxLength: 256
+      required:
+        - username
+        - password
+        - role
+    UpdateUserDto:
+      type: object
+      properties:
+        password:
+          type: string
+          description: The user's password.
+          maxLength: 256
+          pattern: ^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{6,}$
+        role:
+          type: string
+          description: Role of user.
+          enum:
+            - USER
+            - ADMINISTRATOR
+        displayName:
+          type: string
+          description: Display name of user.
+          maxLength: 256
+  responses:
+    500:
+      description: An internal error has occurred on the server side.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorDto"
+    422:
+      description: User input validation failed.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorDto"
+    404:
+      description: The specified resource was not found.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorDto"
+    403:
+      description: Access was denied due to insufficient rights.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorDto"
+    401:
+      description: The access must be authenticated or authentication failed.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorDto"
+  securitySchemes:
+    jwt:
+      type: http
+      scheme: bearer
+      bearerFormat: jwt
+security:
+  - jwt: [ ]

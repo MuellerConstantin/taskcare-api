@@ -3,6 +3,7 @@ package de.mueller_constantin.taskcare.api.presentation.rest.v1.error;
 import de.mueller_constantin.taskcare.api.core.common.application.service.NoSuchEntityException;
 import de.mueller_constantin.taskcare.api.core.user.domain.model.IllegalDefaultAdminAlterationException;
 import de.mueller_constantin.taskcare.api.core.user.application.service.UsernameAlreadyInUseException;
+import de.mueller_constantin.taskcare.api.core.user.domain.model.IllegalImportedUserAlterationException;
 import de.mueller_constantin.taskcare.api.infrastructure.security.token.InvalidTokenException;
 import de.mueller_constantin.taskcare.api.presentation.rest.v1.dto.ErrorDto;
 import lombok.extern.slf4j.Slf4j;
@@ -263,6 +264,19 @@ public class RestErrorHandler extends ResponseEntityExceptionHandler {
                                                        WebRequest request) {
         ErrorDto dto = ErrorDto.builder()
                 .error("IllegalDefaultAdminAlterationError")
+                .timestamp(OffsetDateTime.now())
+                .status(HttpStatus.CONFLICT.value())
+                .path(((ServletWebRequest) request).getRequest().getServletPath())
+                .build();
+
+        return new ResponseEntity<>(dto, new HttpHeaders(), HttpStatus.valueOf(dto.getStatus()));
+    }
+
+    @ExceptionHandler(IllegalImportedUserAlterationException.class)
+    public ResponseEntity<Object> handleIllegalImportedUserAlteration(IllegalImportedUserAlterationException exc,
+                                                                      WebRequest request) {
+        ErrorDto dto = ErrorDto.builder()
+                .error("IllegalImportedUserAlterationError")
                 .timestamp(OffsetDateTime.now())
                 .status(HttpStatus.CONFLICT.value())
                 .path(((ServletWebRequest) request).getRequest().getServletPath())
