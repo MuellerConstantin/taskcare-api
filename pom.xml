@@ -39,6 +39,7 @@
 		<java.version>17</java.version>
 		<jjwt.version>0.12.6</jjwt.version>
 		<mapstruct.version>1.5.2.Final</mapstruct.version>
+		<minio.version>8.5.14</minio.version>
 	</properties>
 
 	<dependencies>
@@ -88,6 +89,11 @@
 			<artifactId>jedis</artifactId>
 			<version>${jedis.version}</version>
 			<type>jar</type>
+		</dependency>
+		<dependency>
+			<groupId>io.minio</groupId>
+			<artifactId>minio</artifactId>
+			<version>${minio.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.projectlombok</groupId>

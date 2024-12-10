@@ -2,3 +2,10 @@ spring:
   datasource:
     url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;MODE=MYSQL
     driver-class-name: org.h2.Driver
+taskcare:
+  persistence:
+    minio:
+      endpoint: http://localhost:9000
+      accessKey: gzHDeiw9758blgMlr3Yw
+      secretKey: MzI92h677VrY5s0p3jctFJRmmajabzcEkkO2egjv
+      bucketName: taskcare

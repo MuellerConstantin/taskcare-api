@@ -24,16 +24,20 @@ principles of the Spring Boot framework still apply and are mentioned here for t
 
 The following configuration options are available:
 
-| Option                     | Environment Variable       | Description                                                                            | Required |
-|----------------------------|----------------------------|----------------------------------------------------------------------------------------|----------|
-| spring.datasource.url      | SPRING_DATASOURCE_URL      | Url of the MySql database used. This is the storage primarily used by the application. | true     |
-| spring.datasource.username | SPRING_DATASOURCE_USERNAME | The username of the MySql database user used to connect to the database.               | false    |
-| spring.datasource.password | SPRING_DATASOURCE_PASSWORD | The password of the MySql database user used to connect to the database.               | false    |
-| spring.data.redis.host     | SPRING_DATA_REDIS_HOST     | The host of the Redis server used by the application .                                 | true     |
-| spring.data.redis.port     | SPRING_DATA_REDIS_PORT     | The port of the Redis server used by the application.                                  | true     |
-| spring.data.redis.username | SPRING_DATA_REDIS_USERNAME | The username of the Redis server used by the application.                              | false    |
-| spring.data.redis.password | SPRING_DATA_REDIS_PASSWORD | The password of the Redis server used by the application.                              | false    |
-| spring.data.redis.database | SPRING_DATA_REDIS_DATABASE | The instance of the Redis server used by the application.                              | false    |
+| Option                                | Environment Variable                  | Description                                                                            | Required |
+|---------------------------------------|---------------------------------------|----------------------------------------------------------------------------------------|----------|
+| spring.datasource.url                 | SPRING_DATASOURCE_URL                 | Url of the MySql database used. This is the storage primarily used by the application. | true     |
+| spring.datasource.username            | SPRING_DATASOURCE_USERNAME            | The username of the MySql database user used to connect to the database.               | false    |
+| spring.datasource.password            | SPRING_DATASOURCE_PASSWORD            | The password of the MySql database user used to connect to the database.               | false    |
+| spring.data.redis.host                | SPRING_DATA_REDIS_HOST                | The host of the Redis server used by the application .                                 | true     |
+| spring.data.redis.port                | SPRING_DATA_REDIS_PORT                | The port of the Redis server used by the application.                                  | true     |
+| spring.data.redis.username            | SPRING_DATA_REDIS_USERNAME            | The username of the Redis server used by the application.                              | false    |
+| spring.data.redis.password            | SPRING_DATA_REDIS_PASSWORD            | The password of the Redis server used by the application.                              | false    |
+| spring.data.redis.database            | SPRING_DATA_REDIS_DATABASE            | The instance of the Redis server used by the application.                              | false    |
+| taskcare.persistence.minio.endpoint   | TASKCARE_PERSISTENCE_MINIO_ENDPOINT   | The endpoint of the Minio server used by the application.                              | true     |
+| taskcare.persistence.minio.accessKey  | TASKCARE_PERSISTENCE_MINIO_ACCESSKEY  | The access key of the Minio server used by the application.                            | true     |
+| taskcare.persistence.minio.secretKey  | TASKCARE_PERSISTENCE_MINIO_SECRETKEY  | The secret key of the Minio server used by the application.                            | true     |
+| taskcare.persistence.minio.bucketName | TASKCARE_PERSISTENCE_MINIO_BUCKETNAME | The bucket name of the Minio server used by the application.                           | true     |
 
 ### Security Configuration
 

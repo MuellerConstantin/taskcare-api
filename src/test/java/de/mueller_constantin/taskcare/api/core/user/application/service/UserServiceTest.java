@@ -1,6 +1,7 @@
 package de.mueller_constantin.taskcare.api.core.user.application.service;
 
 import de.mueller_constantin.taskcare.api.core.common.application.NoSuchEntityException;
+import de.mueller_constantin.taskcare.api.core.common.application.persistence.MediaStorage;
 import de.mueller_constantin.taskcare.api.core.common.domain.Page;
 import de.mueller_constantin.taskcare.api.core.common.domain.PageInfo;
 import de.mueller_constantin.taskcare.api.core.user.application.*;
@@ -36,6 +37,9 @@ class UserServiceTest {
 
     @Mock
     private CredentialsEncoder credentialsEncoder;
+
+    @Mock
+    private MediaStorage mediaStorage;
 
     @InjectMocks
     private UserService userService;
@@ -132,6 +136,8 @@ class UserServiceTest {
     void handleDeleteUserByIdCommand() {
         when(userAggregateRepository.load(id)).thenReturn(Optional.of(userAggregate));
         doNothing().when(userAggregateRepository).save(any(UserAggregate.class));
+        when(mediaStorage.exists(any())).thenReturn(true);
+        doNothing().when(mediaStorage).delete(any());
 
         userService.dispatch(DeleteUserByIdCommand.builder()
                 .id(id)
@@ -139,6 +145,8 @@ class UserServiceTest {
 
         verify(userAggregateRepository, times(1)).load(id);
         verify(userAggregateRepository, times(1)).save(any(UserAggregate.class));
+        verify(mediaStorage, times(1)).exists(any());
+        verify(mediaStorage, times(1)).delete(any());
     }
 
     @Test

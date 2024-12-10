@@ -1,6 +1,8 @@
 package de.mueller_constantin.taskcare.api.presentation.rest.v1;
 
 import com.fasterxml.jackson.annotation.JsonView;
+import de.mueller_constantin.taskcare.api.core.common.application.NoSuchEntityException;
+import de.mueller_constantin.taskcare.api.core.common.application.persistence.MediaStorage;
 import de.mueller_constantin.taskcare.api.core.user.application.*;
 import de.mueller_constantin.taskcare.api.core.user.domain.UserProjection;
 import de.mueller_constantin.taskcare.api.infrastructure.security.CurrentPrincipal;
@@ -14,10 +16,14 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.UUID;
 
 @RestController
@@ -25,11 +31,13 @@ import java.util.UUID;
 public class UserController {
     private final UserService userService;
     private final UserDtoMapper userDtoMapper;
+    private final MediaStorage mediaStorage;
 
     @Autowired
-    public UserController(UserService userService, UserDtoMapper userDtoMapper) {
+    public UserController(UserService userService, UserDtoMapper userDtoMapper, MediaStorage mediaStorage) {
         this.userService = userService;
         this.userDtoMapper = userDtoMapper;
+        this.mediaStorage = mediaStorage;
     }
 
     @GetMapping("/user/me")
@@ -74,5 +82,58 @@ public class UserController {
     @PreAuthorize("hasRole('ADMINISTRATOR')")
     void deleteUserById(@PathVariable UUID id) {
         userService.dispatch(new DeleteUserByIdCommand(id));
+    }
+
+    @PostMapping("/user/me/profile-image")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    void uploadProfileImage(@CurrentPrincipal UserDetails userDetails, @RequestParam("file") MultipartFile file) throws IOException {
+        FindUserByUsernameQuery query = new FindUserByUsernameQuery(userDetails.getUsername());
+        UserProjection result = userService.query(query);
+
+        mediaStorage.save("/profile-images/" + result.getId().toString(), file.getContentType(), file.getBytes());
+    }
+
+    @DeleteMapping("/user/me/profile-image")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    void removeProfileImage(@CurrentPrincipal UserDetails userDetails) {
+        FindUserByUsernameQuery query = new FindUserByUsernameQuery(userDetails.getUsername());
+        UserProjection result = userService.query(query);
+
+        mediaStorage.delete("/profile-images/" + result.getId().toString());
+    }
+
+    @GetMapping("/user/me/profile-image")
+    ResponseEntity<byte[]> getProfileImage(@CurrentPrincipal UserDetails userDetails) {
+        FindUserByUsernameQuery query = new FindUserByUsernameQuery(userDetails.getUsername());
+        UserProjection result = userService.query(query);
+
+        if(mediaStorage.exists("/profile-images/" + result.getId().toString())) {
+            String contentType = mediaStorage.contentType("/profile-images/" + result.getId().toString());
+            byte[] data = mediaStorage.load("/profile-images/" + result.getId().toString());
+
+            return ResponseEntity.ok()
+                    .contentType(MediaType.parseMediaType(contentType))
+                    .contentLength(data.length)
+                    .body(data);
+        } else {
+            throw new NoSuchEntityException();
+        }
+    }
+
+    @GetMapping("/users/{id}/profile-image")
+    ResponseEntity<byte[]> getProfileImage(@PathVariable UUID id) {
+        UserProjection result = userService.query(new FindUserByIdQuery(id));
+
+        if(mediaStorage.exists("/profile-images/" + result.getId().toString())) {
+            String contentType = mediaStorage.contentType("/profile-images/" + result.getId().toString());
+            byte[] data = mediaStorage.load("/profile-images/" + result.getId().toString());
+
+            return ResponseEntity.ok()
+                    .contentType(MediaType.parseMediaType(contentType))
+                    .contentLength(data.length)
+                    .body(data);
+        } else {
+            throw new NoSuchEntityException();
+        }
     }
 }

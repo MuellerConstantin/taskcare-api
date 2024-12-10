@@ -2,6 +2,7 @@ package de.mueller_constantin.taskcare.api.core.user.application;
 
 import de.mueller_constantin.taskcare.api.core.common.application.ApplicationService;
 import de.mueller_constantin.taskcare.api.core.common.application.NoSuchEntityException;
+import de.mueller_constantin.taskcare.api.core.common.application.persistence.MediaStorage;
 import de.mueller_constantin.taskcare.api.core.common.domain.Page;
 import de.mueller_constantin.taskcare.api.core.common.domain.PageInfo;
 import de.mueller_constantin.taskcare.api.core.user.application.persistence.UserDomainRepository;
@@ -18,6 +19,7 @@ public class UserService implements ApplicationService {
     private final UserDomainRepository userAggregateRepository;
     private final UserStateRepository userProjectionRepository;
     private final CredentialsEncoder credentialsEncoder;
+    private final MediaStorage mediaStorage;
 
     public void dispatch(CreateUserCommand command) {
         boolean usernameInUse = userProjectionRepository.existsByUsername(command.getUsername());
@@ -86,6 +88,10 @@ public class UserService implements ApplicationService {
     public void dispatch(DeleteUserByIdCommand command) {
         UserAggregate userAggregate = userAggregateRepository.load(command.getId())
                 .orElseThrow(NoSuchEntityException::new);
+
+        if(mediaStorage.exists("/profile-images/" + userAggregate.getId().toString())) {
+            mediaStorage.delete("/profile-images/" + userAggregate.getId().toString());
+        }
 
         userAggregate.delete();
         userAggregateRepository.save(userAggregate);

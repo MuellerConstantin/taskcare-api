@@ -29,9 +29,10 @@ info:
     
     ## Content Negotiation
     
-    The API does not support any kind of content negotiation. This means that
-    the content type of all responses and requests is always JSON. HTTP headers like `Accept`
-    or `Content-Type` are used, but accept `application/json` exclusive.
+    The API does not support any kind of content negotiation. This means that the content
+    type of all responses and requests is always `application/json`. The only exception
+    is file uploads and downloads. File uploads are always done via `multipart/form-data`
+    and file downloads in the content type of the respective file.
     
     ## Timestamps
     
@@ -404,6 +405,89 @@ paths:
                 role: USER
         401:
           $ref: "#/components/responses/401"
+  /user/me/profile-image:
+    post:
+      tags:
+        - User
+      summary: Uploads a profile image for the currently authenticated user.
+      description: |
+        Uploads a profile image for the currently authenticated user.
+        Only the profile image of your own authenticated account can be uploaded.
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        204:
+          description: Successfully uploaded the profile image.
+        401:
+          $ref: "#/components/responses/401"
+    delete:
+      tags:
+        - User
+      summary: Deletes the profile image of the currently authenticated user.
+      description: |
+        Deletes the profile image of the currently authenticated user.
+        Only the profile image of your own authenticated account can be deleted.
+      responses:
+        204:
+          description: Successfully deleted the profile image.
+        401:
+          $ref: "#/components/responses/401"
+    get:
+      tags:
+        - User
+      summary: Retrieves the profile image of the currently authenticated user.
+      description: |
+        Retrieves the profile image of the currently authenticated user.
+        Only the profile image of your own authenticated account can be retrieved.
+      responses:
+        200:
+          description: Successfully fetched the profile image.
+          content:
+            text/plain:
+              schema:
+                type: string
+                format: binary
+        401:
+          $ref: "#/components/responses/401"
+        404:
+          $ref: "#/components/responses/404"
+  /users/{id}/profile-image:
+    get:
+      tags:
+        - User
+      summary: Retrieves the profile image of a specific user.
+      description: |
+        Retrieves the profile image of a specific user.
+        Only the profile image of a specific user can be retrieved.
+      parameters:
+        - name: id
+          in: path
+          description: Unique identifier of the user.
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 3377cf8f-da29-4aa7-9036-91951b8fce87
+      responses:
+        200:
+          description: Successfully fetched the profile image.
+          content:
+            text/plain:
+              schema:
+                type: string
+                format: binary
+        401:
+          $ref: "#/components/responses/401"
+        404:
+          $ref: "#/components/responses/404"
 components:
   schemas:
     ValidationErrorDetailsDto:

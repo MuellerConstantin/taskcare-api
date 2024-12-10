@@ -22,6 +22,10 @@ which must be created before it can be used. The exact definition of the tables 
 Redis is a key-value store that is used for the storage of temporary application state. This includes
 the tokens used for authentication and authorization as well as the state of the application itself.
 
+**[MinIO](https://min.io/)**
+
+MinIO is a S3-compatible object storage service that is used for the storage of file attachments.
+
 ## Deployment
 
 As mentioned above, the TaskCare service is generally operated on-premise. After providing required third-party

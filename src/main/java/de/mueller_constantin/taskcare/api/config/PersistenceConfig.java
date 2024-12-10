@@ -1,6 +1,7 @@
 package de.mueller_constantin.taskcare.api.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import de.mueller_constantin.taskcare.api.infrastructure.persistence.MinioProperties;
 import de.mueller_constantin.taskcare.api.infrastructure.persistence.es.EventStore;
 import de.mueller_constantin.taskcare.api.infrastructure.persistence.es.jdbc.JdbcEventStore;
 import de.mueller_constantin.taskcare.api.infrastructure.persistence.es.jdbc.JdbcEventStoreEventRepository;
@@ -9,6 +10,8 @@ import de.mueller_constantin.taskcare.api.infrastructure.persistence.es.jdbc.Jdb
 import de.mueller_constantin.taskcare.api.infrastructure.persistence.es.jdbc.mysql.JdbcMySqlEventStoreEventRepository;
 import de.mueller_constantin.taskcare.api.infrastructure.persistence.es.jdbc.mysql.JdbcMySqlEventStoreMetadataRepository;
 import de.mueller_constantin.taskcare.api.infrastructure.persistence.es.jdbc.mysql.JdbcMySqlEventStoreSnapshotRepository;
+import io.minio.MinioClient;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,6 +24,9 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 @Configuration
 public class PersistenceConfig {
+    @Autowired
+    private MinioProperties minioProperties;
+
     @Bean
     JedisConnectionFactory jedisConnectionFactory(RedisProperties redisProperties) {
         RedisStandaloneConfiguration redisStandaloneConfiguration = new RedisStandaloneConfiguration();
@@ -39,6 +45,14 @@ public class PersistenceConfig {
         redisTemplate.setConnectionFactory(redisConnectionFactory);
         redisTemplate.setDefaultSerializer(new StringRedisSerializer());
         return redisTemplate;
+    }
+
+    @Bean
+    MinioClient minioClient() {
+        return MinioClient.builder()
+                .endpoint(minioProperties.getEndpoint())
+                .credentials(minioProperties.getAccessKey(), minioProperties.getSecretKey())
+                .build();
     }
 
     @Configuration
