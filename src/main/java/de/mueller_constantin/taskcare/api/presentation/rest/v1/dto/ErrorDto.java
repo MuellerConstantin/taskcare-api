@@ -44,6 +44,7 @@ public class ErrorDto {
     @NoArgsConstructor
     @Data
     @Builder
+    @JsonView(DefaultJsonViews.User.class)
     public static class ValidationErrorDetails {
         private String field;
         private String code;
@@ -54,6 +55,7 @@ public class ErrorDto {
     @NoArgsConstructor
     @Data
     @Builder
+    @JsonView(DefaultJsonViews.User.class)
     public static class InvalidParameterErrorDetails {
         private String parameter;
         private String message;
