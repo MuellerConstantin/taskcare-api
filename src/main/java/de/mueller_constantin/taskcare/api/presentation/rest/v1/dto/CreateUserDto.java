@@ -1,6 +1,6 @@
 package de.mueller_constantin.taskcare.api.presentation.rest.v1.dto;
 
-import de.mueller_constantin.taskcare.api.core.user.domain.model.Role;
+import de.mueller_constantin.taskcare.api.core.user.domain.Role;
 import de.mueller_constantin.taskcare.api.infrastructure.validation.Enumerated;
 import de.mueller_constantin.taskcare.api.infrastructure.validation.NullOrNotEmpty;
 import de.mueller_constantin.taskcare.api.infrastructure.validation.Password;

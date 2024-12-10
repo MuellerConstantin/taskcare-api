@@ -1,6 +1,6 @@
 package de.mueller_constantin.taskcare.api.infrastructure.security;
 
-import de.mueller_constantin.taskcare.api.core.user.domain.model.UserProjection;
+import de.mueller_constantin.taskcare.api.core.user.domain.UserProjection;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

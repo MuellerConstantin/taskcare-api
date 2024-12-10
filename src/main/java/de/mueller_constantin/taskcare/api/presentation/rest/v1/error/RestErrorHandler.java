@@ -1,9 +1,9 @@
 package de.mueller_constantin.taskcare.api.presentation.rest.v1.error;
 
-import de.mueller_constantin.taskcare.api.core.common.application.service.NoSuchEntityException;
-import de.mueller_constantin.taskcare.api.core.user.domain.model.IllegalDefaultAdminAlterationException;
-import de.mueller_constantin.taskcare.api.core.user.application.service.UsernameAlreadyInUseException;
-import de.mueller_constantin.taskcare.api.core.user.domain.model.IllegalImportedUserAlterationException;
+import de.mueller_constantin.taskcare.api.core.common.application.NoSuchEntityException;
+import de.mueller_constantin.taskcare.api.core.user.domain.IllegalDefaultAdminAlterationException;
+import de.mueller_constantin.taskcare.api.core.user.application.UsernameAlreadyInUseException;
+import de.mueller_constantin.taskcare.api.core.user.domain.IllegalImportedUserAlterationException;
 import de.mueller_constantin.taskcare.api.infrastructure.security.token.InvalidTokenException;
 import de.mueller_constantin.taskcare.api.presentation.rest.v1.dto.ErrorDto;
 import lombok.extern.slf4j.Slf4j;

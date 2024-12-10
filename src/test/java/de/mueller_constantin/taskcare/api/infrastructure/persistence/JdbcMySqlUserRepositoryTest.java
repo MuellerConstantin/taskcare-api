@@ -1,8 +1,8 @@
 package de.mueller_constantin.taskcare.api.infrastructure.persistence;
 
-import de.mueller_constantin.taskcare.api.core.common.domain.model.Page;
-import de.mueller_constantin.taskcare.api.core.common.domain.model.PageInfo;
-import de.mueller_constantin.taskcare.api.core.user.domain.model.UserProjection;
+import de.mueller_constantin.taskcare.api.core.common.domain.Page;
+import de.mueller_constantin.taskcare.api.core.common.domain.PageInfo;
+import de.mueller_constantin.taskcare.api.core.user.domain.UserProjection;
 import de.mueller_constantin.taskcare.api.infrastructure.persistence.es.EventStore;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -52,14 +52,6 @@ class JdbcMySqlUserRepositoryTest {
 
         assertTrue(user.isPresent());
         assertEquals("maxi123", user.get().getUsername());
-    }
-
-    @Test
-    void existsById() {
-        boolean exists = jdbcMySqlUserRepository.existsById(
-                UUID.fromString("8d031fe3-e445-4d51-8c70-ac3e3810da87"));
-
-        assertTrue(exists);
     }
 
     @Test

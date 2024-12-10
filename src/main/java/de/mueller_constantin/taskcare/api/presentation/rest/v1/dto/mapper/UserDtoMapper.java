@@ -1,10 +1,10 @@
 package de.mueller_constantin.taskcare.api.presentation.rest.v1.dto.mapper;
 
-import de.mueller_constantin.taskcare.api.core.common.domain.model.Page;
-import de.mueller_constantin.taskcare.api.core.user.application.service.CreateUserCommand;
-import de.mueller_constantin.taskcare.api.core.user.application.service.UpdateUserByIdCommand;
-import de.mueller_constantin.taskcare.api.core.user.domain.model.Role;
-import de.mueller_constantin.taskcare.api.core.user.domain.model.UserProjection;
+import de.mueller_constantin.taskcare.api.core.common.domain.Page;
+import de.mueller_constantin.taskcare.api.core.user.application.CreateUserCommand;
+import de.mueller_constantin.taskcare.api.core.user.application.UpdateUserByIdCommand;
+import de.mueller_constantin.taskcare.api.core.user.domain.Role;
+import de.mueller_constantin.taskcare.api.core.user.domain.UserProjection;
 import de.mueller_constantin.taskcare.api.presentation.rest.v1.dto.CreateUserDto;
 import de.mueller_constantin.taskcare.api.presentation.rest.v1.dto.PageDto;
 import de.mueller_constantin.taskcare.api.presentation.rest.v1.dto.UpdateUserDto;

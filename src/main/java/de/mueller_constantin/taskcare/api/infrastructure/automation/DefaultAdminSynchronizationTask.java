@@ -1,7 +1,7 @@
 package de.mueller_constantin.taskcare.api.infrastructure.automation;
 
-import de.mueller_constantin.taskcare.api.core.user.application.service.SyncDefaultAdminCommand;
-import de.mueller_constantin.taskcare.api.core.user.application.service.UserService;
+import de.mueller_constantin.taskcare.api.core.user.application.SyncDefaultAdminCommand;
+import de.mueller_constantin.taskcare.api.core.user.application.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -34,7 +34,7 @@ public class DefaultAdminSynchronizationTask implements ApplicationListener<Appl
 
         log.info("Syncing default admin user...");
 
-        this.userService.handle(SyncDefaultAdminCommand.builder()
+        this.userService.dispatch(SyncDefaultAdminCommand.builder()
                 .password(this.password)
                 .build());
     }

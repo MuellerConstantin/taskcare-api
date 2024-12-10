@@ -3,8 +3,8 @@ package de.mueller_constantin.taskcare.api.infrastructure.persistence.es.jdbc.my
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import de.mueller_constantin.taskcare.api.core.common.domain.model.Aggregate;
-import de.mueller_constantin.taskcare.api.core.dummy.domain.model.DummyAggregate;
+import de.mueller_constantin.taskcare.api.core.common.domain.Aggregate;
+import de.mueller_constantin.taskcare.api.core.dummy.domain.DummyAggregate;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

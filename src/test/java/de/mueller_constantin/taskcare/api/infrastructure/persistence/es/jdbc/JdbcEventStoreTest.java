@@ -1,9 +1,9 @@
 package de.mueller_constantin.taskcare.api.infrastructure.persistence.es.jdbc;
 
-import de.mueller_constantin.taskcare.api.core.common.domain.model.Event;
-import de.mueller_constantin.taskcare.api.core.dummy.domain.model.DummyAggregate;
-import de.mueller_constantin.taskcare.api.core.dummy.domain.model.DummyCreatedEvent;
-import de.mueller_constantin.taskcare.api.core.dummy.domain.model.DummyUpdatedEvent;
+import de.mueller_constantin.taskcare.api.core.common.domain.DomainEvent;
+import de.mueller_constantin.taskcare.api.core.dummy.domain.DummyAggregate;
+import de.mueller_constantin.taskcare.api.core.dummy.domain.DummyCreatedEvent;
+import de.mueller_constantin.taskcare.api.core.dummy.domain.DummyUpdatedEvent;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,7 +34,7 @@ class JdbcEventStoreTest {
     private JdbcEventStore jdbcEventStore;
 
     private UUID id;
-    private List<Event> events;
+    private List<DomainEvent> events;
     private DummyAggregate snapshot;
 
     @BeforeEach

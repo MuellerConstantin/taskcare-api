@@ -3,9 +3,9 @@ package de.mueller_constantin.taskcare.api.infrastructure.persistence.es.jdbc.my
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import de.mueller_constantin.taskcare.api.core.common.domain.model.Event;
-import de.mueller_constantin.taskcare.api.core.dummy.domain.model.DummyCreatedEvent;
-import de.mueller_constantin.taskcare.api.core.dummy.domain.model.DummyUpdatedEvent;
+import de.mueller_constantin.taskcare.api.core.common.domain.DomainEvent;
+import de.mueller_constantin.taskcare.api.core.dummy.domain.DummyCreatedEvent;
+import de.mueller_constantin.taskcare.api.core.dummy.domain.DummyUpdatedEvent;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -40,11 +40,11 @@ class JdbcMySqlEventStoreEventRepositoryTest {
 
     @Test
     void loadEvents() {
-        List<Event> events = jdbcMySqlEventStoreEventRepository.loadEvents(
+        List<DomainEvent> events = jdbcMySqlEventStoreEventRepository.loadEvents(
                 UUID.fromString("065e84bd-2e41-418c-82df-886d7e0c6f72"), 0, null);
 
         assertEquals(6, events.size());
-        assertEquals("de.mueller_constantin.taskcare.api.core.dummy.domain.model.DummyCreatedEvent", events.get(0).getClass().getName());
+        assertEquals("de.mueller_constantin.taskcare.api.core.dummy.domain.DummyCreatedEvent", events.get(0).getClass().getName());
         assertInstanceOf(DummyCreatedEvent.class, events.get(0));
     }
 
@@ -62,11 +62,11 @@ class JdbcMySqlEventStoreEventRepositoryTest {
 
         jdbcMySqlEventStoreEventRepository.createEvent(event);
 
-        List<Event> events = jdbcMySqlEventStoreEventRepository.loadEvents(
+        List<DomainEvent> events = jdbcMySqlEventStoreEventRepository.loadEvents(
                 UUID.fromString("065e84bd-2e41-418c-82df-886d7e0c6f72"), null, null);
 
         assertEquals(7, events.size());
-        assertEquals("de.mueller_constantin.taskcare.api.core.dummy.domain.model.DummyUpdatedEvent", events.get(6).getClass().getName());
+        assertEquals("de.mueller_constantin.taskcare.api.core.dummy.domain.DummyUpdatedEvent", events.get(6).getClass().getName());
         assertInstanceOf(DummyUpdatedEvent.class, events.get(6));
     }
 

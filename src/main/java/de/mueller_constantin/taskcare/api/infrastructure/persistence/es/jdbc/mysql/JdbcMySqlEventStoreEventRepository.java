@@ -1,7 +1,7 @@
 package de.mueller_constantin.taskcare.api.infrastructure.persistence.es.jdbc.mysql;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import de.mueller_constantin.taskcare.api.core.common.domain.model.Event;
+import de.mueller_constantin.taskcare.api.core.common.domain.DomainEvent;
 import de.mueller_constantin.taskcare.api.infrastructure.persistence.es.jdbc.JdbcEventStoreEventRepository;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +26,7 @@ public class JdbcMySqlEventStoreEventRepository implements JdbcEventStoreEventRe
     private final ObjectMapper objectMapper;
 
     @SneakyThrows
-    public void createEvent(@NonNull Event event) {
+    public void createEvent(@NonNull DomainEvent event) {
         MapSqlParameterSource parameters = new MapSqlParameterSource();
         parameters.addValue("aggregateId", event.getAggregateId().toString());
         parameters.addValue("version", event.getVersion(), Types.INTEGER);
@@ -39,7 +39,7 @@ public class JdbcMySqlEventStoreEventRepository implements JdbcEventStoreEventRe
                 """.formatted(EVENTS_TABLE_NAME), parameters);
     }
 
-    public List<Event> loadEvents(@NonNull UUID aggregateId, Integer fromVersion, Integer toVersion) {
+    public List<DomainEvent> loadEvents(@NonNull UUID aggregateId, Integer fromVersion, Integer toVersion) {
         MapSqlParameterSource parameters = new MapSqlParameterSource();
         parameters.addValue("aggregateId", aggregateId.toString());
         parameters.addValue("fromVersion", fromVersion, Types.INTEGER);
@@ -60,11 +60,11 @@ public class JdbcMySqlEventStoreEventRepository implements JdbcEventStoreEventRe
     }
 
     @SneakyThrows
-    private Event toEvent(ResultSet resultSet, int rowNum) {
+    private DomainEvent toEvent(ResultSet resultSet, int rowNum) {
         String eventType = resultSet.getString("event_type");
         String eventData = resultSet.getString("event_data");
 
-        Class<? extends Event> aggregateClass = Class.forName(eventType).asSubclass(Event.class);
+        Class<? extends DomainEvent> aggregateClass = Class.forName(eventType).asSubclass(DomainEvent.class);
 
         return objectMapper.readValue(eventData, aggregateClass);
     }

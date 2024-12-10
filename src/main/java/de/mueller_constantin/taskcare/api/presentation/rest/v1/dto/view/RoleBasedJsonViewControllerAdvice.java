@@ -1,6 +1,6 @@
 package de.mueller_constantin.taskcare.api.presentation.rest.v1.dto.view;
 
-import de.mueller_constantin.taskcare.api.core.user.domain.model.Role;
+import de.mueller_constantin.taskcare.api.core.user.domain.Role;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJacksonValue;

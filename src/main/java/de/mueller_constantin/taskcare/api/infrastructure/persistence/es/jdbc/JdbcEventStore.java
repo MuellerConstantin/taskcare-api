@@ -1,7 +1,7 @@
 package de.mueller_constantin.taskcare.api.infrastructure.persistence.es.jdbc;
 
-import de.mueller_constantin.taskcare.api.core.common.domain.model.Aggregate;
-import de.mueller_constantin.taskcare.api.core.common.domain.model.Event;
+import de.mueller_constantin.taskcare.api.core.common.domain.Aggregate;
+import de.mueller_constantin.taskcare.api.core.common.domain.DomainEvent;
 import de.mueller_constantin.taskcare.api.infrastructure.persistence.es.EventStore;
 import lombok.*;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,7 +28,7 @@ public class JdbcEventStore implements EventStore {
     public void saveAggregate(@NonNull Aggregate aggregate) {
         metadataRepository.createMetadata(aggregate);
 
-        for(Event event : aggregate.getUncommittedEvents()) {
+        for(DomainEvent event : aggregate.getUncommittedEvents()) {
             eventRepository.createEvent(event);
 
             if(event.getVersion() % snapshotInterval == 0) {
@@ -46,7 +46,7 @@ public class JdbcEventStore implements EventStore {
         Aggregate aggregate = snapshotRepository.loadSnapshot(aggregateId, version)
                 .orElseGet(() -> createAggregate(aggregateId, aggregateClass));
 
-        List<Event> events = eventRepository.loadEvents(aggregateId, aggregate.getVersion(), version);
+        List<DomainEvent> events = eventRepository.loadEvents(aggregateId, aggregate.getVersion(), version);
 
         aggregate.loadFromHistory(events);
 

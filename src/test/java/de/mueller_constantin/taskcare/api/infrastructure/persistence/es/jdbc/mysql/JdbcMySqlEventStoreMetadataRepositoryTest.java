@@ -1,6 +1,6 @@
 package de.mueller_constantin.taskcare.api.infrastructure.persistence.es.jdbc.mysql;
 
-import de.mueller_constantin.taskcare.api.core.dummy.domain.model.DummyAggregate;
+import de.mueller_constantin.taskcare.api.core.dummy.domain.DummyAggregate;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,13 +1,13 @@
 package de.mueller_constantin.taskcare.api.infrastructure.persistence;
 
-import de.mueller_constantin.taskcare.api.core.common.domain.model.Page;
-import de.mueller_constantin.taskcare.api.core.common.domain.model.PageInfo;
-import de.mueller_constantin.taskcare.api.core.user.domain.model.IdentityProvider;
-import de.mueller_constantin.taskcare.api.core.user.domain.model.Role;
-import de.mueller_constantin.taskcare.api.core.user.domain.model.UserAggregate;
-import de.mueller_constantin.taskcare.api.core.user.domain.model.UserProjection;
-import de.mueller_constantin.taskcare.api.core.user.application.repository.UserAggregateRepository;
-import de.mueller_constantin.taskcare.api.core.user.application.repository.UserProjectionRepository;
+import de.mueller_constantin.taskcare.api.core.common.domain.Page;
+import de.mueller_constantin.taskcare.api.core.common.domain.PageInfo;
+import de.mueller_constantin.taskcare.api.core.user.domain.IdentityProvider;
+import de.mueller_constantin.taskcare.api.core.user.domain.Role;
+import de.mueller_constantin.taskcare.api.core.user.domain.UserAggregate;
+import de.mueller_constantin.taskcare.api.core.user.domain.UserProjection;
+import de.mueller_constantin.taskcare.api.core.user.application.persistence.UserDomainRepository;
+import de.mueller_constantin.taskcare.api.core.user.application.persistence.UserStateRepository;
 import de.mueller_constantin.taskcare.api.infrastructure.persistence.es.EventStore;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -26,7 +26,7 @@ import java.util.UUID;
 @Component
 @Transactional
 @RequiredArgsConstructor
-public class JdbcMySqlUserRepository implements UserAggregateRepository, UserProjectionRepository {
+public class JdbcMySqlUserRepository implements UserDomainRepository, UserStateRepository {
     private final String USER_TABLE_NAME = "users";
 
     private final NamedParameterJdbcTemplate jdbcTemplate;
@@ -59,7 +59,7 @@ public class JdbcMySqlUserRepository implements UserAggregateRepository, UserPro
             jdbcTemplate.update("""
                 INSERT INTO %s (id, username, password, display_name, role, identity_provider, locked)
                 VALUES (:id, :username, :password, :displayName, :role, :identity_provider, :locked)
-                ON DUPLICATE KEY UPDATE username = :username, password = :password, display_name = :displayName, role = :role, locked = :locked
+                ON DUPLICATE KEY UPDATE username = :username, password = :password, display_name = :displayName, role = :role, identity_provider = :identity_provider, locked = :locked
                 """.formatted(USER_TABLE_NAME), parameters);
         }
     }
@@ -157,20 +157,6 @@ public class JdbcMySqlUserRepository implements UserAggregateRepository, UserPro
                         .totalPages(totalPages)
                         .build())
                 .build();
-    }
-
-    @Override
-    public boolean existsById(UUID id) {
-        MapSqlParameterSource parameters = new MapSqlParameterSource();
-        parameters.addValue("id", id);
-
-        Integer count = jdbcTemplate.queryForObject("""
-                SELECT COUNT(*)
-                FROM %s
-                WHERE id = :id
-                """.formatted(USER_TABLE_NAME), parameters, Integer.class);
-
-        return count != null && count > 0;
     }
 
     @SneakyThrows

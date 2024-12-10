@@ -1,8 +1,8 @@
 package de.mueller_constantin.taskcare.api.presentation.rest.v1;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import de.mueller_constantin.taskcare.api.core.user.application.service.*;
-import de.mueller_constantin.taskcare.api.core.user.domain.model.UserProjection;
+import de.mueller_constantin.taskcare.api.core.user.application.*;
+import de.mueller_constantin.taskcare.api.core.user.domain.UserProjection;
 import de.mueller_constantin.taskcare.api.infrastructure.security.CurrentPrincipal;
 import de.mueller_constantin.taskcare.api.presentation.rest.v1.dto.CreateUserDto;
 import de.mueller_constantin.taskcare.api.presentation.rest.v1.dto.PageDto;
@@ -36,7 +36,7 @@ public class UserController {
     @JsonView(DefaultJsonViews.Me.class)
     UserDto getCurrentUser(@CurrentPrincipal UserDetails userDetails) {
         FindUserByUsernameQuery query = new FindUserByUsernameQuery(userDetails.getUsername());
-        UserProjection result = userService.handle(query);
+        UserProjection result = userService.query(query);
         return userDtoMapper.mapToDto(result);
     }
 
@@ -44,20 +44,20 @@ public class UserController {
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasRole('ADMINISTRATOR')")
     void createUser(@RequestBody @Valid CreateUserDto createUserDto) {
-        userService.handle(userDtoMapper.mapToCommand(createUserDto));
+        userService.dispatch(userDtoMapper.mapToCommand(createUserDto));
     }
 
     @PatchMapping("/users/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("hasRole('ADMINISTRATOR')")
     void updateUser(@PathVariable UUID id, @RequestBody @Valid UpdateUserDto updateUserDto) {
-        userService.handle(userDtoMapper.mapToCommand(id, updateUserDto));
+        userService.dispatch(userDtoMapper.mapToCommand(id, updateUserDto));
     }
 
     @GetMapping("/users")
     PageDto<UserDto> getAllUsers(@RequestParam(required = false, defaultValue = "0") @Min(0) int page,
                                  @RequestParam(required = false, defaultValue = "25") @Min(0) int perPage) {
-        return userDtoMapper.mapToDTO(userService.handle(FindAllUsersQuery.builder()
+        return userDtoMapper.mapToDTO(userService.query(FindAllUsersQuery.builder()
                 .page(page)
                 .perPage(perPage)
                 .build()
@@ -66,13 +66,13 @@ public class UserController {
 
     @GetMapping("/users/{id}")
     UserDto getUserById(@PathVariable UUID id) {
-        return userDtoMapper.mapToDto(userService.handle(new FindUserByIdQuery(id)));
+        return userDtoMapper.mapToDto(userService.query(new FindUserByIdQuery(id)));
     }
 
     @DeleteMapping("/users/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("hasRole('ADMINISTRATOR')")
     void deleteUserById(@PathVariable UUID id) {
-        userService.handle(new DeleteUserByIdCommand(id));
+        userService.dispatch(new DeleteUserByIdCommand(id));
     }
 }

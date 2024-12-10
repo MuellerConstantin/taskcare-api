@@ -1,15 +1,16 @@
 package de.mueller_constantin.taskcare.api.core.user.application.service;
 
-import de.mueller_constantin.taskcare.api.core.common.application.service.NoSuchEntityException;
-import de.mueller_constantin.taskcare.api.core.common.domain.model.Page;
-import de.mueller_constantin.taskcare.api.core.common.domain.model.PageInfo;
-import de.mueller_constantin.taskcare.api.core.user.application.repository.UserAggregateRepository;
-import de.mueller_constantin.taskcare.api.core.user.application.repository.UserProjectionRepository;
+import de.mueller_constantin.taskcare.api.core.common.application.NoSuchEntityException;
+import de.mueller_constantin.taskcare.api.core.common.domain.Page;
+import de.mueller_constantin.taskcare.api.core.common.domain.PageInfo;
+import de.mueller_constantin.taskcare.api.core.user.application.*;
+import de.mueller_constantin.taskcare.api.core.user.application.persistence.UserDomainRepository;
+import de.mueller_constantin.taskcare.api.core.user.application.persistence.UserStateRepository;
 import de.mueller_constantin.taskcare.api.core.user.application.security.CredentialsEncoder;
-import de.mueller_constantin.taskcare.api.core.user.domain.model.IdentityProvider;
-import de.mueller_constantin.taskcare.api.core.user.domain.model.Role;
-import de.mueller_constantin.taskcare.api.core.user.domain.model.UserAggregate;
-import de.mueller_constantin.taskcare.api.core.user.domain.model.UserProjection;
+import de.mueller_constantin.taskcare.api.core.user.domain.IdentityProvider;
+import de.mueller_constantin.taskcare.api.core.user.domain.Role;
+import de.mueller_constantin.taskcare.api.core.user.domain.UserAggregate;
+import de.mueller_constantin.taskcare.api.core.user.domain.UserProjection;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,10 +29,10 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
     @Mock
-    private UserAggregateRepository userAggregateRepository;
+    private UserDomainRepository userAggregateRepository;
 
     @Mock
-    private UserProjectionRepository userProjectionRepository;
+    private UserStateRepository userProjectionRepository;
 
     @Mock
     private CredentialsEncoder credentialsEncoder;
@@ -67,7 +68,7 @@ class UserServiceTest {
         when(credentialsEncoder.encode(any())).thenAnswer(i -> i.getArguments()[0].toString());
         doNothing().when(userAggregateRepository).save(any(UserAggregate.class));
 
-        userService.handle(CreateUserCommand.builder()
+        userService.dispatch(CreateUserCommand.builder()
                 .username("erika123")
                 .password("Abc123")
                 .displayName("Erika Musterfrau")
@@ -84,7 +85,7 @@ class UserServiceTest {
         when(userProjectionRepository.existsByUsername("maxi123")).thenReturn(true);
 
         assertThrows(UsernameAlreadyInUseException.class, () -> {
-            userService.handle(CreateUserCommand.builder()
+            userService.dispatch(CreateUserCommand.builder()
                     .username("maxi123")
                     .password("Abc123")
                     .displayName("Maximilian Mustermann")
@@ -100,7 +101,7 @@ class UserServiceTest {
         when(credentialsEncoder.encode(any())).thenAnswer(i -> i.getArguments()[0].toString());
         doNothing().when(userAggregateRepository).save(any(UserAggregate.class));
 
-        userService.handle(UpdateUserByIdCommand.builder()
+        userService.dispatch(UpdateUserByIdCommand.builder()
                 .id(id)
                 .password("Abc123")
                 .displayName("Erika Musterfrau")
@@ -118,7 +119,7 @@ class UserServiceTest {
         when(userProjectionRepository.findById(id)).thenReturn(Optional.empty());
 
         assertThrows(NoSuchEntityException.class, () -> {
-            userService.handle(UpdateUserByIdCommand.builder()
+            userService.dispatch(UpdateUserByIdCommand.builder()
                     .id(id)
                     .password("Def456")
                     .displayName("Max Mustermann")
@@ -132,7 +133,7 @@ class UserServiceTest {
         when(userAggregateRepository.load(id)).thenReturn(Optional.of(userAggregate));
         doNothing().when(userAggregateRepository).save(any(UserAggregate.class));
 
-        userService.handle(DeleteUserByIdCommand.builder()
+        userService.dispatch(DeleteUserByIdCommand.builder()
                 .id(id)
                 .build());
 
@@ -145,7 +146,7 @@ class UserServiceTest {
         when(userAggregateRepository.load(id)).thenReturn(Optional.empty());
 
         assertThrows(NoSuchEntityException.class, () -> {
-            userService.handle(DeleteUserByIdCommand.builder()
+            userService.dispatch(DeleteUserByIdCommand.builder()
                     .id(id)
                     .build());
         });
@@ -156,7 +157,7 @@ class UserServiceTest {
         when(userAggregateRepository.load(id)).thenReturn(Optional.of(userAggregate));
         doNothing().when(userAggregateRepository).save(any(UserAggregate.class));
 
-        userService.handle(LockUserByIdCommand.builder()
+        userService.dispatch(LockUserByIdCommand.builder()
                 .id(id)
                 .build());
 
@@ -169,7 +170,7 @@ class UserServiceTest {
         when(userAggregateRepository.load(id)).thenReturn(Optional.of(userAggregate));
         doNothing().when(userAggregateRepository).save(any(UserAggregate.class));
 
-        userService.handle(UnlockUserByIdCommand.builder()
+        userService.dispatch(UnlockUserByIdCommand.builder()
                 .id(id)
                 .build());
 
@@ -182,7 +183,7 @@ class UserServiceTest {
         when(userAggregateRepository.load(id)).thenReturn(Optional.empty());
 
         assertThrows(NoSuchEntityException.class, () -> {
-            userService.handle(LockUserByIdCommand.builder()
+            userService.dispatch(LockUserByIdCommand.builder()
                     .id(id)
                     .build());
         });
@@ -193,7 +194,7 @@ class UserServiceTest {
         when(userAggregateRepository.load(id)).thenReturn(Optional.empty());
 
         assertThrows(NoSuchEntityException.class, () -> {
-            userService.handle(UnlockUserByIdCommand.builder()
+            userService.dispatch(UnlockUserByIdCommand.builder()
                     .id(id)
                     .build());
         });
@@ -203,7 +204,7 @@ class UserServiceTest {
     void handleFindUserByIdQuery() {
         when(userProjectionRepository.findById(id)).thenReturn(Optional.of(userProjection));
 
-        UserProjection result = userService.handle(FindUserByIdQuery.builder()
+        UserProjection result = userService.query(FindUserByIdQuery.builder()
                 .id(id)
                 .build());
 
@@ -215,7 +216,7 @@ class UserServiceTest {
         when(userProjectionRepository.findById(id)).thenReturn(Optional.empty());
 
         assertThrows(NoSuchEntityException.class, () -> {
-            userService.handle(FindUserByIdQuery.builder()
+            userService.query(FindUserByIdQuery.builder()
                     .id(id)
                     .build());
         });
@@ -225,7 +226,7 @@ class UserServiceTest {
     void handleFindUserByUsernameQuery() {
         when(userProjectionRepository.findByUsername(userAggregate.getUsername())).thenReturn(Optional.of(userProjection));
 
-        UserProjection result = userService.handle(FindUserByUsernameQuery.builder()
+        UserProjection result = userService.query(FindUserByUsernameQuery.builder()
                 .username(userAggregate.getUsername())
                 .build());
 
@@ -237,7 +238,7 @@ class UserServiceTest {
         when(userProjectionRepository.findByUsername("erika123")).thenReturn(Optional.empty());
 
         assertThrows(NoSuchEntityException.class, () -> {
-            userService.handle(FindUserByUsernameQuery.builder()
+            userService.query(FindUserByUsernameQuery.builder()
                     .username("erika123")
                     .build());
         });
@@ -253,7 +254,7 @@ class UserServiceTest {
                         .build())
                 .build());
 
-        Page<UserProjection> result = userService.handle(FindAllUsersQuery.builder()
+        Page<UserProjection> result = userService.query(FindAllUsersQuery.builder()
                 .page(0)
                 .perPage(10)
                 .build());

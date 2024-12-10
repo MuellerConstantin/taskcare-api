@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
-import de.mueller_constantin.taskcare.api.core.common.domain.model.Aggregate;
+import de.mueller_constantin.taskcare.api.core.common.domain.Aggregate;
 import de.mueller_constantin.taskcare.api.infrastructure.persistence.es.jdbc.JdbcEventStoreSnapshotRepository;
 import lombok.NonNull;
 import lombok.SneakyThrows;
