@@ -34,7 +34,10 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -53,6 +56,51 @@ public class RestErrorHandler extends ResponseEntityExceptionHandler {
 
     protected String getMessage(String key, Object[] args) {
         return messageSource.getMessage(key, args, LocaleContextHolder.getLocale());
+    }
+
+    @Override
+    protected ResponseEntity<Object> handleMaxUploadSizeExceededException(MaxUploadSizeExceededException exc,
+                                                                          HttpHeaders headers,
+                                                                          HttpStatusCode status,
+                                                                          WebRequest request) {
+        ErrorDto dto = ErrorDto.builder()
+                .error("MaxUploadSizeExceededError")
+                .timestamp(OffsetDateTime.now())
+                .status(HttpStatus.BAD_REQUEST.value())
+                .path(((ServletWebRequest) request).getRequest().getServletPath())
+                .build();
+
+        return handleExceptionInternal(exc, dto, headers, HttpStatus.valueOf(dto.getStatus()), request);
+    }
+
+    @Override
+    protected ResponseEntity<Object> handleNoResourceFoundException(NoResourceFoundException exc,
+                                                                    HttpHeaders headers,
+                                                                    HttpStatusCode status,
+                                                                    WebRequest request) {
+        ErrorDto dto = ErrorDto.builder()
+                .error("NotFoundError")
+                .timestamp(OffsetDateTime.now())
+                .status(HttpStatus.NOT_FOUND.value())
+                .path(((ServletWebRequest) request).getRequest().getServletPath())
+                .build();
+
+        return handleExceptionInternal(exc, dto, headers, HttpStatus.valueOf(dto.getStatus()), request);
+    }
+
+    @Override
+    protected ResponseEntity<Object> handleNoHandlerFoundException(NoHandlerFoundException exc,
+                                                                   HttpHeaders headers,
+                                                                   HttpStatusCode status,
+                                                                   WebRequest request) {
+        ErrorDto dto = ErrorDto.builder()
+                .error("NotFoundError")
+                .timestamp(OffsetDateTime.now())
+                .status(HttpStatus.NOT_FOUND.value())
+                .path(((ServletWebRequest) request).getRequest().getServletPath())
+                .build();
+
+        return handleExceptionInternal(exc, dto, headers, HttpStatus.valueOf(dto.getStatus()), request);
     }
 
     @Override
