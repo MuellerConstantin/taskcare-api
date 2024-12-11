@@ -2,6 +2,13 @@
 
 > Collaboration platform for managing tasks in a team.
 
+![](https://img.shields.io/badge/Java-17-red?logo=openjdk)
+![](https://img.shields.io/badge/Spring%20Boot-3.4.0-green?logo=springboot)
+![](https://img.shields.io/badge/Database-MySQL-blue?logo=mysql)
+![](https://img.shields.io/badge/Database-Redis-red?logo=redis)
+![](https://img.shields.io/badge/Object%20Storage-MinIO-pink?logo=minio)
+![](https://img.shields.io/badge/OpenAPI-3.0.3-green?logo=openapi-initiative)
+
 ## Table of contents
 
 - [Introduction](#introduction)

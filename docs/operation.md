@@ -15,7 +15,8 @@ are required, the exact versions are TaskCare release dependent:
 MySQL is a database that is used for the storage of application data. It is used as primary storage for
 business data and event sourcing. The application expects a specific table structure from the database,
 which must be created before it can be used. The exact definition of the tables can be found
-[here](./ddl/mysql.sql).
+[here](./ddl/mysql.sql). It is the responsibility of the database administrator to ensure that the
+application can access the database and that the required tables are created.
 
 **[Redis](https://redis.io/)**
 
