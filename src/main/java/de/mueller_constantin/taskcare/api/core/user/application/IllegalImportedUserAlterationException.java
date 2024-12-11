@@ -1,4 +1,4 @@
-package de.mueller_constantin.taskcare.api.core.user.domain;
+package de.mueller_constantin.taskcare.api.core.user.application;
 
 public class IllegalImportedUserAlterationException extends RuntimeException {
     public IllegalImportedUserAlterationException() {

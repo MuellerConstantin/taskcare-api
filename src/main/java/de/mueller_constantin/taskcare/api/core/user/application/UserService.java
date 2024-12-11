@@ -14,6 +14,9 @@ import de.mueller_constantin.taskcare.api.core.user.domain.UserAggregate;
 import de.mueller_constantin.taskcare.api.core.user.domain.UserProjection;
 import lombok.RequiredArgsConstructor;
 
+import java.util.Objects;
+import java.util.Optional;
+
 @RequiredArgsConstructor
 public class UserService implements ApplicationService {
     private final UserDomainRepository userAggregateRepository;
@@ -62,9 +65,46 @@ public class UserService implements ApplicationService {
         }
     }
 
+    public void dispatch(SyncLdapUserCommand command) {
+        Optional<UserProjection> userProjection = userProjectionRepository.findByUsername(command.getUsername());
+
+        if(userProjection.isPresent() && userProjection.get().getIdentityProvider() != IdentityProvider.LDAP) {
+            throw new UsernameAlreadyInUseException();
+        }
+
+        if(userProjection.isEmpty()) {
+            UserAggregate userAggregate = new UserAggregate();
+
+            userAggregate.create(command.getUsername(), null, command.getDisplayName(), Role.USER, IdentityProvider.LDAP);
+            userAggregateRepository.save(userAggregate);
+        } else {
+            if(!userProjection.get().getDisplayName().equals(command.getDisplayName())) {
+                UserAggregate userAggregate = userAggregateRepository.load(userProjection.get().getId())
+                        .orElseThrow(NoSuchEntityException::new);
+
+                userAggregate.update(null, command.getDisplayName(), userProjection.get().getRole());
+                userAggregateRepository.save(userAggregate);
+            }
+        }
+    }
+
     public void dispatch(UpdateUserByIdCommand command) {
         UserProjection userProjection = userProjectionRepository.findById(command.getId())
                 .orElseThrow(NoSuchEntityException::new);
+
+        if(userProjection.getUsername().equals(UserAggregate.DEFAULT_ADMIN_USERNAME)) {
+            throw new IllegalDefaultAdminAlterationException("Cannot change default admin user");
+        }
+
+        if(userProjection.getIdentityProvider() != IdentityProvider.LOCAL) {
+            if(command.getPassword() != null) {
+                throw new IllegalImportedUserAlterationException("Cannot change password of imported user");
+            }
+
+            if(command.getDisplayName() != null) {
+                throw new IllegalImportedUserAlterationException("Cannot change display name of imported user");
+            }
+        }
 
         UserAggregate userAggregate = userAggregateRepository.load(command.getId())
                 .orElseThrow(NoSuchEntityException::new);
@@ -89,6 +129,10 @@ public class UserService implements ApplicationService {
         UserAggregate userAggregate = userAggregateRepository.load(command.getId())
                 .orElseThrow(NoSuchEntityException::new);
 
+        if(userAggregate.getUsername().equals(UserAggregate.DEFAULT_ADMIN_USERNAME)) {
+            throw new IllegalDefaultAdminAlterationException("Cannot delete default admin user");
+        }
+
         if(mediaStorage.exists("/profile-images/" + userAggregate.getId().toString())) {
             mediaStorage.delete("/profile-images/" + userAggregate.getId().toString());
         }
@@ -101,6 +145,10 @@ public class UserService implements ApplicationService {
         UserAggregate userAggregate = userAggregateRepository.load(command.getId())
                 .orElseThrow(NoSuchEntityException::new);
 
+        if(userAggregate.getUsername().equals(UserAggregate.DEFAULT_ADMIN_USERNAME)) {
+            throw new IllegalDefaultAdminAlterationException("Cannot lock default admin user");
+        }
+
         userAggregate.lock();
         userAggregateRepository.save(userAggregate);
     }
@@ -108,6 +156,10 @@ public class UserService implements ApplicationService {
     public void dispatch(UnlockUserByIdCommand command) {
         UserAggregate userAggregate = userAggregateRepository.load(command.getId())
                 .orElseThrow(NoSuchEntityException::new);
+
+        if(userAggregate.getUsername().equals(UserAggregate.DEFAULT_ADMIN_USERNAME)) {
+            throw new IllegalDefaultAdminAlterationException("Cannot unlock default admin user");
+        }
 
         userAggregate.unlock();
         userAggregateRepository.save(userAggregate);

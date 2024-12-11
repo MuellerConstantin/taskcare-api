@@ -26,6 +26,12 @@ the tokens used for authentication and authorization as well as the state of the
 
 MinIO is a S3-compatible object storage service that is used for the storage of file attachments.
 
+**[LDAP Server](https://www.rfc-editor.org/rfc/rfc4511)**
+
+LDAP is a directory service that can be used for user authentication and authorization. Instead of manually
+adding users to the application, users can be synchronized and used from an LDAP server. An LDAP compatible
+directory service is required for this. However, the use of such a service is optional.
+
 ## Deployment
 
 As mentioned above, the TaskCare service is generally operated on-premise. After providing required third-party

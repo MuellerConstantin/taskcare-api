@@ -6,7 +6,6 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 
-import java.util.Objects;
 import java.util.UUID;
 
 @Getter
@@ -84,10 +83,6 @@ public class UserAggregate extends Aggregate {
 
     @Override
     protected void processDelete() {
-        if(this.getUsername().equals(DEFAULT_ADMIN_USERNAME)) {
-            throw new IllegalDefaultAdminAlterationException("Cannot delete default admin user");
-        }
-
         this.applyChange(UserDeletedEvent.builder()
                 .aggregateId(this.getId())
                 .version(this.getNextVersion())
@@ -109,26 +104,6 @@ public class UserAggregate extends Aggregate {
     }
 
     public void update(String password, String displayName, Role role) {
-        if(this.getUsername().equals(DEFAULT_ADMIN_USERNAME)) {
-            if(role != Role.ADMINISTRATOR) {
-                throw new IllegalDefaultAdminAlterationException("Cannot assign a non-admin role to default admin user");
-            }
-
-            if(displayName != null) {
-                throw new IllegalDefaultAdminAlterationException("Cannot change display name of default admin user");
-            }
-        }
-
-        if(this.getIdentityProvider() != IdentityProvider.LOCAL) {
-            if(!Objects.equals(password, this.getPassword())) {
-                throw new IllegalImportedUserAlterationException("Cannot change password of imported user");
-            }
-
-            if(!Objects.equals(displayName, this.getDisplayName())) {
-                throw new IllegalImportedUserAlterationException("Cannot change display name of imported user");
-            }
-        }
-
         this.applyChange(UserUpdatedEvent.builder()
                 .aggregateId(this.getId())
                 .version(this.getNextVersion())
@@ -140,10 +115,6 @@ public class UserAggregate extends Aggregate {
     }
 
     public void lock() {
-        if(this.getUsername().equals(DEFAULT_ADMIN_USERNAME)) {
-            throw new IllegalDefaultAdminAlterationException("Cannot lock default admin user");
-        }
-
         this.applyChange(UserLockedEvent.builder()
                 .aggregateId(this.getId())
                 .version(this.getNextVersion())
@@ -152,10 +123,6 @@ public class UserAggregate extends Aggregate {
     }
 
     public void unlock() {
-        if(this.getUsername().equals(DEFAULT_ADMIN_USERNAME)) {
-            throw new IllegalDefaultAdminAlterationException("Cannot unlock default admin user");
-        }
-
         this.applyChange(UserUnlockedEvent.builder()
                 .aggregateId(this.getId())
                 .version(this.getNextVersion())

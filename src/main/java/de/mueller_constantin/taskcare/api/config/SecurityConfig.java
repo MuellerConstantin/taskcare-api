@@ -1,6 +1,10 @@
 package de.mueller_constantin.taskcare.api.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import de.mueller_constantin.taskcare.api.core.user.application.UserService;
+import de.mueller_constantin.taskcare.api.infrastructure.security.ldap.LdapSecurityProperties;
+import de.mueller_constantin.taskcare.api.infrastructure.security.ldap.LdapUserContextMapper;
+import de.mueller_constantin.taskcare.api.infrastructure.security.ldap.LdapUserMapper;
 import de.mueller_constantin.taskcare.api.infrastructure.security.token.RefreshToken;
 import de.mueller_constantin.taskcare.api.infrastructure.security.ajax.AjaxAuthenticationProcessingFilterConfigurer;
 import de.mueller_constantin.taskcare.api.infrastructure.security.token.AccessToken;
@@ -10,9 +14,11 @@ import de.mueller_constantin.taskcare.api.infrastructure.security.token.auth.Ref
 import de.mueller_constantin.taskcare.api.infrastructure.security.token.filter.AccessTokenAuthenticationFilterConfigurer;
 import de.mueller_constantin.taskcare.api.infrastructure.security.token.filter.RefreshTokenAuthenticationProcessingFilterConfigurer;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.ldap.core.support.LdapContextSource;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -25,6 +31,12 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.ldap.authentication.BindAuthenticator;
+import org.springframework.security.ldap.authentication.LdapAuthenticationProvider;
+import org.springframework.security.ldap.authentication.LdapAuthenticator;
+import org.springframework.security.ldap.search.FilterBasedLdapUserSearch;
+import org.springframework.security.ldap.userdetails.DefaultLdapAuthoritiesPopulator;
+import org.springframework.security.ldap.userdetails.LdapAuthoritiesPopulator;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
@@ -164,5 +176,62 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/api/v1/auth/token", "/api/v1/auth/refresh")
                 .permitAll()
                 .anyRequest().authenticated());
+    }
+
+    @Configuration
+    @ConditionalOnProperty(prefix = "taskcare.security.ldap", name = "enabled", havingValue = "true")
+    public static class LdapConfig {
+        @Autowired
+        private LdapSecurityProperties ldapSecurityProperties;
+
+        @Bean
+        LdapAuthenticationProvider ldapAuthenticationProvider(LdapUserContextMapper ldapUserContextMapper) {
+            LdapAuthenticationProvider ldapAuthenticationProvider = new LdapAuthenticationProvider(authenticator(), authoritiesPopulator());
+            ldapAuthenticationProvider.setUserDetailsContextMapper(ldapUserContextMapper);
+
+            return ldapAuthenticationProvider;
+        }
+
+        @Bean
+        LdapAuthoritiesPopulator authoritiesPopulator() {
+            return new DefaultLdapAuthoritiesPopulator(ldapContextSource(), null);
+        }
+
+        @Bean
+        FilterBasedLdapUserSearch ldapUserSearch() {
+            final String searchBase = ldapSecurityProperties.getUserSearchBase();
+            final String searchFilter = ldapSecurityProperties.getUserSearchFilter();
+
+            return new FilterBasedLdapUserSearch(searchBase, searchFilter, ldapContextSource());
+        }
+
+        @Bean
+        LdapUserContextMapper ldapUserContextMapper(UserService userService, LdapUserMapper ldapUserMapper) {
+            return new LdapUserContextMapper(userService, ldapUserMapper);
+        }
+
+        @Bean
+        LdapAuthenticator authenticator() {
+            BindAuthenticator authenticator = new BindAuthenticator(ldapContextSource());
+            authenticator.setUserSearch(ldapUserSearch());
+
+            return authenticator;
+        }
+
+        @Bean
+        LdapUserMapper ldapUserMapper() {
+            return new LdapUserMapper(ldapSecurityProperties);
+        }
+
+        @Bean
+        LdapContextSource ldapContextSource() {
+            final LdapContextSource ldapContextSource = new LdapContextSource();
+            ldapContextSource.setUserDn(ldapSecurityProperties.getManagerDn());
+            ldapContextSource.setPassword(ldapSecurityProperties.getManagerPassword());
+            ldapContextSource.setBase(ldapSecurityProperties.getBase());
+            ldapContextSource.setUrl(ldapSecurityProperties.getUrl());
+
+            return ldapContextSource;
+        }
     }
 }

@@ -49,6 +49,19 @@ The following configuration options are available:
 | taskcare.security.token.access.jwt.expiresIn     | TASKCARE_SECURITY_TOKEN_ACCESS_JWT_EXPIRESIN     | The expiration time of JWT access tokens in milliseconds. Default is one hour.                    | false    |
 | taskcare.security.token.refresh.opaque.length    | TASKCARE_SECURITY_TOKEN_REFRESH_OPAQUE_LENGTH    | The length of opaque refresh tokens. Default is 16.                                               | false    |
 | taskcare.security.token.refresh.opaque.expiresIn | TASKCARE_SECURITY_TOKEN_REFRESH_OPAQUE_EXPIRESIN | The expiration time of opaque refresh tokens in milliseconds. Default is two days.                | false    |
+| taskcare.security.ldap.enabled                   | TASKCARE_SECURITY_LDAP_ENABLED                   | If enabled, the application will try to connect to an LDAP server.                                | false    |
+| taskcare.security.ldap.url                       | TASKCARE_SECURITY_LDAP_URL                       | The url of the LDAP server used by the application.                                               | false¹   |
+| taskcare.security.ldap.base                      | TASKCARE_SECURITY_LDAP_BASE                      | The domain of the LDAP server used by the application.                                            | false¹   |
+| taskcare.security.ldap.managerDn                 | TASKCARE_SECURITY_LDAP_MANAGERDN                 | The DN of LDAP user used to connect to the LDAP server.                                           | false¹   |
+| taskcare.security.ldap.managerPassword           | TASKCARE_SECURITY_LDAP_MANAGERPASSWORD           | The password of the LDAP user used to connect to the LDAP server.                                 | false¹   |
+| taskcare.security.ldap.userSearchBase            | TASKCARE_SECURITY_LDAP_USERSEARCHBASE            | The base to search for users in the LDAP server. It is combined with the general base.            | false¹   |
+| taskcare.security.ldap.userSearchFilter          | TASKCARE_SECURITY_LDAP_USERSEARCHFILTER          | The filter to search for users in the LDAP server.                                                | false¹   |
+| taskcare.security.ldap.sync.usernameField        | TASKCARE_SECURITY_LDAP_SYNC_USERNAMEFIELD        | The username field of a LDAP user.                                                                | false¹   |
+| taskcare.security.ldap.sync.displayNameField     | TASKCARE_SECURITY_LDAP_SYNC_DISPLAYNAMEFIELD     | The display name field of a LDAP user.                                                            | false¹   |
+
+<small>
+    ¹If LDAP is enabled, this option is required.
+</small>
 
 ### Automation Configuration
 
@@ -57,4 +70,8 @@ The following configuration options are available:
 | Option                                                      | Environment Variable                                        | Description                                                                                       | Required |
 |-------------------------------------------------------------|-------------------------------------------------------------|---------------------------------------------------------------------------------------------------|----------|
 | taskcare.automation.default-admin-synchronization.enabled   | TASKCARE_AUTOMATION_DEFAULT_ADMIN_SYNCHRONIZATION_ENABLED   | If enabled, the default admin user will be created on startup and synchronized with the database. | false    |
-| taskcare.automation.default-admin-synchronization.password  | TASKCARE_AUTOMATION_DEFAULT_ADMIN_SYNCHRONIZATION_PASSWORD  | The password of the default admin user. This is required if the task is enabled.                  | false    |
+| taskcare.automation.default-admin-synchronization.password  | TASKCARE_AUTOMATION_DEFAULT_ADMIN_SYNCHRONIZATION_PASSWORD  | The password of the default admin user. This is required if the task is enabled.                  | false¹   |
+
+<small>
+    ¹If the default admin synchronization is enabled, this option is required.
+</small>

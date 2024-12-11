@@ -62,6 +62,7 @@ class UserServiceTest {
                 .password("Abc123")
                 .displayName("Maximilian Mustermann")
                 .role(Role.USER)
+                .identityProvider(IdentityProvider.LOCAL)
                 .locked(false)
                 .build();
     }
