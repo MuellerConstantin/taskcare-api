@@ -12,10 +12,13 @@ import de.mueller_constantin.taskcare.api.core.user.domain.IdentityProvider;
 import de.mueller_constantin.taskcare.api.core.user.domain.Role;
 import de.mueller_constantin.taskcare.api.core.user.domain.UserAggregate;
 import de.mueller_constantin.taskcare.api.core.user.domain.UserProjection;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
 
-import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 
 @RequiredArgsConstructor
 public class UserService implements ApplicationService {
@@ -23,8 +26,19 @@ public class UserService implements ApplicationService {
     private final UserStateRepository userProjectionRepository;
     private final CredentialsEncoder credentialsEncoder;
     private final MediaStorage mediaStorage;
+    private final Validator validator;
+
+    protected void validate(Object object) throws ConstraintViolationException {
+        Set<ConstraintViolation<Object>> violations = validator.validate(object);
+
+        if (!violations.isEmpty()) {
+            throw new ConstraintViolationException(violations);
+        }
+    }
 
     public void dispatch(CreateUserCommand command) {
+        validate(command);
+
         boolean usernameInUse = userProjectionRepository.existsByUsername(command.getUsername());
 
         if (usernameInUse) {
@@ -40,6 +54,8 @@ public class UserService implements ApplicationService {
     }
 
     public void dispatch(SyncDefaultAdminCommand command) {
+        validate(command);
+
         boolean defaultAdminExists = userProjectionRepository.existsByUsername(UserAggregate.DEFAULT_ADMIN_USERNAME);
 
         if(!defaultAdminExists) {
@@ -66,6 +82,8 @@ public class UserService implements ApplicationService {
     }
 
     public void dispatch(SyncLdapUserCommand command) {
+        validate(command);
+
         Optional<UserProjection> userProjection = userProjectionRepository.findByUsername(command.getUsername());
 
         if(userProjection.isPresent() && userProjection.get().getIdentityProvider() != IdentityProvider.LDAP) {
@@ -89,6 +107,8 @@ public class UserService implements ApplicationService {
     }
 
     public void dispatch(UpdateUserByIdCommand command) {
+        validate(command);
+
         UserProjection userProjection = userProjectionRepository.findById(command.getId())
                 .orElseThrow(NoSuchEntityException::new);
 
@@ -126,6 +146,8 @@ public class UserService implements ApplicationService {
     }
 
     public void dispatch(DeleteUserByIdCommand command) {
+        validate(command);
+
         UserAggregate userAggregate = userAggregateRepository.load(command.getId())
                 .orElseThrow(NoSuchEntityException::new);
 
@@ -142,6 +164,8 @@ public class UserService implements ApplicationService {
     }
 
     public void dispatch(LockUserByIdCommand command) {
+        validate(command);
+
         UserAggregate userAggregate = userAggregateRepository.load(command.getId())
                 .orElseThrow(NoSuchEntityException::new);
 
@@ -154,6 +178,8 @@ public class UserService implements ApplicationService {
     }
 
     public void dispatch(UnlockUserByIdCommand command) {
+        validate(command);
+
         UserAggregate userAggregate = userAggregateRepository.load(command.getId())
                 .orElseThrow(NoSuchEntityException::new);
 

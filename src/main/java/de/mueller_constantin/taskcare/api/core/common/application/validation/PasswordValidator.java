@@ -1,4 +1,4 @@
-package de.mueller_constantin.taskcare.api.infrastructure.validation;
+package de.mueller_constantin.taskcare.api.core.common.application.validation;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;

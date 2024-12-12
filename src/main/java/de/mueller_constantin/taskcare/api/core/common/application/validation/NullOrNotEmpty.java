@@ -1,4 +1,4 @@
-package de.mueller_constantin.taskcare.api.infrastructure.validation;
+package de.mueller_constantin.taskcare.api.core.common.application.validation;
 
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
@@ -15,7 +15,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Constraint(validatedBy = NullOrNotEmptyValidatorForString.class)
 @Documented
 public @interface NullOrNotEmpty {
-    String message() default "{de.mueller_constantin.taskcare.api.infrastructure.validation.NullOrNotEmpty.message}";
+    String message() default "{de.mueller_constantin.taskcare.api.core.common.application.validation.NullOrNotEmpty.message}";
 
     Class<?>[] groups() default {};
 

@@ -1,4 +1,4 @@
-package de.mueller_constantin.taskcare.api.infrastructure.validation;
+package de.mueller_constantin.taskcare.api.core.common.application.validation;
 
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
@@ -16,7 +16,7 @@ import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
 @Constraint(validatedBy = EnumeratedValidator.class)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Enumerated {
-    String message() default "{de.mueller_constantin.taskcare.api.infrastructure.validation.Enumerated.message}";
+    String message() default "{de.mueller_constantin.taskcare.api.core.common.application.validation.Enumerated.message}";
 
     Class<?>[] groups() default {};
 

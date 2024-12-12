@@ -2,9 +2,9 @@ package de.mueller_constantin.taskcare.api.presentation.rest.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import de.mueller_constantin.taskcare.api.core.user.domain.Role;
-import de.mueller_constantin.taskcare.api.infrastructure.validation.Enumerated;
-import de.mueller_constantin.taskcare.api.infrastructure.validation.NullOrNotEmpty;
-import de.mueller_constantin.taskcare.api.infrastructure.validation.Password;
+import de.mueller_constantin.taskcare.api.core.common.application.validation.Enumerated;
+import de.mueller_constantin.taskcare.api.core.common.application.validation.NullOrNotEmpty;
+import de.mueller_constantin.taskcare.api.core.common.application.validation.Password;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

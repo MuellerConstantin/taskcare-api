@@ -12,6 +12,7 @@ import de.mueller_constantin.taskcare.api.core.user.domain.IdentityProvider;
 import de.mueller_constantin.taskcare.api.core.user.domain.Role;
 import de.mueller_constantin.taskcare.api.core.user.domain.UserAggregate;
 import de.mueller_constantin.taskcare.api.core.user.domain.UserProjection;
+import jakarta.validation.Validator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,6 +22,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -40,6 +42,9 @@ class UserServiceTest {
 
     @Mock
     private MediaStorage mediaStorage;
+
+    @Mock
+    private Validator validator;
 
     @InjectMocks
     private UserService userService;

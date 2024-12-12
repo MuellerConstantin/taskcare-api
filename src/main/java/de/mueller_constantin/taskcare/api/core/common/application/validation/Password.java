@@ -1,4 +1,4 @@
-package de.mueller_constantin.taskcare.api.infrastructure.validation;
+package de.mueller_constantin.taskcare.api.core.common.application.validation;
 
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
@@ -15,7 +15,7 @@ import java.lang.annotation.Target;
 @Constraint(validatedBy = PasswordValidator.class)
 @Documented
 public @interface Password {
-    String message() default "{de.mueller_constantin.taskcare.api.infrastructure.validation.Password.message}";
+    String message() default "{de.mueller_constantin.taskcare.api.core.common.application.validation.Password.message}";
 
     Class<?>[] groups() default {};
 

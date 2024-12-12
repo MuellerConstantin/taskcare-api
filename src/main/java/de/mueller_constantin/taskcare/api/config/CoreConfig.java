@@ -5,6 +5,7 @@ import de.mueller_constantin.taskcare.api.core.user.application.persistence.User
 import de.mueller_constantin.taskcare.api.core.user.application.persistence.UserStateRepository;
 import de.mueller_constantin.taskcare.api.core.user.application.security.CredentialsEncoder;
 import de.mueller_constantin.taskcare.api.core.user.application.UserService;
+import jakarta.validation.Validator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -14,7 +15,9 @@ public class CoreConfig {
     UserService userService(UserDomainRepository userAggregateRepository,
                             UserStateRepository userProjectionRepository,
                             CredentialsEncoder credentialsEncoder,
-                            MediaStorage mediaStorage) {
-        return new UserService(userAggregateRepository, userProjectionRepository, credentialsEncoder, mediaStorage);
+                            MediaStorage mediaStorage,
+                            Validator validator) {
+        return new UserService(userAggregateRepository, userProjectionRepository,
+                credentialsEncoder, mediaStorage, validator);
     }
 }

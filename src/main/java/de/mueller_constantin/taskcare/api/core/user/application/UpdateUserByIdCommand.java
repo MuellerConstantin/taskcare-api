@@ -1,7 +1,10 @@
 package de.mueller_constantin.taskcare.api.core.user.application;
 
 import de.mueller_constantin.taskcare.api.core.common.application.Command;
+import de.mueller_constantin.taskcare.api.core.common.application.validation.NullOrNotEmpty;
+import de.mueller_constantin.taskcare.api.core.common.application.validation.Password;
 import de.mueller_constantin.taskcare.api.core.user.domain.Role;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.util.UUID;
@@ -10,9 +13,13 @@ import java.util.UUID;
 @Data
 @Builder
 public class UpdateUserByIdCommand implements Command {
+    @NotNull
     private UUID id;
 
+    @NullOrNotEmpty
+    @Password
     private String password;
+
     private String displayName;
     private Role role;
 
