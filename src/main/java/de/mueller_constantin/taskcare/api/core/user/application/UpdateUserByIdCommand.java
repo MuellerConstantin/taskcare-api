@@ -39,9 +39,6 @@ public class UpdateUserByIdCommand implements Command {
 
     public void setDisplayName(String displayName) {
         this.displayName = displayName;
-
-        if(displayName != null) {
-            this.displayNameTouched = true;
-        }
+        this.displayNameTouched = true;
     }
 }
