@@ -121,6 +121,20 @@ public class JdbcMySqlUserRepository implements UserDomainRepository, UserStateR
     }
 
     @Override
+    public boolean existsById(UUID id) {
+        MapSqlParameterSource parameters = new MapSqlParameterSource();
+        parameters.addValue("id", id.toString());
+
+        Integer count = jdbcTemplate.queryForObject("""
+                SELECT COUNT(*)
+                FROM %s
+                WHERE id = :id
+                """.formatted(USER_TABLE_NAME), parameters, Integer.class);
+
+        return count != null && count > 0;
+    }
+
+    @Override
     public List<UserProjection> findAll() {
         return jdbcTemplate.query("""
                 SELECT id, username, password, display_name, role, identity_provider, locked

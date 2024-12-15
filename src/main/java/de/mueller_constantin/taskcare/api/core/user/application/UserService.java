@@ -207,4 +207,8 @@ public class UserService implements ApplicationService {
                 .perPage(query.getPerPage())
                 .build());
     }
+
+    public boolean query(ExistsUserByIdQuery query) {
+        return userProjectionRepository.existsById(query.getId());
+    }
 }

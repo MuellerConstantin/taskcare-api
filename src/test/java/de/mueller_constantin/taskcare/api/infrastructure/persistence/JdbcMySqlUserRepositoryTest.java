@@ -62,6 +62,13 @@ class JdbcMySqlUserRepositoryTest {
     }
 
     @Test
+    void existsById() {
+        boolean exists = jdbcMySqlUserRepository.existsById(UUID.fromString("8d031fe3-e445-4d51-8c70-ac3e3810da87"));
+
+        assertTrue(exists);
+    }
+
+    @Test
     void findAll() {
         List<UserProjection> users = jdbcMySqlUserRepository.findAll();
 

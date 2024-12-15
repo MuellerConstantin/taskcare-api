@@ -19,4 +19,6 @@ public interface UserStateRepository extends StateRepository {
     Optional<UserProjection> findByUsername(String username);
 
     boolean existsByUsername(String username);
+
+    boolean existsById(UUID id);
 }
