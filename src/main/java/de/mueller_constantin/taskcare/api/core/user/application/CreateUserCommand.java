@@ -26,6 +26,10 @@ public class CreateUserCommand implements Command {
     private String password;
 
     private String displayName;
+
+    @NotNull
     private Role role;
+
+    @NotNull
     private IdentityProvider identityProvider;
 }

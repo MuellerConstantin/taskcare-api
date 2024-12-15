@@ -63,9 +63,6 @@ public class SecurityConfig {
     private AuthenticationSuccessHandler authenticationSuccessHandler;
 
     @Autowired
-    private UserDetailsService userDetailsService;
-
-    @Autowired
     private TokenProvider<AccessToken> accessTokenProvider;
 
     @Autowired
@@ -111,7 +108,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    DaoAuthenticationProvider daoAuthenticationProvider() {
+    DaoAuthenticationProvider daoAuthenticationProvider(UserDetailsService userDetailsService) {
         DaoAuthenticationProvider daoAuthenticationProvider = new DaoAuthenticationProvider();
         daoAuthenticationProvider.setUserDetailsService(userDetailsService);
         daoAuthenticationProvider.setPasswordEncoder(bCryptPasswordEncoder());
@@ -120,7 +117,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    AccessTokenAuthenticationProvider accessTokenAuthenticationProvider() {
+    AccessTokenAuthenticationProvider accessTokenAuthenticationProvider(UserDetailsService userDetailsService) {
         AccessTokenAuthenticationProvider accessTokenAuthenticationProvider = new AccessTokenAuthenticationProvider();
         accessTokenAuthenticationProvider.setUserDetailsService(userDetailsService);
         accessTokenAuthenticationProvider.setAccessTokenProvider(accessTokenProvider);
@@ -129,7 +126,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    RefreshTokenAuthenticationProvider refreshTokenAuthenticationProvider() {
+    RefreshTokenAuthenticationProvider refreshTokenAuthenticationProvider(UserDetailsService userDetailsService) {
         RefreshTokenAuthenticationProvider refreshTokenAuthenticationProvider = new RefreshTokenAuthenticationProvider();
         refreshTokenAuthenticationProvider.setUserDetailsService(userDetailsService);
         refreshTokenAuthenticationProvider.setRefreshTokenProvider(refreshTokenProvider);
