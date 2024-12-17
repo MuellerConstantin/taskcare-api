@@ -5,6 +5,7 @@ import de.mueller_constantin.taskcare.api.core.common.application.validation.Nul
 import de.mueller_constantin.taskcare.api.core.common.application.validation.Password;
 import de.mueller_constantin.taskcare.api.core.user.domain.Role;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 
 import java.util.UUID;
@@ -18,9 +19,12 @@ public class UpdateUserByIdCommand implements Command {
 
     @NullOrNotEmpty
     @Password
+    @Size(max = 64)
     private String password;
 
+    @Size(max = 255)
     private String displayName;
+
     private Role role;
 
     private boolean displayNameTouched;

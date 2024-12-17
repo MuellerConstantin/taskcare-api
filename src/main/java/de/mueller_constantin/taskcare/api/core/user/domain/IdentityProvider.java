@@ -1,6 +1,8 @@
 package de.mueller_constantin.taskcare.api.core.user.domain;
 
-public enum IdentityProvider {
+import de.mueller_constantin.taskcare.api.core.common.domain.ValueObject;
+
+public enum IdentityProvider implements ValueObject {
     LOCAL,
     LDAP
 }
