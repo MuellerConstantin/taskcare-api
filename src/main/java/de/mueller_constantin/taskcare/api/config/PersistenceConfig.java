@@ -7,9 +7,9 @@ import de.mueller_constantin.taskcare.api.infrastructure.persistence.es.jdbc.Jdb
 import de.mueller_constantin.taskcare.api.infrastructure.persistence.es.jdbc.JdbcEventStoreEventRepository;
 import de.mueller_constantin.taskcare.api.infrastructure.persistence.es.jdbc.JdbcEventStoreMetadataRepository;
 import de.mueller_constantin.taskcare.api.infrastructure.persistence.es.jdbc.JdbcEventStoreSnapshotRepository;
-import de.mueller_constantin.taskcare.api.infrastructure.persistence.es.jdbc.mysql.JdbcMySqlEventStoreEventRepository;
-import de.mueller_constantin.taskcare.api.infrastructure.persistence.es.jdbc.mysql.JdbcMySqlEventStoreMetadataRepository;
-import de.mueller_constantin.taskcare.api.infrastructure.persistence.es.jdbc.mysql.JdbcMySqlEventStoreSnapshotRepository;
+import de.mueller_constantin.taskcare.api.infrastructure.persistence.es.jdbc.MySqlEventStoreEventRepository;
+import de.mueller_constantin.taskcare.api.infrastructure.persistence.es.jdbc.MySqlEventStoreMetadataRepository;
+import de.mueller_constantin.taskcare.api.infrastructure.persistence.es.jdbc.MySqlEventStoreSnapshotRepository;
 import io.minio.MinioClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
@@ -69,18 +69,18 @@ public class PersistenceConfig {
         @Bean
         JdbcEventStoreEventRepository jdbcEventStoreEventRepository(NamedParameterJdbcTemplate jdbcTemplate,
                                                                     ObjectMapper objectMapper) {
-            return new JdbcMySqlEventStoreEventRepository(jdbcTemplate, objectMapper);
+            return new MySqlEventStoreEventRepository(jdbcTemplate, objectMapper);
         }
 
         @Bean
         JdbcEventStoreMetadataRepository jdbcEventStoreMetadataRepository(NamedParameterJdbcTemplate jdbcTemplate) {
-            return new JdbcMySqlEventStoreMetadataRepository(jdbcTemplate);
+            return new MySqlEventStoreMetadataRepository(jdbcTemplate);
         }
 
         @Bean
         JdbcEventStoreSnapshotRepository jdbcEventStoreSnapshotRepository(NamedParameterJdbcTemplate jdbcTemplate,
                                                                           ObjectMapper objectMapper) {
-            return new JdbcMySqlEventStoreSnapshotRepository(jdbcTemplate, objectMapper);
+            return new MySqlEventStoreSnapshotRepository(jdbcTemplate, objectMapper);
         }
     }
 }

@@ -5,8 +5,8 @@ import de.mueller_constantin.taskcare.api.core.common.application.persistence.Me
 import de.mueller_constantin.taskcare.api.core.common.domain.Page;
 import de.mueller_constantin.taskcare.api.core.common.domain.PageInfo;
 import de.mueller_constantin.taskcare.api.core.user.application.*;
-import de.mueller_constantin.taskcare.api.core.user.application.persistence.UserDomainRepository;
-import de.mueller_constantin.taskcare.api.core.user.application.persistence.UserStateRepository;
+import de.mueller_constantin.taskcare.api.core.user.application.persistence.UserEventStoreRepository;
+import de.mueller_constantin.taskcare.api.core.user.application.persistence.UserReadModelRepository;
 import de.mueller_constantin.taskcare.api.core.user.application.security.CredentialsEncoder;
 import de.mueller_constantin.taskcare.api.core.user.domain.IdentityProvider;
 import de.mueller_constantin.taskcare.api.core.user.domain.Role;
@@ -31,10 +31,10 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
     @Mock
-    private UserDomainRepository userDomainRepository;
+    private UserEventStoreRepository userEventStoreRepository;
 
     @Mock
-    private UserStateRepository userStateRepository;
+    private UserReadModelRepository userReadModelRepository;
 
     @Mock
     private CredentialsEncoder credentialsEncoder;
@@ -73,9 +73,9 @@ class UserServiceTest {
 
     @Test
     void handleCreateUserCommand() {
-        when(userStateRepository.existsByUsername("erika123")).thenReturn(false);
+        when(userReadModelRepository.existsByUsername("erika123")).thenReturn(false);
         when(credentialsEncoder.encode(any())).thenAnswer(i -> i.getArguments()[0].toString());
-        doNothing().when(userDomainRepository).save(any(UserAggregate.class));
+        doNothing().when(userEventStoreRepository).save(any(UserAggregate.class));
 
         userService.dispatch(CreateUserCommand.builder()
                 .username("erika123")
@@ -84,14 +84,14 @@ class UserServiceTest {
                 .role(Role.USER)
                 .build());
 
-        verify(userStateRepository, times(1)).existsByUsername("erika123");
+        verify(userReadModelRepository, times(1)).existsByUsername("erika123");
         verify(credentialsEncoder, times(1)).encode("Abc123");
-        verify(userDomainRepository, times(1)).save(any(UserAggregate.class));
+        verify(userEventStoreRepository, times(1)).save(any(UserAggregate.class));
     }
 
     @Test
     void handleCreateUserCommandWithUsernameAlreadyInUse() {
-        when(userStateRepository.existsByUsername("maxi123")).thenReturn(true);
+        when(userReadModelRepository.existsByUsername("maxi123")).thenReturn(true);
 
         assertThrows(UsernameAlreadyInUseException.class, () -> {
             userService.dispatch(CreateUserCommand.builder()
@@ -105,10 +105,10 @@ class UserServiceTest {
 
     @Test
     void handleUpdateUserByIdCommand() {
-        when(userStateRepository.findById(id)).thenReturn(Optional.of(userProjection));
-        when(userDomainRepository.load(id)).thenReturn(Optional.of(userAggregate));
+        when(userReadModelRepository.findById(id)).thenReturn(Optional.of(userProjection));
+        when(userEventStoreRepository.load(id)).thenReturn(Optional.of(userAggregate));
         when(credentialsEncoder.encode(any())).thenAnswer(i -> i.getArguments()[0].toString());
-        doNothing().when(userDomainRepository).save(any(UserAggregate.class));
+        doNothing().when(userEventStoreRepository).save(any(UserAggregate.class));
 
         userService.dispatch(UpdateUserByIdCommand.builder()
                 .id(id)
@@ -117,15 +117,15 @@ class UserServiceTest {
                 .role(Role.USER)
                 .build());
 
-        verify(userStateRepository, times(1)).findById(id);
-        verify(userDomainRepository, times(1)).load(id);
+        verify(userReadModelRepository, times(1)).findById(id);
+        verify(userEventStoreRepository, times(1)).load(id);
         verify(credentialsEncoder, times(1)).encode("Abc123");
-        verify(userDomainRepository, times(1)).save(any(UserAggregate.class));
+        verify(userEventStoreRepository, times(1)).save(any(UserAggregate.class));
     }
 
     @Test
     void handleUpdateUserByIdCommandUnknownId() {
-        when(userStateRepository.findById(id)).thenReturn(Optional.empty());
+        when(userReadModelRepository.findById(id)).thenReturn(Optional.empty());
 
         assertThrows(NoSuchEntityException.class, () -> {
             userService.dispatch(UpdateUserByIdCommand.builder()
@@ -139,8 +139,8 @@ class UserServiceTest {
 
     @Test
     void handleDeleteUserByIdCommand() {
-        when(userDomainRepository.load(id)).thenReturn(Optional.of(userAggregate));
-        doNothing().when(userDomainRepository).save(any(UserAggregate.class));
+        when(userEventStoreRepository.load(id)).thenReturn(Optional.of(userAggregate));
+        doNothing().when(userEventStoreRepository).save(any(UserAggregate.class));
         when(mediaStorage.exists(any())).thenReturn(true);
         doNothing().when(mediaStorage).delete(any());
 
@@ -148,15 +148,15 @@ class UserServiceTest {
                 .id(id)
                 .build());
 
-        verify(userDomainRepository, times(1)).load(id);
-        verify(userDomainRepository, times(1)).save(any(UserAggregate.class));
+        verify(userEventStoreRepository, times(1)).load(id);
+        verify(userEventStoreRepository, times(1)).save(any(UserAggregate.class));
         verify(mediaStorage, times(1)).exists(any());
         verify(mediaStorage, times(1)).delete(any());
     }
 
     @Test
     void handleDeleteUserByIdCommandUnknownId() {
-        when(userDomainRepository.load(id)).thenReturn(Optional.empty());
+        when(userEventStoreRepository.load(id)).thenReturn(Optional.empty());
 
         assertThrows(NoSuchEntityException.class, () -> {
             userService.dispatch(DeleteUserByIdCommand.builder()
@@ -167,33 +167,33 @@ class UserServiceTest {
 
     @Test
     void handleLockUserByIdCommand() {
-        when(userDomainRepository.load(id)).thenReturn(Optional.of(userAggregate));
-        doNothing().when(userDomainRepository).save(any(UserAggregate.class));
+        when(userEventStoreRepository.load(id)).thenReturn(Optional.of(userAggregate));
+        doNothing().when(userEventStoreRepository).save(any(UserAggregate.class));
 
         userService.dispatch(LockUserByIdCommand.builder()
                 .id(id)
                 .build());
 
-        verify(userDomainRepository, times(1)).load(id);
-        verify(userDomainRepository, times(1)).save(any(UserAggregate.class));
+        verify(userEventStoreRepository, times(1)).load(id);
+        verify(userEventStoreRepository, times(1)).save(any(UserAggregate.class));
     }
 
     @Test
     void handleUnlockUserByIdCommand() {
-        when(userDomainRepository.load(id)).thenReturn(Optional.of(userAggregate));
-        doNothing().when(userDomainRepository).save(any(UserAggregate.class));
+        when(userEventStoreRepository.load(id)).thenReturn(Optional.of(userAggregate));
+        doNothing().when(userEventStoreRepository).save(any(UserAggregate.class));
 
         userService.dispatch(UnlockUserByIdCommand.builder()
                 .id(id)
                 .build());
 
-        verify(userDomainRepository, times(1)).load(id);
-        verify(userDomainRepository, times(1)).save(any(UserAggregate.class));
+        verify(userEventStoreRepository, times(1)).load(id);
+        verify(userEventStoreRepository, times(1)).save(any(UserAggregate.class));
     }
 
     @Test
     void handleLockUserByIdCommandUnknownId() {
-        when(userDomainRepository.load(id)).thenReturn(Optional.empty());
+        when(userEventStoreRepository.load(id)).thenReturn(Optional.empty());
 
         assertThrows(NoSuchEntityException.class, () -> {
             userService.dispatch(LockUserByIdCommand.builder()
@@ -204,7 +204,7 @@ class UserServiceTest {
 
     @Test
     void handleUnlockUserByIdCommandUnknownId() {
-        when(userDomainRepository.load(id)).thenReturn(Optional.empty());
+        when(userEventStoreRepository.load(id)).thenReturn(Optional.empty());
 
         assertThrows(NoSuchEntityException.class, () -> {
             userService.dispatch(UnlockUserByIdCommand.builder()
@@ -215,7 +215,7 @@ class UserServiceTest {
 
     @Test
     void handleFindUserByIdQuery() {
-        when(userStateRepository.findById(id)).thenReturn(Optional.of(userProjection));
+        when(userReadModelRepository.findById(id)).thenReturn(Optional.of(userProjection));
 
         UserProjection result = userService.query(FindUserByIdQuery.builder()
                 .id(id)
@@ -226,7 +226,7 @@ class UserServiceTest {
 
     @Test
     void handleFindUserByIdQueryUnknownId() {
-        when(userStateRepository.findById(id)).thenReturn(Optional.empty());
+        when(userReadModelRepository.findById(id)).thenReturn(Optional.empty());
 
         assertThrows(NoSuchEntityException.class, () -> {
             userService.query(FindUserByIdQuery.builder()
@@ -237,7 +237,7 @@ class UserServiceTest {
 
     @Test
     void handleFindUserByUsernameQuery() {
-        when(userStateRepository.findByUsername(userAggregate.getUsername())).thenReturn(Optional.of(userProjection));
+        when(userReadModelRepository.findByUsername(userAggregate.getUsername())).thenReturn(Optional.of(userProjection));
 
         UserProjection result = userService.query(FindUserByUsernameQuery.builder()
                 .username(userAggregate.getUsername())
@@ -248,7 +248,7 @@ class UserServiceTest {
 
     @Test
     void handleFindUserByUsernameQueryUnknownUsername() {
-        when(userStateRepository.findByUsername("erika123")).thenReturn(Optional.empty());
+        when(userReadModelRepository.findByUsername("erika123")).thenReturn(Optional.empty());
 
         assertThrows(NoSuchEntityException.class, () -> {
             userService.query(FindUserByUsernameQuery.builder()
@@ -259,7 +259,7 @@ class UserServiceTest {
 
     @Test
     void handleFindAllUsersQuery() {
-        when(userStateRepository.findAll(any(PageInfo.class))).thenReturn(Page.<UserProjection>builder()
+        when(userReadModelRepository.findAll(any(PageInfo.class))).thenReturn(Page.<UserProjection>builder()
                 .content(List.of(userProjection))
                 .info(PageInfo.builder()
                         .page(0)
@@ -273,6 +273,6 @@ class UserServiceTest {
                 .build());
 
         assertEquals(userProjection, result.getContent().get(0));
-        verify(userStateRepository, times(1)).findAll(any(PageInfo.class));
+        verify(userReadModelRepository, times(1)).findAll(any(PageInfo.class));
     }
 }

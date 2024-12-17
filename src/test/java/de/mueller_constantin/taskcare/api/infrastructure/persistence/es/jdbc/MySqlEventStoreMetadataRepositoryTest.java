@@ -1,4 +1,4 @@
-package de.mueller_constantin.taskcare.api.infrastructure.persistence.es.jdbc.mysql;
+package de.mueller_constantin.taskcare.api.infrastructure.persistence.es.jdbc;
 
 import de.mueller_constantin.taskcare.api.core.dummy.domain.DummyAggregate;
 import org.junit.jupiter.api.Test;
@@ -20,23 +20,23 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @Sql(scripts = {"/sql/ddl/es/mysql.sql", "/sql/dml/es/mysql.sql"})
-class JdbcMySqlEventStoreMetadataRepositoryTest {
+class MySqlEventStoreMetadataRepositoryTest {
     @Autowired
-    private JdbcMySqlEventStoreMetadataRepository jdbcMySqlEventStoreMetadataRepository;
+    private MySqlEventStoreMetadataRepository mySqlEventStoreMetadataRepository;
 
     @Test
     void save() {
         DummyAggregate dummyAggregate = new DummyAggregate();
         dummyAggregate.create("value1", "value2");
 
-        jdbcMySqlEventStoreMetadataRepository.createMetadata(dummyAggregate);
+        mySqlEventStoreMetadataRepository.createMetadata(dummyAggregate);
     }
 
     @TestConfiguration
     static class JdbcMySqlEventStoreMetadataRepositoryTestConfig {
         @Bean
-        JdbcMySqlEventStoreMetadataRepository jdbcEventStoreMetadataRepository(NamedParameterJdbcTemplate jdbcTemplate) {
-            return new JdbcMySqlEventStoreMetadataRepository(jdbcTemplate);
+        MySqlEventStoreMetadataRepository jdbcEventStoreMetadataRepository(NamedParameterJdbcTemplate jdbcTemplate) {
+            return new MySqlEventStoreMetadataRepository(jdbcTemplate);
         }
     }
 }

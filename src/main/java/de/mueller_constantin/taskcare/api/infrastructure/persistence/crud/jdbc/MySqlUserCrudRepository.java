@@ -1,14 +1,11 @@
-package de.mueller_constantin.taskcare.api.infrastructure.persistence;
+package de.mueller_constantin.taskcare.api.infrastructure.persistence.crud.jdbc;
 
 import de.mueller_constantin.taskcare.api.core.common.domain.Page;
 import de.mueller_constantin.taskcare.api.core.common.domain.PageInfo;
 import de.mueller_constantin.taskcare.api.core.user.domain.IdentityProvider;
 import de.mueller_constantin.taskcare.api.core.user.domain.Role;
-import de.mueller_constantin.taskcare.api.core.user.domain.UserAggregate;
 import de.mueller_constantin.taskcare.api.core.user.domain.UserProjection;
-import de.mueller_constantin.taskcare.api.core.user.application.persistence.UserDomainRepository;
-import de.mueller_constantin.taskcare.api.core.user.application.persistence.UserStateRepository;
-import de.mueller_constantin.taskcare.api.infrastructure.persistence.es.EventStore;
+import de.mueller_constantin.taskcare.api.infrastructure.persistence.crud.UserCrudRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -26,53 +23,10 @@ import java.util.UUID;
 @Component
 @Transactional
 @RequiredArgsConstructor
-public class JdbcMySqlUserRepository implements UserDomainRepository, UserStateRepository {
+public class MySqlUserCrudRepository implements UserCrudRepository {
     private final String USER_TABLE_NAME = "users";
 
     private final NamedParameterJdbcTemplate jdbcTemplate;
-    private final EventStore eventStore;
-
-    @Override
-    public void save(UserAggregate aggregate) {
-        eventStore.saveAggregate(aggregate);
-
-        // Synchronize read model with event store
-
-        if(aggregate.isDeleted()) {
-            MapSqlParameterSource parameters = new MapSqlParameterSource();
-            parameters.addValue("id", aggregate.getId().toString());
-
-            jdbcTemplate.update("""
-                DELETE FROM %s
-                WHERE id = :id
-                """.formatted(USER_TABLE_NAME), parameters);
-        } else {
-            MapSqlParameterSource parameters = new MapSqlParameterSource();
-            parameters.addValue("id", aggregate.getId().toString());
-            parameters.addValue("username", aggregate.getUsername());
-            parameters.addValue("password", aggregate.getPassword());
-            parameters.addValue("displayName", aggregate.getDisplayName());
-            parameters.addValue("role", aggregate.getRole().toString());
-            parameters.addValue("identity_provider", aggregate.getIdentityProvider().toString());
-            parameters.addValue("locked", aggregate.isLocked(), Types.BOOLEAN);
-
-            jdbcTemplate.update("""
-                INSERT INTO %s (id, username, password, display_name, role, identity_provider, locked)
-                VALUES (:id, :username, :password, :displayName, :role, :identity_provider, :locked)
-                ON DUPLICATE KEY UPDATE username = :username, password = :password, display_name = :displayName, role = :role, identity_provider = :identity_provider, locked = :locked
-                """.formatted(USER_TABLE_NAME), parameters);
-        }
-    }
-
-    @Override
-    public Optional<UserAggregate> load(UUID aggregateId) {
-        return eventStore.loadAggregate(aggregateId, UserAggregate.class, null);
-    }
-
-    @Override
-    public Optional<UserAggregate> load(UUID aggregateId, Integer version) {
-        return eventStore.loadAggregate(aggregateId, UserAggregate.class, version);
-    }
 
     @Override
     public Optional<UserProjection> findByUsername(String username) {
@@ -173,8 +127,38 @@ public class JdbcMySqlUserRepository implements UserDomainRepository, UserStateR
                 .build();
     }
 
+    @Override
+    public void deleteById(UUID id) {
+        MapSqlParameterSource parameters = new MapSqlParameterSource();
+        parameters.addValue("id", id.toString());
+
+        jdbcTemplate.update("""
+                DELETE FROM %s
+                WHERE id = :id
+                """.formatted(USER_TABLE_NAME), parameters);
+    }
+
+    @Override
+    public void save(UserProjection projection) {
+        MapSqlParameterSource parameters = new MapSqlParameterSource();
+        parameters.addValue("id", projection.getId().toString());
+        parameters.addValue("username", projection.getUsername());
+        parameters.addValue("password", projection.getPassword());
+        parameters.addValue("displayName", projection.getDisplayName());
+        parameters.addValue("role", projection.getRole().toString());
+        parameters.addValue("identity_provider", projection.getIdentityProvider().toString());
+        parameters.addValue("locked", projection.isLocked(), Types.BOOLEAN);
+
+        jdbcTemplate.update("""
+                INSERT INTO %s (id, username, password, display_name, role, identity_provider, locked)
+                VALUES (:id, :username, :password, :displayName, :role, :identity_provider, :locked)
+                ON DUPLICATE KEY UPDATE username = :username, password = :password, display_name = :displayName, role = :role, identity_provider = :identity_provider, locked = :locked
+                """.formatted(USER_TABLE_NAME), parameters);
+    }
+
     @SneakyThrows
     private UserProjection toProjection(ResultSet resultSet, int rowNum) {
+        UUID id = UUID.fromString(resultSet.getString("id"));
         String username = resultSet.getString("username");
         String password = resultSet.getString("password");
         String displayName = resultSet.getString("display_name");
@@ -183,7 +167,7 @@ public class JdbcMySqlUserRepository implements UserDomainRepository, UserStateR
         boolean locked = resultSet.getBoolean("locked");
 
         return UserProjection.builder()
-                .id(UUID.fromString(resultSet.getString("id")))
+                .id(id)
                 .username(username)
                 .password(password)
                 .displayName(displayName)

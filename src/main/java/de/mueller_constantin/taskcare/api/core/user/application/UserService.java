@@ -5,8 +5,8 @@ import de.mueller_constantin.taskcare.api.core.common.application.NoSuchEntityEx
 import de.mueller_constantin.taskcare.api.core.common.application.persistence.MediaStorage;
 import de.mueller_constantin.taskcare.api.core.common.domain.Page;
 import de.mueller_constantin.taskcare.api.core.common.domain.PageInfo;
-import de.mueller_constantin.taskcare.api.core.user.application.persistence.UserDomainRepository;
-import de.mueller_constantin.taskcare.api.core.user.application.persistence.UserStateRepository;
+import de.mueller_constantin.taskcare.api.core.user.application.persistence.UserEventStoreRepository;
+import de.mueller_constantin.taskcare.api.core.user.application.persistence.UserReadModelRepository;
 import de.mueller_constantin.taskcare.api.core.user.application.security.CredentialsEncoder;
 import de.mueller_constantin.taskcare.api.core.user.domain.IdentityProvider;
 import de.mueller_constantin.taskcare.api.core.user.domain.Role;
@@ -22,8 +22,8 @@ import java.util.Set;
 
 @RequiredArgsConstructor
 public class UserService implements ApplicationService {
-    private final UserDomainRepository userAggregateRepository;
-    private final UserStateRepository userProjectionRepository;
+    private final UserEventStoreRepository userEventStoreRepository;
+    private final UserReadModelRepository userReadModelRepository;
     private final CredentialsEncoder credentialsEncoder;
     private final MediaStorage mediaStorage;
     private final Validator validator;
@@ -39,7 +39,7 @@ public class UserService implements ApplicationService {
     public void dispatch(CreateUserCommand command) {
         validate(command);
 
-        boolean usernameInUse = userProjectionRepository.existsByUsername(command.getUsername());
+        boolean usernameInUse = userReadModelRepository.existsByUsername(command.getUsername());
 
         if (usernameInUse) {
             throw new UsernameAlreadyInUseException();
@@ -50,13 +50,13 @@ public class UserService implements ApplicationService {
         String hashedPassword = credentialsEncoder.encode(command.getPassword());
 
         userAggregate.create(command.getUsername(), hashedPassword, command.getDisplayName(), command.getRole(), command.getIdentityProvider());
-        userAggregateRepository.save(userAggregate);
+        userEventStoreRepository.save(userAggregate);
     }
 
     public void dispatch(SyncDefaultAdminCommand command) {
         validate(command);
 
-        boolean defaultAdminExists = userProjectionRepository.existsByUsername(UserAggregate.DEFAULT_ADMIN_USERNAME);
+        boolean defaultAdminExists = userReadModelRepository.existsByUsername(UserAggregate.DEFAULT_ADMIN_USERNAME);
 
         if(!defaultAdminExists) {
             UserAggregate userAggregate = new UserAggregate();
@@ -64,19 +64,19 @@ public class UserService implements ApplicationService {
             String hashedPassword = credentialsEncoder.encode(command.getPassword());
 
             userAggregate.create(UserAggregate.DEFAULT_ADMIN_USERNAME, hashedPassword, null, Role.ADMINISTRATOR, IdentityProvider.LOCAL);
-            userAggregateRepository.save(userAggregate);
+            userEventStoreRepository.save(userAggregate);
         } else {
-            UserProjection userProjection = userProjectionRepository.findByUsername(UserAggregate.DEFAULT_ADMIN_USERNAME)
+            UserProjection userProjection = userReadModelRepository.findByUsername(UserAggregate.DEFAULT_ADMIN_USERNAME)
                     .orElseThrow(NoSuchEntityException::new);
 
             if(!credentialsEncoder.matches(command.getPassword(), userProjection.getPassword())) {
                 String hashedPassword = credentialsEncoder.encode(command.getPassword());
 
-                UserAggregate userAggregate = userAggregateRepository.load(userProjection.getId())
+                UserAggregate userAggregate = userEventStoreRepository.load(userProjection.getId())
                         .orElseThrow(NoSuchEntityException::new);
 
                 userAggregate.update(hashedPassword, null, Role.ADMINISTRATOR);
-                userAggregateRepository.save(userAggregate);
+                userEventStoreRepository.save(userAggregate);
             }
         }
     }
@@ -84,7 +84,7 @@ public class UserService implements ApplicationService {
     public void dispatch(SyncLdapUserCommand command) {
         validate(command);
 
-        Optional<UserProjection> userProjection = userProjectionRepository.findByUsername(command.getUsername());
+        Optional<UserProjection> userProjection = userReadModelRepository.findByUsername(command.getUsername());
 
         if(userProjection.isPresent() && userProjection.get().getIdentityProvider() != IdentityProvider.LDAP) {
             throw new UsernameAlreadyInUseException();
@@ -94,14 +94,14 @@ public class UserService implements ApplicationService {
             UserAggregate userAggregate = new UserAggregate();
 
             userAggregate.create(command.getUsername(), null, command.getDisplayName(), Role.USER, IdentityProvider.LDAP);
-            userAggregateRepository.save(userAggregate);
+            userEventStoreRepository.save(userAggregate);
         } else {
             if(!userProjection.get().getDisplayName().equals(command.getDisplayName())) {
-                UserAggregate userAggregate = userAggregateRepository.load(userProjection.get().getId())
+                UserAggregate userAggregate = userEventStoreRepository.load(userProjection.get().getId())
                         .orElseThrow(NoSuchEntityException::new);
 
                 userAggregate.update(null, command.getDisplayName(), userProjection.get().getRole());
-                userAggregateRepository.save(userAggregate);
+                userEventStoreRepository.save(userAggregate);
             }
         }
     }
@@ -109,7 +109,7 @@ public class UserService implements ApplicationService {
     public void dispatch(UpdateUserByIdCommand command) {
         validate(command);
 
-        UserProjection userProjection = userProjectionRepository.findById(command.getId())
+        UserProjection userProjection = userReadModelRepository.findById(command.getId())
                 .orElseThrow(NoSuchEntityException::new);
 
         if(userProjection.getUsername().equals(UserAggregate.DEFAULT_ADMIN_USERNAME)) {
@@ -126,7 +126,7 @@ public class UserService implements ApplicationService {
             }
         }
 
-        UserAggregate userAggregate = userAggregateRepository.load(command.getId())
+        UserAggregate userAggregate = userEventStoreRepository.load(command.getId())
                 .orElseThrow(NoSuchEntityException::new);
 
         String password = command.getPassword() != null ?
@@ -142,13 +142,13 @@ public class UserService implements ApplicationService {
                 userProjection.getRole();
 
         userAggregate.update(password, displayName, role);
-        userAggregateRepository.save(userAggregate);
+        userEventStoreRepository.save(userAggregate);
     }
 
     public void dispatch(DeleteUserByIdCommand command) {
         validate(command);
 
-        UserAggregate userAggregate = userAggregateRepository.load(command.getId())
+        UserAggregate userAggregate = userEventStoreRepository.load(command.getId())
                 .orElseThrow(NoSuchEntityException::new);
 
         if(userAggregate.getUsername().equals(UserAggregate.DEFAULT_ADMIN_USERNAME)) {
@@ -160,13 +160,13 @@ public class UserService implements ApplicationService {
         }
 
         userAggregate.delete();
-        userAggregateRepository.save(userAggregate);
+        userEventStoreRepository.save(userAggregate);
     }
 
     public void dispatch(LockUserByIdCommand command) {
         validate(command);
 
-        UserAggregate userAggregate = userAggregateRepository.load(command.getId())
+        UserAggregate userAggregate = userEventStoreRepository.load(command.getId())
                 .orElseThrow(NoSuchEntityException::new);
 
         if(userAggregate.getUsername().equals(UserAggregate.DEFAULT_ADMIN_USERNAME)) {
@@ -174,13 +174,13 @@ public class UserService implements ApplicationService {
         }
 
         userAggregate.lock();
-        userAggregateRepository.save(userAggregate);
+        userEventStoreRepository.save(userAggregate);
     }
 
     public void dispatch(UnlockUserByIdCommand command) {
         validate(command);
 
-        UserAggregate userAggregate = userAggregateRepository.load(command.getId())
+        UserAggregate userAggregate = userEventStoreRepository.load(command.getId())
                 .orElseThrow(NoSuchEntityException::new);
 
         if(userAggregate.getUsername().equals(UserAggregate.DEFAULT_ADMIN_USERNAME)) {
@@ -188,27 +188,27 @@ public class UserService implements ApplicationService {
         }
 
         userAggregate.unlock();
-        userAggregateRepository.save(userAggregate);
+        userEventStoreRepository.save(userAggregate);
     }
 
     public UserProjection query(FindUserByIdQuery query) {
-        return userProjectionRepository.findById(query.getId())
+        return userReadModelRepository.findById(query.getId())
                 .orElseThrow(NoSuchEntityException::new);
     }
 
     public UserProjection query(FindUserByUsernameQuery query) {
-        return userProjectionRepository.findByUsername(query.getUsername())
+        return userReadModelRepository.findByUsername(query.getUsername())
                 .orElseThrow(NoSuchEntityException::new);
     }
 
     public Page<UserProjection> query(FindAllUsersQuery query) {
-        return userProjectionRepository.findAll(PageInfo.builder()
+        return userReadModelRepository.findAll(PageInfo.builder()
                 .page(query.getPage())
                 .perPage(query.getPerPage())
                 .build());
     }
 
     public boolean query(ExistsUserByIdQuery query) {
-        return userProjectionRepository.existsById(query.getId());
+        return userReadModelRepository.existsById(query.getId());
     }
 }

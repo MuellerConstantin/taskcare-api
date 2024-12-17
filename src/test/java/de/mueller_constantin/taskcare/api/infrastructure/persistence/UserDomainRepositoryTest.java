@@ -3,6 +3,8 @@ package de.mueller_constantin.taskcare.api.infrastructure.persistence;
 import de.mueller_constantin.taskcare.api.core.common.domain.Page;
 import de.mueller_constantin.taskcare.api.core.common.domain.PageInfo;
 import de.mueller_constantin.taskcare.api.core.user.domain.UserProjection;
+import de.mueller_constantin.taskcare.api.infrastructure.persistence.crud.UserCrudRepository;
+import de.mueller_constantin.taskcare.api.infrastructure.persistence.crud.jdbc.MySqlUserCrudRepository;
 import de.mueller_constantin.taskcare.api.infrastructure.persistence.es.EventStore;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,16 +32,16 @@ import static org.junit.jupiter.api.Assertions.*;
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @Sql(scripts = {"/sql/ddl/mysql.sql", "/sql/dml/mysql.sql"})
-class JdbcMySqlUserRepositoryTest {
+class UserDomainRepositoryTest {
     @MockitoBean
     private EventStore eventStore;
 
     @Autowired
-    private JdbcMySqlUserRepository jdbcMySqlUserRepository;
+    private UserDomainRepository userDomainRepository;
 
     @Test
     void findById() {
-        Optional<UserProjection> user = jdbcMySqlUserRepository.findById(
+        Optional<UserProjection> user = userDomainRepository.findById(
                 UUID.fromString("8d031fe3-e445-4d51-8c70-ac3e3810da87"));
 
         assertTrue(user.isPresent());
@@ -48,7 +50,7 @@ class JdbcMySqlUserRepositoryTest {
 
     @Test
     void findByUsername() {
-        Optional<UserProjection> user = jdbcMySqlUserRepository.findByUsername("maxi123");
+        Optional<UserProjection> user = userDomainRepository.findByUsername("maxi123");
 
         assertTrue(user.isPresent());
         assertEquals("maxi123", user.get().getUsername());
@@ -56,28 +58,28 @@ class JdbcMySqlUserRepositoryTest {
 
     @Test
     void existsByUsername() {
-        boolean exists = jdbcMySqlUserRepository.existsByUsername("maxi123");
+        boolean exists = userDomainRepository.existsByUsername("maxi123");
 
         assertTrue(exists);
     }
 
     @Test
     void existsById() {
-        boolean exists = jdbcMySqlUserRepository.existsById(UUID.fromString("8d031fe3-e445-4d51-8c70-ac3e3810da87"));
+        boolean exists = userDomainRepository.existsById(UUID.fromString("8d031fe3-e445-4d51-8c70-ac3e3810da87"));
 
         assertTrue(exists);
     }
 
     @Test
     void findAll() {
-        List<UserProjection> users = jdbcMySqlUserRepository.findAll();
+        List<UserProjection> users = userDomainRepository.findAll();
 
         assertEquals(2, users.size());
     }
 
     @Test
     void findAllPaged() {
-        Page<UserProjection> page = jdbcMySqlUserRepository.findAll(PageInfo.builder()
+        Page<UserProjection> page = userDomainRepository.findAll(PageInfo.builder()
                 .page(0)
                 .perPage(1)
                 .build());
@@ -90,8 +92,13 @@ class JdbcMySqlUserRepositoryTest {
     @TestConfiguration
     static class JdbcUserRepositoryTestConfig {
         @Bean
-        JdbcMySqlUserRepository jdbcUserRepository(NamedParameterJdbcTemplate jdbcTemplate, EventStore eventStore) {
-            return new JdbcMySqlUserRepository(jdbcTemplate, eventStore);
+        UserDomainRepository userDomainRepository(EventStore eventStore, UserCrudRepository userCrudRepository) {
+            return new UserDomainRepository(eventStore, userCrudRepository);
+        }
+
+        @Bean
+        UserCrudRepository mysqlUserCrudRepository(NamedParameterJdbcTemplate jdbcTemplate) {
+            return new MySqlUserCrudRepository(jdbcTemplate);
         }
     }
 }

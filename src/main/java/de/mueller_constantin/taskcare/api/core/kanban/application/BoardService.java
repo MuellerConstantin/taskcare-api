@@ -3,8 +3,8 @@ package de.mueller_constantin.taskcare.api.core.kanban.application;
 import de.mueller_constantin.taskcare.api.core.common.application.NoSuchEntityException;
 import de.mueller_constantin.taskcare.api.core.common.domain.Page;
 import de.mueller_constantin.taskcare.api.core.common.domain.PageInfo;
-import de.mueller_constantin.taskcare.api.core.kanban.application.persistence.BoardDomainRepository;
-import de.mueller_constantin.taskcare.api.core.kanban.application.persistence.BoardStateRepository;
+import de.mueller_constantin.taskcare.api.core.kanban.application.persistence.BoardEventStoreRepository;
+import de.mueller_constantin.taskcare.api.core.kanban.application.persistence.BoardReadModelRepository;
 import de.mueller_constantin.taskcare.api.core.kanban.domain.BoardAggregate;
 import de.mueller_constantin.taskcare.api.core.kanban.domain.BoardProjection;
 import de.mueller_constantin.taskcare.api.core.user.application.ExistsUserByIdQuery;
@@ -18,8 +18,8 @@ import java.util.Set;
 
 @RequiredArgsConstructor
 public class BoardService {
-    private final BoardDomainRepository boardDomainRepository;
-    private final BoardStateRepository boardStateRepository;
+    private final BoardEventStoreRepository boardEventStoreRepository;
+    private final BoardReadModelRepository boardReadModelRepository;
     private final UserService userService;
     private final Validator validator;
 
@@ -40,13 +40,13 @@ public class BoardService {
 
         BoardAggregate boardAggregate = new BoardAggregate();
         boardAggregate.create(command.getName(), command.getDescription(), command.getCreatorId());
-        boardDomainRepository.save(boardAggregate);
+        boardEventStoreRepository.save(boardAggregate);
     }
 
     public void dispatch(UpdateBoardByIdCommand command) {
         validate(command);
 
-        BoardAggregate boardAggregate = boardDomainRepository.load(command.getId())
+        BoardAggregate boardAggregate = boardEventStoreRepository.load(command.getId())
                 .orElseThrow(NoSuchEntityException::new);
 
         String name = command.getName() != null ?
@@ -58,17 +58,17 @@ public class BoardService {
                 boardAggregate.getDescription();
 
         boardAggregate.update(name, description);
-        boardDomainRepository.save(boardAggregate);
+        boardEventStoreRepository.save(boardAggregate);
     }
 
     public void dispatch(DeleteBoardByIdCommand command) {
         validate(command);
 
-        BoardAggregate boardAggregate = boardDomainRepository.load(command.getId())
+        BoardAggregate boardAggregate = boardEventStoreRepository.load(command.getId())
                 .orElseThrow(NoSuchEntityException::new);
 
         boardAggregate.delete();
-        boardDomainRepository.save(boardAggregate);
+        boardEventStoreRepository.save(boardAggregate);
     }
 
     public void dispatch(AddMemberByIdCommand command) {
@@ -78,47 +78,47 @@ public class BoardService {
             throw new NoSuchEntityException("User with id '" + command.getUserId() + "' does not exist");
         }
 
-        BoardAggregate boardAggregate = boardDomainRepository.load(command.getBoardId())
+        BoardAggregate boardAggregate = boardEventStoreRepository.load(command.getBoardId())
                 .orElseThrow(NoSuchEntityException::new);
 
         boardAggregate.addMember(command.getUserId(), command.getRole());
-        boardDomainRepository.save(boardAggregate);
+        boardEventStoreRepository.save(boardAggregate);
     }
 
     public void dispatch(RemoveMemberByIdCommand command) {
         validate(command);
 
-        BoardAggregate boardAggregate = boardDomainRepository.load(command.getBoardId())
+        BoardAggregate boardAggregate = boardEventStoreRepository.load(command.getBoardId())
                 .orElseThrow(NoSuchEntityException::new);
 
         boardAggregate.removeMember(command.getMemberId());
-        boardDomainRepository.save(boardAggregate);
+        boardEventStoreRepository.save(boardAggregate);
     }
 
     public void dispatch(UpdateMemberByIdCommand command) {
         validate(command);
 
-        BoardAggregate boardAggregate = boardDomainRepository.load(command.getBoardId())
+        BoardAggregate boardAggregate = boardEventStoreRepository.load(command.getBoardId())
                 .orElseThrow(NoSuchEntityException::new);
 
         boardAggregate.updateMember(command.getMemberId(), command.getRole());
-        boardDomainRepository.save(boardAggregate);
+        boardEventStoreRepository.save(boardAggregate);
     }
 
     public BoardProjection query(FindBoardByIdQuery query) {
-        return boardStateRepository.findById(query.getId())
+        return boardReadModelRepository.findById(query.getId())
                 .orElseThrow(NoSuchEntityException::new);
     }
 
     public Page<BoardProjection> query(FindAllBoardsUserIsMemberQuery query) {
-        return boardStateRepository.findAllUserIsMember(query.getUserId(), PageInfo.builder()
+        return boardReadModelRepository.findAllUserIsMember(query.getUserId(), PageInfo.builder()
                 .page(query.getPage())
                 .perPage(query.getPerPage())
                 .build());
     }
 
     public Page<BoardProjection> query(FindAllBoardsQuery query) {
-        return boardStateRepository.findAll(PageInfo.builder()
+        return boardReadModelRepository.findAll(PageInfo.builder()
                 .page(query.getPage())
                 .perPage(query.getPerPage())
                 .build());

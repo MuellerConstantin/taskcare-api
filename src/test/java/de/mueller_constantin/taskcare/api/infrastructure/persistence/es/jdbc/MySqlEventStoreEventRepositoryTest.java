@@ -1,4 +1,4 @@
-package de.mueller_constantin.taskcare.api.infrastructure.persistence.es.jdbc.mysql;
+package de.mueller_constantin.taskcare.api.infrastructure.persistence.es.jdbc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -31,16 +31,16 @@ import static org.junit.jupiter.api.Assertions.*;
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @Sql(scripts = {"/sql/ddl/es/mysql.sql", "/sql/dml/es/mysql.sql"})
-class JdbcMySqlEventStoreEventRepositoryTest {
+class MySqlEventStoreEventRepositoryTest {
     @Autowired
-    private JdbcMySqlEventStoreEventRepository jdbcMySqlEventStoreEventRepository;
+    private MySqlEventStoreEventRepository mySqlEventStoreEventRepository;
 
     @Autowired
     private ObjectMapper objectMapper;
 
     @Test
     void loadEvents() {
-        List<DomainEvent> events = jdbcMySqlEventStoreEventRepository.loadEvents(
+        List<DomainEvent> events = mySqlEventStoreEventRepository.loadEvents(
                 UUID.fromString("065e84bd-2e41-418c-82df-886d7e0c6f72"), 0, null);
 
         assertEquals(6, events.size());
@@ -60,9 +60,9 @@ class JdbcMySqlEventStoreEventRepositoryTest {
 
         System.out.println(objectMapper.writeValueAsString(event));
 
-        jdbcMySqlEventStoreEventRepository.createEvent(event);
+        mySqlEventStoreEventRepository.createEvent(event);
 
-        List<DomainEvent> events = jdbcMySqlEventStoreEventRepository.loadEvents(
+        List<DomainEvent> events = mySqlEventStoreEventRepository.loadEvents(
                 UUID.fromString("065e84bd-2e41-418c-82df-886d7e0c6f72"), null, null);
 
         assertEquals(7, events.size());
@@ -73,8 +73,8 @@ class JdbcMySqlEventStoreEventRepositoryTest {
     @TestConfiguration
     static class JdbcMySqlEventStoreEventRepositoryTestConfig {
         @Bean
-        JdbcMySqlEventStoreEventRepository jdbcMySqlEventStoreEventRepository(NamedParameterJdbcTemplate jdbcTemplate, ObjectMapper objectMapper) {
-            return new JdbcMySqlEventStoreEventRepository(jdbcTemplate, objectMapper);
+        MySqlEventStoreEventRepository jdbcMySqlEventStoreEventRepository(NamedParameterJdbcTemplate jdbcTemplate, ObjectMapper objectMapper) {
+            return new MySqlEventStoreEventRepository(jdbcTemplate, objectMapper);
         }
 
         @Bean

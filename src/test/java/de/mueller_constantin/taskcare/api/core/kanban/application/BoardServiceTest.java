@@ -4,8 +4,8 @@ import de.mueller_constantin.taskcare.api.core.common.application.NoSuchEntityEx
 import de.mueller_constantin.taskcare.api.core.common.domain.Entity;
 import de.mueller_constantin.taskcare.api.core.common.domain.Page;
 import de.mueller_constantin.taskcare.api.core.common.domain.PageInfo;
-import de.mueller_constantin.taskcare.api.core.kanban.application.persistence.BoardDomainRepository;
-import de.mueller_constantin.taskcare.api.core.kanban.application.persistence.BoardStateRepository;
+import de.mueller_constantin.taskcare.api.core.kanban.application.persistence.BoardEventStoreRepository;
+import de.mueller_constantin.taskcare.api.core.kanban.application.persistence.BoardReadModelRepository;
 import de.mueller_constantin.taskcare.api.core.kanban.domain.*;
 import de.mueller_constantin.taskcare.api.core.user.application.ExistsUserByIdQuery;
 import de.mueller_constantin.taskcare.api.core.user.application.UserService;
@@ -29,10 +29,10 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class BoardServiceTest {
     @Mock
-    private BoardDomainRepository boardDomainRepository;
+    private BoardEventStoreRepository boardEventStoreRepository;
 
     @Mock
-    private BoardStateRepository boardStateRepository;
+    private BoardReadModelRepository boardReadModelRepository;
 
     @Mock
     private UserService userService;
@@ -108,7 +108,7 @@ class BoardServiceTest {
     @Test
     void handleCreateBoardCommand() {
         when(userService.query(any(ExistsUserByIdQuery.class))).thenReturn(true);
-        doNothing().when(boardDomainRepository).save(any(BoardAggregate.class));
+        doNothing().when(boardEventStoreRepository).save(any(BoardAggregate.class));
 
         boardService.dispatch(CreateBoardCommand.builder()
                 .name("Second Test Board")
@@ -117,26 +117,26 @@ class BoardServiceTest {
                 .build());
 
         verify(userService, times(1)).query(any(ExistsUserByIdQuery.class));
-        verify(boardDomainRepository, times(1)).save(any(BoardAggregate.class));
+        verify(boardEventStoreRepository, times(1)).save(any(BoardAggregate.class));
     }
 
     @Test
     void handleUpdateBoardByIdCommand() {
-        when(boardDomainRepository.load(id)).thenReturn(Optional.of(boardAggregate));
-        doNothing().when(boardDomainRepository).save(any(BoardAggregate.class));
+        when(boardEventStoreRepository.load(id)).thenReturn(Optional.of(boardAggregate));
+        doNothing().when(boardEventStoreRepository).save(any(BoardAggregate.class));
 
         boardService.dispatch(UpdateBoardByIdCommand.builder()
                 .id(id)
                 .name("Another Test Board")
                 .build());
 
-        verify(boardDomainRepository, times(1)).load(id);
-        verify(boardDomainRepository, times(1)).save(any(BoardAggregate.class));
+        verify(boardEventStoreRepository, times(1)).load(id);
+        verify(boardEventStoreRepository, times(1)).save(any(BoardAggregate.class));
     }
 
     @Test
     void handleUpdateBoardByIdCommandUnknownId() {
-        when(boardDomainRepository.load(id)).thenReturn(Optional.empty());
+        when(boardEventStoreRepository.load(id)).thenReturn(Optional.empty());
 
         assertThrows(NoSuchEntityException.class, () -> {
             boardService.dispatch(UpdateBoardByIdCommand.builder()
@@ -148,20 +148,20 @@ class BoardServiceTest {
 
     @Test
     void handleDeleteBoardByIdCommand() {
-        when(boardDomainRepository.load(id)).thenReturn(Optional.of(boardAggregate));
-        doNothing().when(boardDomainRepository).save(any(BoardAggregate.class));
+        when(boardEventStoreRepository.load(id)).thenReturn(Optional.of(boardAggregate));
+        doNothing().when(boardEventStoreRepository).save(any(BoardAggregate.class));
 
         boardService.dispatch(DeleteBoardByIdCommand.builder()
                 .id(id)
                 .build());
 
-        verify(boardDomainRepository, times(1)).load(id);
-        verify(boardDomainRepository, times(1)).save(any(BoardAggregate.class));
+        verify(boardEventStoreRepository, times(1)).load(id);
+        verify(boardEventStoreRepository, times(1)).save(any(BoardAggregate.class));
     }
 
     @Test
     void handleDeleteBoardByIdCommandUnknownId() {
-        when(boardDomainRepository.load(id)).thenReturn(Optional.empty());
+        when(boardEventStoreRepository.load(id)).thenReturn(Optional.empty());
 
         assertThrows(NoSuchEntityException.class, () -> {
             boardService.dispatch(DeleteBoardByIdCommand.builder()
@@ -173,8 +173,8 @@ class BoardServiceTest {
     @Test
     void handleAddMemberByIdCommand() {
         when(userService.query(any(ExistsUserByIdQuery.class))).thenReturn(true);
-        when(boardDomainRepository.load(id)).thenReturn(Optional.of(boardAggregate));
-        doNothing().when(boardDomainRepository).save(any(BoardAggregate.class));
+        when(boardEventStoreRepository.load(id)).thenReturn(Optional.of(boardAggregate));
+        doNothing().when(boardEventStoreRepository).save(any(BoardAggregate.class));
 
         boardService.dispatch(AddMemberByIdCommand.builder()
                 .boardId(id)
@@ -185,7 +185,7 @@ class BoardServiceTest {
         assertEquals(3, boardAggregate.getMembers().size());
 
         verify(userService, times(1)).query(any(ExistsUserByIdQuery.class));
-        verify(boardDomainRepository, times(1)).save(any(BoardAggregate.class));
+        verify(boardEventStoreRepository, times(1)).save(any(BoardAggregate.class));
     }
 
     @Test
@@ -204,7 +204,7 @@ class BoardServiceTest {
     @Test
     void handleAddMemberByIdCommandWithAlreadyExistingMember() {
         when(userService.query(any(ExistsUserByIdQuery.class))).thenReturn(true);
-        when(boardDomainRepository.load(id)).thenReturn(Optional.of(boardAggregate));
+        when(boardEventStoreRepository.load(id)).thenReturn(Optional.of(boardAggregate));
 
         assertThrows(BoardMemberAlreadyExistsException.class, () -> {
             boardService.dispatch(AddMemberByIdCommand.builder()
@@ -217,8 +217,8 @@ class BoardServiceTest {
 
     @Test
     void handleRemoveMemberByIdCommand() {
-        when(boardDomainRepository.load(id)).thenReturn(Optional.of(boardAggregate));
-        doNothing().when(boardDomainRepository).save(any(BoardAggregate.class));
+        when(boardEventStoreRepository.load(id)).thenReturn(Optional.of(boardAggregate));
+        doNothing().when(boardEventStoreRepository).save(any(BoardAggregate.class));
 
         boardService.dispatch(RemoveMemberByIdCommand.builder()
                 .boardId(id)
@@ -227,12 +227,12 @@ class BoardServiceTest {
 
         assertEquals(1, boardAggregate.getMembers().size());
 
-        verify(boardDomainRepository, times(1)).save(any(BoardAggregate.class));
+        verify(boardEventStoreRepository, times(1)).save(any(BoardAggregate.class));
     }
 
     @Test
     void handleRemoveMemberByIdCommandWithMissingMember() {
-        when(boardDomainRepository.load(id)).thenReturn(Optional.of(boardAggregate));
+        when(boardEventStoreRepository.load(id)).thenReturn(Optional.of(boardAggregate));
 
         assertThrows(NoSuchEntityException.class, () -> {
             boardService.dispatch(RemoveMemberByIdCommand.builder()
@@ -244,7 +244,7 @@ class BoardServiceTest {
 
     @Test
     void handleRemoveMemberByIdCommandRemoveLastAdmin() {
-        when(boardDomainRepository.load(id)).thenReturn(Optional.of(boardAggregate));
+        when(boardEventStoreRepository.load(id)).thenReturn(Optional.of(boardAggregate));
 
         assertThrows(BoardMustBeAdministrableException.class, () -> {
             boardService.dispatch(RemoveMemberByIdCommand.builder()
@@ -256,8 +256,8 @@ class BoardServiceTest {
 
     @Test
     void handleUpdateMemberByIdCommand() {
-        when(boardDomainRepository.load(id)).thenReturn(Optional.of(boardAggregate));
-        doNothing().when(boardDomainRepository).save(any(BoardAggregate.class));
+        when(boardEventStoreRepository.load(id)).thenReturn(Optional.of(boardAggregate));
+        doNothing().when(boardEventStoreRepository).save(any(BoardAggregate.class));
 
         boardService.dispatch(UpdateMemberByIdCommand.builder()
                 .boardId(id)
@@ -265,12 +265,12 @@ class BoardServiceTest {
                 .role(Role.MAINTAINER)
                 .build());
 
-        verify(boardDomainRepository, times(1)).save(any(BoardAggregate.class));
+        verify(boardEventStoreRepository, times(1)).save(any(BoardAggregate.class));
     }
 
     @Test
     void handleUpdateMemberByIdCommandWithMissingMember() {
-        when(boardDomainRepository.load(id)).thenReturn(Optional.of(boardAggregate));
+        when(boardEventStoreRepository.load(id)).thenReturn(Optional.of(boardAggregate));
 
         assertThrows(NoSuchEntityException.class, () -> {
             boardService.dispatch(UpdateMemberByIdCommand.builder()
@@ -283,7 +283,7 @@ class BoardServiceTest {
 
     @Test
     void handleUpdateMemberByIdCommandChangeLastAdminRole() {
-        when(boardDomainRepository.load(id)).thenReturn(Optional.of(boardAggregate));
+        when(boardEventStoreRepository.load(id)).thenReturn(Optional.of(boardAggregate));
 
         assertThrows(BoardMustBeAdministrableException.class, () -> {
             boardService.dispatch(UpdateMemberByIdCommand.builder()
@@ -296,7 +296,7 @@ class BoardServiceTest {
 
     @Test
     void handleFindUserByIdQuery() {
-        when(boardStateRepository.findById(id)).thenReturn(Optional.of(boardProjection));
+        when(boardReadModelRepository.findById(id)).thenReturn(Optional.of(boardProjection));
 
         BoardProjection result = boardService.query(FindBoardByIdQuery.builder()
                 .id(this.id)
@@ -307,7 +307,7 @@ class BoardServiceTest {
 
     @Test
     void handleFindAllBoardsQuery() {
-        when(boardStateRepository.findAll(any(PageInfo.class))).thenReturn(Page.<BoardProjection>builder()
+        when(boardReadModelRepository.findAll(any(PageInfo.class))).thenReturn(Page.<BoardProjection>builder()
                 .content(List.of(boardProjection))
                 .info(PageInfo.builder()
                         .page(0)
@@ -321,12 +321,12 @@ class BoardServiceTest {
                 .build());
 
         assertEquals(boardProjection, result.getContent().get(0));
-        verify(boardStateRepository, times(1)).findAll(any(PageInfo.class));
+        verify(boardReadModelRepository, times(1)).findAll(any(PageInfo.class));
     }
 
     @Test
     void handleFindAllBoardsUserIsMemberQuery() {
-        when(boardStateRepository.findAllUserIsMember(eq(this.creatorUserId), any(PageInfo.class))).thenReturn(Page.<BoardProjection>builder()
+        when(boardReadModelRepository.findAllUserIsMember(eq(this.creatorUserId), any(PageInfo.class))).thenReturn(Page.<BoardProjection>builder()
                 .content(List.of(boardProjection))
                 .info(PageInfo.builder()
                         .page(0)
@@ -341,6 +341,6 @@ class BoardServiceTest {
                 .build());
 
         assertEquals(boardProjection, result.getContent().get(0));
-        verify(boardStateRepository, times(1)).findAllUserIsMember(eq(this.creatorUserId), any(PageInfo.class));
+        verify(boardReadModelRepository, times(1)).findAllUserIsMember(eq(this.creatorUserId), any(PageInfo.class));
     }
 }

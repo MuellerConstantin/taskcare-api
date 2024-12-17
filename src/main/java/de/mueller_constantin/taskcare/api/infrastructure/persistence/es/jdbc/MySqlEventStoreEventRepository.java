@@ -1,8 +1,7 @@
-package de.mueller_constantin.taskcare.api.infrastructure.persistence.es.jdbc.mysql;
+package de.mueller_constantin.taskcare.api.infrastructure.persistence.es.jdbc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.mueller_constantin.taskcare.api.core.common.domain.DomainEvent;
-import de.mueller_constantin.taskcare.api.infrastructure.persistence.es.jdbc.JdbcEventStoreEventRepository;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -18,7 +17,7 @@ import java.util.UUID;
 
 @Transactional(propagation = Propagation.MANDATORY)
 @RequiredArgsConstructor
-public class JdbcMySqlEventStoreEventRepository implements JdbcEventStoreEventRepository {
+public class MySqlEventStoreEventRepository implements JdbcEventStoreEventRepository {
     private final String METADATA_TABLE_NAME = "es_metadata";
     private final String EVENTS_TABLE_NAME = "es_events";
 

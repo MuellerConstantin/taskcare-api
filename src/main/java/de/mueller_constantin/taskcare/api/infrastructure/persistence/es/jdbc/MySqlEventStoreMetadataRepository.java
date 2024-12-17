@@ -1,7 +1,6 @@
-package de.mueller_constantin.taskcare.api.infrastructure.persistence.es.jdbc.mysql;
+package de.mueller_constantin.taskcare.api.infrastructure.persistence.es.jdbc;
 
 import de.mueller_constantin.taskcare.api.core.common.domain.Aggregate;
-import de.mueller_constantin.taskcare.api.infrastructure.persistence.es.jdbc.JdbcEventStoreMetadataRepository;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -13,7 +12,7 @@ import java.sql.Types;
 
 @Transactional(propagation = Propagation.MANDATORY)
 @RequiredArgsConstructor
-public class JdbcMySqlEventStoreMetadataRepository implements JdbcEventStoreMetadataRepository {
+public class MySqlEventStoreMetadataRepository implements JdbcEventStoreMetadataRepository {
     private final String METADATA_TABLE_NAME = "es_metadata";
 
     private final NamedParameterJdbcTemplate jdbcTemplate;

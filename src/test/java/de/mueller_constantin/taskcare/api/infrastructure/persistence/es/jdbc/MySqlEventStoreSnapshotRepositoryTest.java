@@ -1,4 +1,4 @@
-package de.mueller_constantin.taskcare.api.infrastructure.persistence.es.jdbc.mysql;
+package de.mueller_constantin.taskcare.api.infrastructure.persistence.es.jdbc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -30,14 +30,14 @@ import static org.junit.jupiter.api.Assertions.*;
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @Sql(scripts = {"/sql/ddl/es/mysql.sql", "/sql/dml/es/mysql.sql"})
-class JdbcMySqlEventStoreSnapshotRepositoryTest {
+class MySqlEventStoreSnapshotRepositoryTest {
     @Autowired
-    private JdbcMySqlEventStoreSnapshotRepository jdbcMySqlEventStoreSnapshotRepository;
+    private MySqlEventStoreSnapshotRepository mySqlEventStoreSnapshotRepository;
 
     @Test
     @SneakyThrows
     void loadSnapshot() {
-        Optional<Aggregate> aggregate = jdbcMySqlEventStoreSnapshotRepository.loadSnapshot(
+        Optional<Aggregate> aggregate = mySqlEventStoreSnapshotRepository.loadSnapshot(
                 UUID.fromString("065e84bd-2e41-418c-82df-886d7e0c6f72"), 5);
 
         assertTrue(aggregate.isPresent());
@@ -47,7 +47,7 @@ class JdbcMySqlEventStoreSnapshotRepositoryTest {
 
     @Test
     void loadSnapshotExcessiveVersion() {
-        Optional<Aggregate> aggregate = jdbcMySqlEventStoreSnapshotRepository.loadSnapshot(
+        Optional<Aggregate> aggregate = mySqlEventStoreSnapshotRepository.loadSnapshot(
                 UUID.fromString("065e84bd-2e41-418c-82df-886d7e0c6f72"), 6);
 
         assertTrue(aggregate.isPresent());
@@ -60,14 +60,14 @@ class JdbcMySqlEventStoreSnapshotRepositoryTest {
         DummyAggregate dummyAggregate = new DummyAggregate(UUID.fromString("065e84bd-2e41-418c-82df-886d7e0c6f72"),
                 0, false);
 
-        jdbcMySqlEventStoreSnapshotRepository.createSnapshot(dummyAggregate);
+        mySqlEventStoreSnapshotRepository.createSnapshot(dummyAggregate);
     }
 
     @TestConfiguration
     static class JdbcMySqlEventStoreSnapshotRepositoryTestConfig {
         @Bean
-        JdbcMySqlEventStoreSnapshotRepository jdbcMySqlEventStoreSnapshotRepository(NamedParameterJdbcTemplate jdbcTemplate, ObjectMapper objectMapper) {
-            return new JdbcMySqlEventStoreSnapshotRepository(jdbcTemplate, objectMapper);
+        MySqlEventStoreSnapshotRepository jdbcMySqlEventStoreSnapshotRepository(NamedParameterJdbcTemplate jdbcTemplate, ObjectMapper objectMapper) {
+            return new MySqlEventStoreSnapshotRepository(jdbcTemplate, objectMapper);
         }
 
         @Bean

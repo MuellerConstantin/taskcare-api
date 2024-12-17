@@ -1,4 +1,4 @@
-package de.mueller_constantin.taskcare.api.infrastructure.persistence.es.jdbc.mysql;
+package de.mueller_constantin.taskcare.api.infrastructure.persistence.es.jdbc;
 
 import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import de.mueller_constantin.taskcare.api.core.common.domain.Aggregate;
-import de.mueller_constantin.taskcare.api.infrastructure.persistence.es.jdbc.JdbcEventStoreSnapshotRepository;
 import lombok.NonNull;
 import lombok.SneakyThrows;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -20,7 +19,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Transactional(propagation = Propagation.MANDATORY)
-public class JdbcMySqlEventStoreSnapshotRepository implements JdbcEventStoreSnapshotRepository {
+public class MySqlEventStoreSnapshotRepository implements JdbcEventStoreSnapshotRepository {
     private final String METADATA_TABLE_NAME = "es_metadata";
     private final String SNAPSHOT_TABLE_NAME = "es_snapshots";
 
@@ -28,7 +27,7 @@ public class JdbcMySqlEventStoreSnapshotRepository implements JdbcEventStoreSnap
     private final ObjectMapper objectMapper;
     private final ObjectWriter objectWriter;
 
-    public JdbcMySqlEventStoreSnapshotRepository(NamedParameterJdbcTemplate jdbcTemplate, ObjectMapper objectMapper) {
+    public MySqlEventStoreSnapshotRepository(NamedParameterJdbcTemplate jdbcTemplate, ObjectMapper objectMapper) {
         this.jdbcTemplate = jdbcTemplate;
         this.objectMapper = objectMapper;
 

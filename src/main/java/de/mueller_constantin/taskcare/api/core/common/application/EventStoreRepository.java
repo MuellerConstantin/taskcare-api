@@ -11,7 +11,7 @@ import java.util.UUID;
  *
  * @param <T> The type of aggregate.
  */
-public interface DomainRepository<T extends Aggregate> {
+public interface EventStoreRepository<T extends Aggregate> {
     /**
      * Persists the aggregate as a chain of events.
      *
