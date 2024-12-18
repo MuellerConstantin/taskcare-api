@@ -46,12 +46,19 @@ public class MySqlEventStoreSnapshotRepository implements JdbcEventStoreSnapshot
         parameters.addValue("version", aggregate.getVersion(), Types.INTEGER);
         parameters.addValue("aggregateData", objectWriter.writeValueAsString(aggregate));
 
-        System.out.println(objectWriter.writeValueAsString(aggregate));
+        String query = """
+            INSERT INTO %s (
+                aggregate_id,
+                version,
+                aggregate_data
+            ) VALUES (
+                :aggregateId,
+                :version,
+                :aggregateData
+            )
+        """.formatted(SNAPSHOT_TABLE_NAME);
 
-        jdbcTemplate.update("""
-                INSERT INTO %s (aggregate_id, version, aggregate_data)
-                VALUES (:aggregateId, :version, :aggregateData)
-                """.formatted(SNAPSHOT_TABLE_NAME), parameters);
+        jdbcTemplate.update(query, parameters);
     }
 
     public <T extends Aggregate> Optional<T> loadSnapshot(@NonNull UUID aggregateId, Integer version) {
@@ -59,18 +66,20 @@ public class MySqlEventStoreSnapshotRepository implements JdbcEventStoreSnapshot
         parameters.addValue("aggregateId", aggregateId.toString());
         parameters.addValue("version", version, Types.INTEGER);
 
-        return jdbcTemplate.query("""
-                SELECT
-                    m.aggregate_type as aggregate_type,
-                    s.aggregate_data as aggregate_data
-                FROM %s s
-                JOIN %s m ON s.aggregate_id = m.aggregate_id
-                WHERE s.aggregate_id = :aggregateId
-                    AND (:version IS NULL OR s.version <= :version)
-                    AND m.deleted = false
-                ORDER BY s.version DESC
-                LIMIT 1
-                """.formatted(SNAPSHOT_TABLE_NAME, METADATA_TABLE_NAME), parameters, this::toAggregate)
+        String query = """
+            SELECT
+                m.aggregate_type as aggregate_type,
+                s.aggregate_data as aggregate_data
+            FROM %s s
+            JOIN %s m ON s.aggregate_id = m.aggregate_id
+            WHERE s.aggregate_id = :aggregateId
+                AND (:version IS NULL OR s.version <= :version)
+                AND m.deleted = false
+            ORDER BY s.version DESC
+            LIMIT 1
+        """.formatted(SNAPSHOT_TABLE_NAME, METADATA_TABLE_NAME);
+
+        return jdbcTemplate.query(query, parameters, this::toAggregate)
                 .stream()
                 .findFirst()
                 .map(aggregate -> (T) aggregate);

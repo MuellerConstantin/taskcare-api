@@ -33,12 +33,21 @@ public class MySqlUserCrudRepository implements UserCrudRepository {
         MapSqlParameterSource parameters = new MapSqlParameterSource();
         parameters.addValue("username", username);
 
+        String query = """
+            SELECT
+                id,
+                username,
+                password,
+                display_name,
+                role,
+                identity_provider,
+                locked
+            FROM %s
+            WHERE username = :username
+        """.formatted(USER_TABLE_NAME);
+
         try {
-            return Optional.ofNullable(jdbcTemplate.queryForObject("""
-                SELECT id, username, password, display_name, role, identity_provider, locked
-                FROM %s
-                WHERE username = :username
-                """.formatted(USER_TABLE_NAME), parameters, this::toProjection));
+            return Optional.ofNullable(jdbcTemplate.queryForObject(query, parameters, this::toProjection));
         } catch (EmptyResultDataAccessException exc) {
             return Optional.empty();
         }
@@ -49,11 +58,14 @@ public class MySqlUserCrudRepository implements UserCrudRepository {
         MapSqlParameterSource parameters = new MapSqlParameterSource();
         parameters.addValue("username", username);
 
-        Integer count = jdbcTemplate.queryForObject("""
-                SELECT COUNT(*)
-                FROM %s
-                WHERE username = :username
-                """.formatted(USER_TABLE_NAME), parameters, Integer.class);
+        String query = """
+            SELECT
+                COUNT(*)
+            FROM %s
+            WHERE username = :username
+        """.formatted(USER_TABLE_NAME);
+
+        Integer count = jdbcTemplate.queryForObject(query, parameters, Integer.class);
 
         return count != null && count > 0;
     }
@@ -63,12 +75,21 @@ public class MySqlUserCrudRepository implements UserCrudRepository {
         MapSqlParameterSource parameters = new MapSqlParameterSource();
         parameters.addValue("id", id.toString());
 
+        String query = """
+            SELECT
+                id,
+                username,
+                password,
+                display_name,
+                role,
+                identity_provider,
+                locked
+            FROM %s
+            WHERE id = :id
+        """.formatted(USER_TABLE_NAME);
+
         try {
-            return Optional.ofNullable(jdbcTemplate.queryForObject("""
-                SELECT id, username, password, display_name, role, identity_provider, locked
-                FROM %s
-                WHERE id = :id
-                """.formatted(USER_TABLE_NAME), parameters, this::toProjection));
+            return Optional.ofNullable(jdbcTemplate.queryForObject(query, parameters, this::toProjection));
         } catch (EmptyResultDataAccessException exc) {
             return Optional.empty();
         }
@@ -79,29 +100,44 @@ public class MySqlUserCrudRepository implements UserCrudRepository {
         MapSqlParameterSource parameters = new MapSqlParameterSource();
         parameters.addValue("id", id.toString());
 
-        Integer count = jdbcTemplate.queryForObject("""
-                SELECT COUNT(*)
-                FROM %s
-                WHERE id = :id
-                """.formatted(USER_TABLE_NAME), parameters, Integer.class);
+        String query = """
+            SELECT
+                COUNT(*)
+            FROM %s
+            WHERE id = :id
+        """.formatted(USER_TABLE_NAME);
+
+        Integer count = jdbcTemplate.queryForObject(query, parameters, Integer.class);
 
         return count != null && count > 0;
     }
 
     @Override
     public List<UserProjection> findAll() {
-        return jdbcTemplate.query("""
-                SELECT id, username, password, display_name, role, identity_provider, locked
-                FROM %s
-                """.formatted(USER_TABLE_NAME), this::toProjection);
+        String query = """
+            SELECT
+                id,
+                username,
+                password,
+                display_name,
+                role,
+                identity_provider,
+                locked
+            FROM %s
+        """.formatted(USER_TABLE_NAME);
+
+        return jdbcTemplate.query(query, this::toProjection);
     }
 
     @Override
     public Page<UserProjection> findAll(PageInfo pageInfo) {
-        Integer totalElements = jdbcTemplate.queryForObject("""
-                SELECT COUNT(*)
-                FROM %s
-                """.formatted(USER_TABLE_NAME), new MapSqlParameterSource(), Integer.class);
+        String query = """
+            SELECT
+                COUNT(*)
+            FROM %s
+        """.formatted(USER_TABLE_NAME);
+
+        Integer totalElements = jdbcTemplate.queryForObject(query, new MapSqlParameterSource(), Integer.class);
 
         int totalPages = (int) Math.ceil((double) totalElements / pageInfo.getPerPage());
 
@@ -109,12 +145,21 @@ public class MySqlUserCrudRepository implements UserCrudRepository {
         parameters.addValue("page", pageInfo.getPage());
         parameters.addValue("perPage", pageInfo.getPerPage());
 
-        List<UserProjection> content = jdbcTemplate.query("""
-                SELECT id, username, password, display_name, role, identity_provider, locked
-                FROM %s
-                LIMIT :perPage
-                OFFSET :page
-                """.formatted(USER_TABLE_NAME), parameters, this::toProjection);
+        query = """
+            SELECT
+                id,
+                username,
+                password,
+                display_name,
+                role,
+                identity_provider,
+                locked
+            FROM %s
+            LIMIT :perPage
+            OFFSET :page
+        """.formatted(USER_TABLE_NAME);
+
+        List<UserProjection> content = jdbcTemplate.query(query, parameters, this::toProjection);
 
         return Page.<UserProjection>builder()
                 .content(content)
@@ -132,10 +177,13 @@ public class MySqlUserCrudRepository implements UserCrudRepository {
         MapSqlParameterSource parameters = new MapSqlParameterSource();
         parameters.addValue("id", id.toString());
 
-        jdbcTemplate.update("""
-                DELETE FROM %s
-                WHERE id = :id
-                """.formatted(USER_TABLE_NAME), parameters);
+        String query = """
+            DELETE
+            FROM %s
+            WHERE id = :id
+        """;
+
+        jdbcTemplate.update(query, parameters);
     }
 
     @Override
@@ -146,14 +194,36 @@ public class MySqlUserCrudRepository implements UserCrudRepository {
         parameters.addValue("password", projection.getPassword());
         parameters.addValue("displayName", projection.getDisplayName());
         parameters.addValue("role", projection.getRole().toString());
-        parameters.addValue("identity_provider", projection.getIdentityProvider().toString());
+        parameters.addValue("identityProvider", projection.getIdentityProvider().toString());
         parameters.addValue("locked", projection.isLocked(), Types.BOOLEAN);
 
-        jdbcTemplate.update("""
-                INSERT INTO %s (id, username, password, display_name, role, identity_provider, locked)
-                VALUES (:id, :username, :password, :displayName, :role, :identity_provider, :locked)
-                ON DUPLICATE KEY UPDATE username = :username, password = :password, display_name = :displayName, role = :role, identity_provider = :identity_provider, locked = :locked
-                """.formatted(USER_TABLE_NAME), parameters);
+        String query = """
+            INSERT INTO %s (
+                id,
+                username,
+                password,
+                display_name,
+                role,
+                identity_provider,
+                locked
+            ) VALUES (
+                :id,
+                :username,
+                :password,
+                :displayName,
+                :role,
+                :identityProvider,
+                :locked
+            ) ON DUPLICATE KEY UPDATE
+                username = :username,
+                password = :password,
+                display_name = :displayName,
+                role = :role,
+                identity_provider = :identityProvider,
+                locked = :locked
+        """;
+
+        jdbcTemplate.update(query, parameters);
     }
 
     @SneakyThrows

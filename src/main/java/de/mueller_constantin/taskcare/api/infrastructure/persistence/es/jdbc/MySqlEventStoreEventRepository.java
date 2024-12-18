@@ -32,10 +32,21 @@ public class MySqlEventStoreEventRepository implements JdbcEventStoreEventReposi
         parameters.addValue("eventType", event.getClass().getName());
         parameters.addValue("eventData", objectMapper.writeValueAsString(event));
 
-        jdbcTemplate.update("""
-                INSERT INTO %s (aggregate_id, version, event_type, event_data)
-                VALUES (:aggregateId, :version, :eventType, :eventData)
-                """.formatted(EVENTS_TABLE_NAME), parameters);
+        String query = """
+            INSERT INTO %s (
+                aggregate_id,
+                version,
+                event_type,
+                event_data
+            ) VALUES (
+                :aggregateId,
+                :version,
+                :eventType,
+                :eventData
+            )
+        """.formatted(EVENTS_TABLE_NAME);
+
+        jdbcTemplate.update(query, parameters);
     }
 
     public List<DomainEvent> loadEvents(@NonNull UUID aggregateId, Integer fromVersion, Integer toVersion) {
@@ -44,18 +55,20 @@ public class MySqlEventStoreEventRepository implements JdbcEventStoreEventReposi
         parameters.addValue("fromVersion", fromVersion, Types.INTEGER);
         parameters.addValue("toVersion", toVersion, Types.INTEGER);
 
-        return jdbcTemplate.query("""
-                SELECT
-                    e.event_type as event_type,
-                    e.event_data as event_data
-                FROM %s e
-                JOIN %s m ON e.aggregate_id = m.aggregate_id
-                WHERE e.aggregate_id = :aggregateId
-                    AND (:fromVersion IS NULL OR e.version > :fromVersion)
-                    AND (:toVersion IS NULL OR e.version <= :toVersion)
-                    AND m.deleted = false
-                ORDER BY e.version ASC
-                """.formatted(EVENTS_TABLE_NAME, METADATA_TABLE_NAME), parameters, this::toEvent);
+        String query = """
+            SELECT
+                e.event_type as event_type,
+                e.event_data as event_data
+            FROM %s e
+            JOIN %s m ON e.aggregate_id = m.aggregate_id
+            WHERE e.aggregate_id = :aggregateId
+                AND (:fromVersion IS NULL OR e.version > :fromVersion)
+                AND (:toVersion IS NULL OR e.version <= :toVersion)
+                AND m.deleted = false
+            ORDER BY e.version ASC
+        """.formatted(EVENTS_TABLE_NAME, METADATA_TABLE_NAME);
+
+        return jdbcTemplate.query(query, parameters, this::toEvent);
     }
 
     @SneakyThrows

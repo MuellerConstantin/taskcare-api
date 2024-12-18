@@ -24,10 +24,21 @@ public class MySqlEventStoreMetadataRepository implements JdbcEventStoreMetadata
         parameters.addValue("version", 0, Types.INTEGER);
         parameters.addValue("deleted", false, Types.BOOLEAN);
 
-        jdbcTemplate.update("""
-                INSERT IGNORE INTO %s (aggregate_id, aggregate_type, version, deleted)
-                VALUES (:aggregateId, :aggregateType, :version, :deleted)
-                """.formatted(METADATA_TABLE_NAME), parameters);
+        String query = """
+            INSERT IGNORE INTO %s (
+                aggregate_id,
+                aggregate_type,
+                version,
+                deleted
+            ) VALUES (
+                :aggregateId,
+                :aggregateType,
+                :version,
+                :deleted
+            )
+        """.formatted(METADATA_TABLE_NAME);
+
+        jdbcTemplate.update(query, parameters);
     }
 
     public void updateMetadata(@NonNull Aggregate aggregate) {
@@ -36,10 +47,14 @@ public class MySqlEventStoreMetadataRepository implements JdbcEventStoreMetadata
         parameters.addValue("version", aggregate.getVersion(), Types.INTEGER);
         parameters.addValue("deleted", aggregate.isDeleted(), Types.BOOLEAN);
 
-        jdbcTemplate.update("""
-                UPDATE %s
-                SET version = :version, deleted = :deleted
-                WHERE aggregate_id = :aggregateId
-                """.formatted(METADATA_TABLE_NAME), parameters);
+        String query = """
+            UPDATE %s
+            SET
+                version = :version,
+                deleted = :deleted
+            WHERE aggregate_id = :aggregateId
+        """.formatted(METADATA_TABLE_NAME);
+
+        jdbcTemplate.update(query, parameters);
     }
 }
