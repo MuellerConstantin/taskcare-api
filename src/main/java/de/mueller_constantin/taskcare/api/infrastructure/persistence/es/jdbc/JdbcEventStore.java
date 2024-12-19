@@ -36,7 +36,6 @@ public class JdbcEventStore implements EventStore {
             }
         }
 
-        aggregate.commit();
         metadataRepository.updateMetadata(aggregate);
     }
 

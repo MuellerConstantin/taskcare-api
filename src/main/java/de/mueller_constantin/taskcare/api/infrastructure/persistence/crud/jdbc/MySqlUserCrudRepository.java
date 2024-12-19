@@ -138,7 +138,6 @@ public class MySqlUserCrudRepository implements UserCrudRepository {
         """.formatted(USER_TABLE_NAME);
 
         Integer totalElements = jdbcTemplate.queryForObject(query, new MapSqlParameterSource(), Integer.class);
-
         int totalPages = (int) Math.ceil((double) totalElements / pageInfo.getPerPage());
 
         MapSqlParameterSource parameters = new MapSqlParameterSource();
@@ -181,13 +180,15 @@ public class MySqlUserCrudRepository implements UserCrudRepository {
             DELETE
             FROM %s
             WHERE id = :id
-        """;
+        """.formatted(USER_TABLE_NAME);
 
         jdbcTemplate.update(query, parameters);
     }
 
     @Override
     public void save(UserProjection projection) {
+        boolean exists = existsById(projection.getId());
+
         MapSqlParameterSource parameters = new MapSqlParameterSource();
         parameters.addValue("id", projection.getId().toString());
         parameters.addValue("username", projection.getUsername());
@@ -197,31 +198,41 @@ public class MySqlUserCrudRepository implements UserCrudRepository {
         parameters.addValue("identityProvider", projection.getIdentityProvider().toString());
         parameters.addValue("locked", projection.isLocked(), Types.BOOLEAN);
 
-        String query = """
-            INSERT INTO %s (
-                id,
-                username,
-                password,
-                display_name,
-                role,
-                identity_provider,
-                locked
-            ) VALUES (
-                :id,
-                :username,
-                :password,
-                :displayName,
-                :role,
-                :identityProvider,
-                :locked
-            ) ON DUPLICATE KEY UPDATE
-                username = :username,
-                password = :password,
-                display_name = :displayName,
-                role = :role,
-                identity_provider = :identityProvider,
-                locked = :locked
-        """;
+        String query;
+
+        if(exists) {
+            query = """
+                UPDATE %s
+                SET
+                    username = :username,
+                    password = :password,
+                    display_name = :displayName,
+                    role = :role,
+                    identity_provider = :identityProvider,
+                    locked = :locked
+                WHERE id = :id
+            """.formatted(USER_TABLE_NAME);
+        } else {
+            query = """
+                INSERT INTO %s (
+                    id,
+                    username,
+                    password,
+                    display_name,
+                    role,
+                    identity_provider,
+                    locked
+                ) VALUES (
+                    :id,
+                    :username,
+                    :password,
+                    :displayName,
+                    :role,
+                    :identityProvider,
+                    :locked
+                )
+            """.formatted(USER_TABLE_NAME);
+        }
 
         jdbcTemplate.update(query, parameters);
     }

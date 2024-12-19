@@ -44,6 +44,8 @@ public class UserDomainRepository implements UserEventStoreRepository, UserReadM
 
             userCrudRepository.save(projection);
         }
+
+        aggregate.commit();
     }
 
     @Override
