@@ -9,6 +9,7 @@ import de.mueller_constantin.taskcare.api.core.user.application.persistence.User
 import de.mueller_constantin.taskcare.api.infrastructure.persistence.crud.UserCrudRepository;
 import de.mueller_constantin.taskcare.api.infrastructure.persistence.es.EventStore;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +23,7 @@ import java.util.UUID;
 public class UserDomainRepository implements UserEventStoreRepository, UserReadModelRepository {
     private final EventStore eventStore;
     private final UserCrudRepository userCrudRepository;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     @Override
     public void save(UserAggregate aggregate) {
@@ -45,6 +47,7 @@ public class UserDomainRepository implements UserEventStoreRepository, UserReadM
             userCrudRepository.save(projection);
         }
 
+        aggregate.getUncommittedEvents().forEach(applicationEventPublisher::publishEvent);
         aggregate.commit();
     }
 

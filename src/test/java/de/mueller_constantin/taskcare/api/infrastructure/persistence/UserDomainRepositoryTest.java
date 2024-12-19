@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.jdbc.DataJdbcTest;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -50,9 +51,13 @@ class UserDomainRepositoryTest {
     @Autowired
     private UserDomainRepository userDomainRepository;
 
+    @MockitoBean
+    private ApplicationEventPublisher applicationEventPublisher;
+
     @Test
     void save() {
         doNothing().when(eventStore).saveAggregate(any());
+        doNothing().when(applicationEventPublisher).publishEvent(any());
 
         UserAggregate aggregate = new UserAggregate();
         aggregate.create("gerd123",
@@ -127,8 +132,10 @@ class UserDomainRepositoryTest {
     @TestConfiguration
     static class JdbcUserRepositoryTestConfig {
         @Bean
-        UserDomainRepository userDomainRepository(EventStore eventStore, UserCrudRepository userCrudRepository) {
-            return new UserDomainRepository(eventStore, userCrudRepository);
+        UserDomainRepository userDomainRepository(EventStore eventStore,
+                                                  UserCrudRepository userCrudRepository,
+                                                  ApplicationEventPublisher applicationEventPublisher) {
+            return new UserDomainRepository(eventStore, userCrudRepository, applicationEventPublisher);
         }
 
         @Bean

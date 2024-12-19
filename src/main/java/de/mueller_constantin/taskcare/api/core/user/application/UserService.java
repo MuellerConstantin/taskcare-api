@@ -2,31 +2,45 @@ package de.mueller_constantin.taskcare.api.core.user.application;
 
 import de.mueller_constantin.taskcare.api.core.common.application.ApplicationService;
 import de.mueller_constantin.taskcare.api.core.common.application.NoSuchEntityException;
+import de.mueller_constantin.taskcare.api.core.common.application.event.DomainEventBus;
 import de.mueller_constantin.taskcare.api.core.common.application.persistence.MediaStorage;
+import de.mueller_constantin.taskcare.api.core.common.domain.DomainEvent;
 import de.mueller_constantin.taskcare.api.core.common.domain.Page;
 import de.mueller_constantin.taskcare.api.core.common.domain.PageInfo;
 import de.mueller_constantin.taskcare.api.core.user.application.persistence.UserEventStoreRepository;
 import de.mueller_constantin.taskcare.api.core.user.application.persistence.UserReadModelRepository;
 import de.mueller_constantin.taskcare.api.core.user.application.security.CredentialsEncoder;
-import de.mueller_constantin.taskcare.api.core.user.domain.IdentityProvider;
-import de.mueller_constantin.taskcare.api.core.user.domain.Role;
-import de.mueller_constantin.taskcare.api.core.user.domain.UserAggregate;
-import de.mueller_constantin.taskcare.api.core.user.domain.UserProjection;
+import de.mueller_constantin.taskcare.api.core.user.domain.*;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Validator;
-import lombok.RequiredArgsConstructor;
 
 import java.util.Optional;
 import java.util.Set;
 
-@RequiredArgsConstructor
 public class UserService implements ApplicationService {
     private final UserEventStoreRepository userEventStoreRepository;
     private final UserReadModelRepository userReadModelRepository;
     private final CredentialsEncoder credentialsEncoder;
     private final MediaStorage mediaStorage;
+    private final DomainEventBus domainEventBus;
     private final Validator validator;
+
+    public UserService(UserEventStoreRepository userEventStoreRepository,
+                       UserReadModelRepository userReadModelRepository,
+                       CredentialsEncoder credentialsEncoder,
+                       MediaStorage mediaStorage,
+                       DomainEventBus domainEventBus,
+                       Validator validator) {
+        this.userEventStoreRepository = userEventStoreRepository;
+        this.userReadModelRepository = userReadModelRepository;
+        this.credentialsEncoder = credentialsEncoder;
+        this.mediaStorage = mediaStorage;
+        this.domainEventBus = domainEventBus;
+        this.validator = validator;
+
+        this.domainEventBus.subscribe(UserDeletedEvent.class, this::onUserDeletedEvent);
+    }
 
     protected void validate(Object object) throws ConstraintViolationException {
         Set<ConstraintViolation<Object>> violations = validator.validate(object);
@@ -155,10 +169,6 @@ public class UserService implements ApplicationService {
             throw new IllegalDefaultAdminAlterationException("Cannot delete default admin user");
         }
 
-        if(mediaStorage.exists("/profile-images/" + userAggregate.getId().toString())) {
-            mediaStorage.delete("/profile-images/" + userAggregate.getId().toString());
-        }
-
         userAggregate.delete();
         userEventStoreRepository.save(userAggregate);
     }
@@ -210,5 +220,13 @@ public class UserService implements ApplicationService {
 
     public boolean query(ExistsUserByIdQuery query) {
         return userReadModelRepository.existsById(query.getId());
+    }
+
+    protected void onUserDeletedEvent(DomainEvent event) {
+        UserDeletedEvent userDeletedEvent = (UserDeletedEvent) event;
+
+        if(mediaStorage.exists("/profile-images/" + userDeletedEvent.getAggregateId().toString())) {
+            mediaStorage.delete("/profile-images/" + userDeletedEvent.getAggregateId().toString());
+        }
     }
 }

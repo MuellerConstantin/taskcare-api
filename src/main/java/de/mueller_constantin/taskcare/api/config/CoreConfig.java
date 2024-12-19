@@ -1,5 +1,6 @@
 package de.mueller_constantin.taskcare.api.config;
 
+import de.mueller_constantin.taskcare.api.core.common.application.event.DomainEventBus;
 import de.mueller_constantin.taskcare.api.core.common.application.persistence.MediaStorage;
 import de.mueller_constantin.taskcare.api.core.user.application.persistence.UserEventStoreRepository;
 import de.mueller_constantin.taskcare.api.core.user.application.persistence.UserReadModelRepository;
@@ -16,8 +17,9 @@ public class CoreConfig {
                             UserReadModelRepository readModelRepository,
                             CredentialsEncoder credentialsEncoder,
                             MediaStorage mediaStorage,
+                            DomainEventBus domainEventBus,
                             Validator validator) {
         return new UserService(userEventStoreRepository, readModelRepository,
-                credentialsEncoder, mediaStorage, validator);
+                credentialsEncoder, mediaStorage, domainEventBus, validator);
     }
 }
