@@ -253,6 +253,62 @@ public class MySqlBoardCrudRepository implements BoardCrudRepository {
     }
 
     @Override
+    public List<BoardProjection> findAllUserIsMember(UUID userId) {
+        MapSqlParameterSource parameters = new MapSqlParameterSource();
+        parameters.addValue("userId", userId);
+
+        String query = """
+            SELECT
+                DISTINCT board_id
+            FROM %s
+            WHERE user_id = :userId
+        """.formatted(MEMBER_TABLE_NAME);
+
+        List<UUID> boardIds = jdbcTemplate.query(query, parameters, (rs, rowNum) -> UUID.fromString(rs.getString("board_id")));
+
+        if (boardIds.isEmpty()) {
+            return List.of();
+        }
+
+        parameters = new MapSqlParameterSource();
+        parameters.addValue("boardIds", boardIds);
+
+        query = """
+            SELECT
+                id,
+                name,
+                description
+            FROM %s
+            WHERE id IN (:boardIds)
+        """.formatted(BOARD_TABLE_NAME);
+
+        List<BoardProjection> boardProjections = jdbcTemplate.query(query, parameters, this::toBoardProjection);
+
+        parameters = new MapSqlParameterSource();
+        parameters.addValue("boardIds", boardIds);
+
+        query = """
+            SELECT
+                id,
+                board_id,
+                user_id,
+                role
+            FROM %s
+            WHERE board_id IN (:boardIds)
+        """.formatted(MEMBER_TABLE_NAME);
+
+        List<MemberProjection> memberProjections = jdbcTemplate.query(query, parameters, this::toMemberProjection);
+
+        return boardProjections.stream()
+                .map(projection -> projection.toBuilder()
+                        .members(memberProjections.stream()
+                                .filter(m -> m.getBoardId().equals(projection.getId()))
+                                .collect(Collectors.toSet()))
+                        .build())
+                .toList();
+    }
+
+    @Override
     public void deleteById(UUID id) {
         MapSqlParameterSource parameters = new MapSqlParameterSource();
         parameters.addValue("id", id.toString());

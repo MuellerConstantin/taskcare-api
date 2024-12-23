@@ -87,6 +87,11 @@ public class BoardDomainRepository implements BoardEventStoreRepository, BoardRe
     }
 
     @Override
+    public List<BoardProjection> findAllUserIsMember(UUID userId) {
+        return boardCrudRepository.findAllUserIsMember(userId);
+    }
+
+    @Override
     public boolean existsById(UUID id) {
         return boardCrudRepository.existsById(id);
     }

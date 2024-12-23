@@ -1,6 +1,7 @@
 package de.mueller_constantin.taskcare.api.core.kanban.application;
 
 import de.mueller_constantin.taskcare.api.core.common.application.NoSuchEntityException;
+import de.mueller_constantin.taskcare.api.core.common.application.event.DomainEventBus;
 import de.mueller_constantin.taskcare.api.core.common.domain.Entity;
 import de.mueller_constantin.taskcare.api.core.common.domain.Page;
 import de.mueller_constantin.taskcare.api.core.common.domain.PageInfo;
@@ -36,6 +37,9 @@ class BoardServiceTest {
 
     @Mock
     private UserService userService;
+
+    @Mock
+    private DomainEventBus domainEventBus;
 
     @Mock
     private Validator validator;

@@ -88,7 +88,7 @@ class BoardDomainRepositoryTest {
     }
 
     @Test
-    void findAllUserIsMember() {
+    void findAllUserIsMemberPaged() {
         Page<BoardProjection> page = boardDomainRepository.findAllUserIsMember(UUID.fromString("6aa18950-81e0-4ac4-ad3a-37437db5c957"), PageInfo.builder()
                 .page(0)
                 .perPage(1)
@@ -97,6 +97,13 @@ class BoardDomainRepositoryTest {
         assertEquals(1, page.getContent().size());
         assertEquals(2, page.getInfo().getTotalElements());
         assertEquals(2, page.getInfo().getTotalPages());
+    }
+
+    @Test
+    void findAllUserIsMember() {
+        List<BoardProjection> boardProjections = boardDomainRepository.findAllUserIsMember(UUID.fromString("6aa18950-81e0-4ac4-ad3a-37437db5c957"));
+
+        assertEquals(2, boardProjections.size());
     }
 
     @Test

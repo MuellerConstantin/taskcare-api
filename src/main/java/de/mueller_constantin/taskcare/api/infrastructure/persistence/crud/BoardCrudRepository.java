@@ -17,6 +17,8 @@ public interface BoardCrudRepository {
 
     Page<BoardProjection> findAllUserIsMember(UUID userId, PageInfo pageInfo);
 
+    List<BoardProjection> findAllUserIsMember(UUID userId);
+
     void deleteById(UUID id);
 
     void save(BoardProjection projection);
