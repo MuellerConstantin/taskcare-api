@@ -33,3 +33,20 @@ CREATE TABLE IF NOT EXISTS users (
 );
 
 ALTER TABLE users ADD CONSTRAINT UNIQUE_USERNAME UNIQUE (username);
+
+CREATE TABLE IF NOT EXISTS boards (
+    id VARCHAR(255) PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    description VARCHAR(255)
+);
+
+CREATE TABLE IF NOT EXISTS members (
+    id VARCHAR(255) PRIMARY KEY,
+    board_id VARCHAR(255) NOT NULL,
+    user_id VARCHAR(255) NOT NULL,
+    role VARCHAR(255) NOT NULL,
+    FOREIGN KEY (board_id) REFERENCES boards(id),
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+ALTER TABLE members ADD CONSTRAINT UNIQUE_BOARD_USER UNIQUE (board_id, user_id);

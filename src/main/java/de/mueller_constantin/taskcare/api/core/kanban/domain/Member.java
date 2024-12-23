@@ -12,11 +12,13 @@ import java.util.UUID;
 @SuperBuilder
 @EqualsAndHashCode(callSuper = true)
 public class Member extends Entity {
+    private UUID boardId;
     private UUID userId;
     private Role role;
 
-    public Member(UUID id, UUID userId, Role role) {
+    public Member(UUID id, UUID boardId, UUID userId, Role role) {
         super(id);
+        this.boardId = boardId;
         this.userId = userId;
         this.role = role;
     }

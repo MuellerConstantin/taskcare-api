@@ -1,6 +1,5 @@
-package de.mueller_constantin.taskcare.api.core.kanban.application.persistence;
+package de.mueller_constantin.taskcare.api.infrastructure.persistence.crud;
 
-import de.mueller_constantin.taskcare.api.core.common.application.ReadModelRepository;
 import de.mueller_constantin.taskcare.api.core.common.domain.Page;
 import de.mueller_constantin.taskcare.api.core.common.domain.PageInfo;
 import de.mueller_constantin.taskcare.api.core.kanban.domain.BoardProjection;
@@ -9,7 +8,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-public interface BoardReadModelRepository extends ReadModelRepository {
+public interface BoardCrudRepository {
     Optional<BoardProjection> findById(UUID id);
 
     List<BoardProjection> findAll();
@@ -17,6 +16,10 @@ public interface BoardReadModelRepository extends ReadModelRepository {
     Page<BoardProjection> findAll(PageInfo pageInfo);
 
     Page<BoardProjection> findAllUserIsMember(UUID userId, PageInfo pageInfo);
+
+    void deleteById(UUID id);
+
+    void save(BoardProjection projection);
 
     boolean existsById(UUID id);
 }

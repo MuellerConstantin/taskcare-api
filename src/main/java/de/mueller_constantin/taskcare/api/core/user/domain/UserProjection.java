@@ -2,14 +2,13 @@ package de.mueller_constantin.taskcare.api.core.user.domain;
 
 import de.mueller_constantin.taskcare.api.core.common.domain.Projection;
 import lombok.*;
-import lombok.experimental.SuperBuilder;
 
 import java.util.UUID;
 
 @Getter
 @ToString
 @EqualsAndHashCode
-@SuperBuilder
+@Builder(toBuilder = true)
 public class UserProjection implements Projection {
     private final UUID id;
     private final String username;

@@ -37,10 +37,8 @@ import static org.mockito.Mockito.doNothing;
 @ExtendWith(SpringExtension.class)
 @DataJdbcTest
 @ActiveProfiles("test")
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
-@Sql(scripts = {"/sql/ddl/mysql.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS)
-@Sql(scripts = {"/sql/dml/mysql.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+@Sql(scripts = {"/sql/ddl/mysql.sql", "/sql/dml/mysql.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 @TestPropertySource(properties = {
         "logging.level.org.springframework.jdbc.core=TRACE"
 })
@@ -48,11 +46,11 @@ class UserDomainRepositoryTest {
     @MockitoBean
     private EventStore eventStore;
 
-    @Autowired
-    private UserDomainRepository userDomainRepository;
-
     @MockitoBean
     private ApplicationEventPublisher applicationEventPublisher;
+
+    @Autowired
+    private UserDomainRepository userDomainRepository;
 
     @Test
     void save() {
@@ -130,7 +128,7 @@ class UserDomainRepositoryTest {
     }
 
     @TestConfiguration
-    static class JdbcUserRepositoryTestConfig {
+    static class UserDomainRepositoryTestConfig {
         @Bean
         UserDomainRepository userDomainRepository(EventStore eventStore,
                                                   UserCrudRepository userCrudRepository,

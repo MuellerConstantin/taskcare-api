@@ -84,7 +84,7 @@ public class BoardAggregate extends Aggregate {
                 .version(this.getNextVersion())
                 .name(name)
                 .description(description)
-                .creator(new Member(UUID.randomUUID(), creatorId, Role.ADMINISTRATOR))
+                .creator(new Member(UUID.randomUUID(), this.getId(), creatorId, Role.ADMINISTRATOR))
                 .build()
         );
     }
@@ -109,7 +109,7 @@ public class BoardAggregate extends Aggregate {
         this.applyChange(MemberAddedEvent.builder()
                 .aggregateId(this.getId())
                 .version(this.getNextVersion())
-                .member(new Member(UUID.randomUUID(), userId, role))
+                .member(new Member(UUID.randomUUID(), this.getId(), userId, role))
                 .build()
         );
     }
