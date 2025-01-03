@@ -65,7 +65,7 @@ public class UserController {
     @GetMapping("/users")
     PageDto<UserDto> getAllUsers(@RequestParam(required = false, defaultValue = "0") @Min(0) int page,
                                  @RequestParam(required = false, defaultValue = "25") @Min(0) int perPage) {
-        return userDtoMapper.mapToDTO(userService.query(FindAllUsersQuery.builder()
+        return userDtoMapper.mapToDto(userService.query(FindAllUsersQuery.builder()
                 .page(page)
                 .perPage(perPage)
                 .build()

@@ -30,7 +30,7 @@ public interface UserDtoMapper {
     UpdateUserByIdCommand mapToCommand(UUID id, UpdateUserDto updateUserDto);
 
     @Mapping(source = "content", target = "content", defaultExpression = "java(new ArrayList<>())")
-    PageDto<UserDto> mapToDTO(Page<UserProjection> userProjectionPage);
+    PageDto<UserDto> mapToDto(Page<UserProjection> userProjectionPage);
 
     @Named("unwrapOptional")
     default <T> T unwrapOptional(Optional<T> optional) {
