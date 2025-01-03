@@ -128,7 +128,10 @@ public class MySqlBoardCrudRepository implements BoardCrudRepository {
         List<BoardProjection> boardProjections = jdbcTemplate.query(query, parameters, this::toBoardProjection);
 
         parameters = new MapSqlParameterSource();
-        parameters.addValue("boardIds", boardProjections.stream().map(BoardProjection::getId).toList());
+        parameters.addValue("boardIds", boardProjections.stream()
+                .map(BoardProjection::getId)
+                .map(UUID::toString)
+                .toList());
 
         query = """
             SELECT
@@ -164,7 +167,7 @@ public class MySqlBoardCrudRepository implements BoardCrudRepository {
     @Override
     public Page<BoardProjection> findAllUserIsMember(UUID userId, PageInfo pageInfo) {
         MapSqlParameterSource parameters = new MapSqlParameterSource();
-        parameters.addValue("userId", userId);
+        parameters.addValue("userId", userId.toString());
 
         String query = """
             SELECT
@@ -177,7 +180,7 @@ public class MySqlBoardCrudRepository implements BoardCrudRepository {
         int totalPages = (int) Math.ceil((double) totalElements / pageInfo.getPerPage());
 
         parameters = new MapSqlParameterSource();
-        parameters.addValue("userId", userId);
+        parameters.addValue("userId", userId.toString());
         parameters.addValue("perPage", pageInfo.getPerPage());
         parameters.addValue("offset", pageInfo.getPage() * pageInfo.getPerPage());
 
@@ -205,7 +208,9 @@ public class MySqlBoardCrudRepository implements BoardCrudRepository {
         }
 
         parameters = new MapSqlParameterSource();
-        parameters.addValue("boardIds", boardIds);
+        parameters.addValue("boardIds", boardIds.stream()
+                .map(UUID::toString)
+                .toList());
 
         query = """
             SELECT
@@ -219,7 +224,9 @@ public class MySqlBoardCrudRepository implements BoardCrudRepository {
         List<BoardProjection> boardProjections = jdbcTemplate.query(query, parameters, this::toBoardProjection);
 
         parameters = new MapSqlParameterSource();
-        parameters.addValue("boardIds", boardIds);
+        parameters.addValue("boardIds", boardIds.stream()
+                .map(UUID::toString)
+                .toList());
 
         query = """
             SELECT
@@ -255,7 +262,7 @@ public class MySqlBoardCrudRepository implements BoardCrudRepository {
     @Override
     public List<BoardProjection> findAllUserIsMember(UUID userId) {
         MapSqlParameterSource parameters = new MapSqlParameterSource();
-        parameters.addValue("userId", userId);
+        parameters.addValue("userId", userId.toString());
 
         String query = """
             SELECT
@@ -271,7 +278,9 @@ public class MySqlBoardCrudRepository implements BoardCrudRepository {
         }
 
         parameters = new MapSqlParameterSource();
-        parameters.addValue("boardIds", boardIds);
+        parameters.addValue("boardIds", boardIds.stream()
+                .map(UUID::toString)
+                .toList());
 
         query = """
             SELECT
@@ -285,7 +294,9 @@ public class MySqlBoardCrudRepository implements BoardCrudRepository {
         List<BoardProjection> boardProjections = jdbcTemplate.query(query, parameters, this::toBoardProjection);
 
         parameters = new MapSqlParameterSource();
-        parameters.addValue("boardIds", boardIds);
+        parameters.addValue("boardIds", boardIds.stream()
+                .map(UUID::toString)
+                .toList());
 
         query = """
             SELECT
@@ -371,7 +382,7 @@ public class MySqlBoardCrudRepository implements BoardCrudRepository {
         // Delete removed members
 
         parameters = new MapSqlParameterSource();
-        parameters.addValue("boardId", projection.getId());
+        parameters.addValue("boardId", projection.getId().toString());
         parameters.addValue("memberIds", projection.getMembers().stream().map(MemberProjection::getId).collect(Collectors.toList()));
 
         query = """
@@ -385,7 +396,7 @@ public class MySqlBoardCrudRepository implements BoardCrudRepository {
         // Save current members
 
         parameters = new MapSqlParameterSource();
-        parameters.addValue("boardId", projection.getId());
+        parameters.addValue("boardId", projection.getId().toString());
 
         query = """
             SELECT
@@ -402,9 +413,9 @@ public class MySqlBoardCrudRepository implements BoardCrudRepository {
                     .filter(m -> newMemberIds.contains(m.getId()))
                     .map(member -> {
                         MapSqlParameterSource nestedParameters = new MapSqlParameterSource();
-                        nestedParameters.addValue("id", member.getId());
-                        nestedParameters.addValue("boardId", projection.getId());
-                        nestedParameters.addValue("userId", member.getUserId());
+                        nestedParameters.addValue("id", member.getId().toString());
+                        nestedParameters.addValue("boardId", projection.getId().toString());
+                        nestedParameters.addValue("userId", member.getUserId().toString());
                         nestedParameters.addValue("role", member.getRole().toString());
                         return nestedParameters;
                     })
@@ -432,9 +443,9 @@ public class MySqlBoardCrudRepository implements BoardCrudRepository {
                     .filter(m -> existingMemberIds.contains(m.getId()))
                     .map(member -> {
                         MapSqlParameterSource nestedParameters = new MapSqlParameterSource();
-                        nestedParameters.addValue("id", member.getId());
-                        nestedParameters.addValue("boardId", projection.getId());
-                        nestedParameters.addValue("userId", member.getUserId());
+                        nestedParameters.addValue("id", member.getId().toString());
+                        nestedParameters.addValue("boardId", projection.getId().toString());
+                        nestedParameters.addValue("userId", member.getUserId().toString());
                         nestedParameters.addValue("role", member.getRole().toString());
                         return nestedParameters;
                     })
