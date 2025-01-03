@@ -13,12 +13,9 @@ import de.mueller_constantin.taskcare.api.core.kanban.domain.Role;
 import de.mueller_constantin.taskcare.api.core.user.application.ExistsUserByIdQuery;
 import de.mueller_constantin.taskcare.api.core.user.application.UserService;
 import de.mueller_constantin.taskcare.api.core.user.domain.UserDeletedEvent;
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.ConstraintViolationException;
-import jakarta.validation.Validator;
+import jakarta.validation.Valid;
 
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 public class BoardService {
@@ -26,33 +23,20 @@ public class BoardService {
     private final BoardReadModelRepository boardReadModelRepository;
     private final UserService userService;
     private final DomainEventBus domainEventBus;
-    private final Validator validator;
 
     public BoardService(BoardEventStoreRepository boardEventStoreRepository,
                         BoardReadModelRepository boardReadModelRepository,
                         UserService userService,
-                        DomainEventBus domainEventBus,
-                        Validator validator) {
+                        DomainEventBus domainEventBus) {
         this.boardEventStoreRepository = boardEventStoreRepository;
         this.boardReadModelRepository = boardReadModelRepository;
         this.userService = userService;
         this.domainEventBus = domainEventBus;
-        this.validator = validator;
 
         this.domainEventBus.subscribe(UserDeletedEvent.class, this::onUserDeletedEvent);
     }
 
-    protected void validate(Object object) throws ConstraintViolationException {
-        Set<ConstraintViolation<Object>> violations = validator.validate(object);
-
-        if (!violations.isEmpty()) {
-            throw new ConstraintViolationException(violations);
-        }
-    }
-
-    public void dispatch(CreateBoardCommand command) {
-        validate(command);
-
+    public void dispatch(@Valid CreateBoardCommand command) {
         if (!userService.query(new ExistsUserByIdQuery(command.getCreatorId()))) {
             throw new NoSuchEntityException("User with id '" + command.getCreatorId() + "' does not exist");
         }
@@ -62,9 +46,7 @@ public class BoardService {
         boardEventStoreRepository.save(boardAggregate);
     }
 
-    public void dispatch(UpdateBoardByIdCommand command) {
-        validate(command);
-
+    public void dispatch(@Valid UpdateBoardByIdCommand command) {
         BoardAggregate boardAggregate = boardEventStoreRepository.load(command.getId())
                 .orElseThrow(NoSuchEntityException::new);
 
@@ -80,9 +62,7 @@ public class BoardService {
         boardEventStoreRepository.save(boardAggregate);
     }
 
-    public void dispatch(DeleteBoardByIdCommand command) {
-        validate(command);
-
+    public void dispatch(@Valid DeleteBoardByIdCommand command) {
         BoardAggregate boardAggregate = boardEventStoreRepository.load(command.getId())
                 .orElseThrow(NoSuchEntityException::new);
 
@@ -90,9 +70,7 @@ public class BoardService {
         boardEventStoreRepository.save(boardAggregate);
     }
 
-    public void dispatch(AddMemberByIdCommand command) {
-        validate(command);
-
+    public void dispatch(@Valid AddMemberByIdCommand command) {
         if (!userService.query(new ExistsUserByIdQuery(command.getUserId()))) {
             throw new NoSuchEntityException("User with id '" + command.getUserId() + "' does not exist");
         }
@@ -104,9 +82,7 @@ public class BoardService {
         boardEventStoreRepository.save(boardAggregate);
     }
 
-    public void dispatch(RemoveMemberByIdCommand command) {
-        validate(command);
-
+    public void dispatch(@Valid RemoveMemberByIdCommand command) {
         BoardAggregate boardAggregate = boardEventStoreRepository.load(command.getBoardId())
                 .orElseThrow(NoSuchEntityException::new);
 
@@ -114,9 +90,7 @@ public class BoardService {
         boardEventStoreRepository.save(boardAggregate);
     }
 
-    public void dispatch(UpdateMemberByIdCommand command) {
-        validate(command);
-
+    public void dispatch(@Valid UpdateMemberByIdCommand command) {
         BoardAggregate boardAggregate = boardEventStoreRepository.load(command.getBoardId())
                 .orElseThrow(NoSuchEntityException::new);
 

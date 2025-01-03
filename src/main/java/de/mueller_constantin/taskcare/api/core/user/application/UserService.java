@@ -4,6 +4,7 @@ import de.mueller_constantin.taskcare.api.core.common.application.ApplicationSer
 import de.mueller_constantin.taskcare.api.core.common.application.NoSuchEntityException;
 import de.mueller_constantin.taskcare.api.core.common.application.event.DomainEventBus;
 import de.mueller_constantin.taskcare.api.core.common.application.persistence.MediaStorage;
+import de.mueller_constantin.taskcare.api.core.common.application.validation.Validated;
 import de.mueller_constantin.taskcare.api.core.common.domain.DomainEvent;
 import de.mueller_constantin.taskcare.api.core.common.domain.Page;
 import de.mueller_constantin.taskcare.api.core.common.domain.PageInfo;
@@ -11,48 +12,33 @@ import de.mueller_constantin.taskcare.api.core.user.application.persistence.User
 import de.mueller_constantin.taskcare.api.core.user.application.persistence.UserReadModelRepository;
 import de.mueller_constantin.taskcare.api.core.user.application.security.CredentialsEncoder;
 import de.mueller_constantin.taskcare.api.core.user.domain.*;
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.ConstraintViolationException;
-import jakarta.validation.Validator;
+import jakarta.validation.Valid;
 
 import java.util.Optional;
-import java.util.Set;
 
+@Validated
 public class UserService implements ApplicationService {
     private final UserEventStoreRepository userEventStoreRepository;
     private final UserReadModelRepository userReadModelRepository;
     private final CredentialsEncoder credentialsEncoder;
     private final MediaStorage mediaStorage;
     private final DomainEventBus domainEventBus;
-    private final Validator validator;
 
     public UserService(UserEventStoreRepository userEventStoreRepository,
                        UserReadModelRepository userReadModelRepository,
                        CredentialsEncoder credentialsEncoder,
                        MediaStorage mediaStorage,
-                       DomainEventBus domainEventBus,
-                       Validator validator) {
+                       DomainEventBus domainEventBus) {
         this.userEventStoreRepository = userEventStoreRepository;
         this.userReadModelRepository = userReadModelRepository;
         this.credentialsEncoder = credentialsEncoder;
         this.mediaStorage = mediaStorage;
         this.domainEventBus = domainEventBus;
-        this.validator = validator;
 
         this.domainEventBus.subscribe(UserDeletedEvent.class, this::onUserDeletedEvent);
     }
 
-    protected void validate(Object object) throws ConstraintViolationException {
-        Set<ConstraintViolation<Object>> violations = validator.validate(object);
-
-        if (!violations.isEmpty()) {
-            throw new ConstraintViolationException(violations);
-        }
-    }
-
-    public void dispatch(CreateUserCommand command) {
-        validate(command);
-
+    public void dispatch(@Valid CreateUserCommand command) {
         boolean usernameInUse = userReadModelRepository.existsByUsername(command.getUsername());
 
         if (usernameInUse) {
@@ -67,9 +53,7 @@ public class UserService implements ApplicationService {
         userEventStoreRepository.save(userAggregate);
     }
 
-    public void dispatch(SyncDefaultAdminCommand command) {
-        validate(command);
-
+    public void dispatch(@Valid SyncDefaultAdminCommand command) {
         boolean defaultAdminExists = userReadModelRepository.existsByUsername(UserAggregate.DEFAULT_ADMIN_USERNAME);
 
         if(!defaultAdminExists) {
@@ -95,9 +79,7 @@ public class UserService implements ApplicationService {
         }
     }
 
-    public void dispatch(SyncLdapUserCommand command) {
-        validate(command);
-
+    public void dispatch(@Valid SyncLdapUserCommand command) {
         Optional<UserProjection> userProjection = userReadModelRepository.findByUsername(command.getUsername());
 
         if(userProjection.isPresent() && userProjection.get().getIdentityProvider() != IdentityProvider.LDAP) {
@@ -120,9 +102,7 @@ public class UserService implements ApplicationService {
         }
     }
 
-    public void dispatch(UpdateUserByIdCommand command) {
-        validate(command);
-
+    public void dispatch(@Valid UpdateUserByIdCommand command) {
         UserProjection userProjection = userReadModelRepository.findById(command.getId())
                 .orElseThrow(NoSuchEntityException::new);
 
@@ -159,9 +139,7 @@ public class UserService implements ApplicationService {
         userEventStoreRepository.save(userAggregate);
     }
 
-    public void dispatch(DeleteUserByIdCommand command) {
-        validate(command);
-
+    public void dispatch(@Valid DeleteUserByIdCommand command) {
         UserAggregate userAggregate = userEventStoreRepository.load(command.getId())
                 .orElseThrow(NoSuchEntityException::new);
 
@@ -173,9 +151,7 @@ public class UserService implements ApplicationService {
         userEventStoreRepository.save(userAggregate);
     }
 
-    public void dispatch(LockUserByIdCommand command) {
-        validate(command);
-
+    public void dispatch(@Valid LockUserByIdCommand command) {
         UserAggregate userAggregate = userEventStoreRepository.load(command.getId())
                 .orElseThrow(NoSuchEntityException::new);
 
@@ -187,9 +163,7 @@ public class UserService implements ApplicationService {
         userEventStoreRepository.save(userAggregate);
     }
 
-    public void dispatch(UnlockUserByIdCommand command) {
-        validate(command);
-
+    public void dispatch(@Valid UnlockUserByIdCommand command) {
         UserAggregate userAggregate = userEventStoreRepository.load(command.getId())
                 .orElseThrow(NoSuchEntityException::new);
 
