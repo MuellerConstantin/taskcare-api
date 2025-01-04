@@ -83,8 +83,8 @@ public abstract class Aggregate {
      * @throws IllegalArgumentException If the event cannot be applied or is unsupported.
      */
     public final void loadFromHistory(List<DomainEvent> events) throws IllegalArgumentException {
-        if(events == null || events.isEmpty()) {
-            throw new IllegalArgumentException("Events must not be null or empty");
+        if(events == null) {
+            throw new IllegalArgumentException("Events must not be null");
         }
 
         events.forEach((event) -> {
