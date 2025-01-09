@@ -114,6 +114,7 @@ public class BoardController {
     }
 
     @GetMapping("/boards/{id}/logo-image")
+    @PreAuthorize("hasRole('ADMINISTRATOR') or @domainSecurityService.isBoardMember(#id, principal.getUserProjection().getId())")
     public ResponseEntity<byte[]> getLogoImage(@PathVariable UUID id) {
         FindBoardByIdQuery query = new FindBoardByIdQuery(id);
         BoardProjection result = boardService.query(query);
