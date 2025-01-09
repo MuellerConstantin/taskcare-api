@@ -322,24 +322,24 @@ public class MySqlBoardCrudRepository implements BoardCrudRepository {
     @Override
     public void deleteById(UUID id) {
         MapSqlParameterSource parameters = new MapSqlParameterSource();
-        parameters.addValue("id", id.toString());
+        parameters.addValue("boardId", id.toString());
 
         String query = """
             DELETE
             FROM %s
-            WHERE id = :id
-        """.formatted(BOARD_TABLE_NAME);
+            WHERE board_id = :boardId
+        """.formatted(MEMBER_TABLE_NAME);
 
         jdbcTemplate.update(query, parameters);
 
         parameters = new MapSqlParameterSource();
-        parameters.addValue("boardId", id.toString());
+        parameters.addValue("id", id.toString());
 
         query = """
             DELETE
             FROM %s
-            WHERE board_id = :boardId
-        """.formatted(MEMBER_TABLE_NAME);
+            WHERE id = :id
+        """.formatted(BOARD_TABLE_NAME);
 
         jdbcTemplate.update(query, parameters);
     }

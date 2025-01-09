@@ -16,6 +16,10 @@ public class Member extends Entity {
     private UUID userId;
     private Role role;
 
+    public Member() {
+        super(UUID.randomUUID());
+    }
+
     public Member(UUID id, UUID boardId, UUID userId, Role role) {
         super(id);
         this.boardId = boardId;
