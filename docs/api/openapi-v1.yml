@@ -78,6 +78,8 @@ info:
     | `TypeMismatchError` | 422 | One or more field type mismatch errors occurred in request body. |
     | `IllegalDefaultAdminAlterationError` | 409 | If tried to alter the default admin user. |
     | `IllegalImportedUserAlterationError` | 409 | If tried to alter an imported user in an invalid way. |
+    | `BoardMemberAlreadyExistsError` | 409 | If a board member already exists. |
+    | `BoardMustBeAdministrableError` | 409 | If a board would become unadministrable. |
     | `HttpMediaTypeNotSupportedError` | 406 | Unsupported media type used in request body. |
     | `HttpRequestMethodNotSupportedError` | 405 | Unsupported request method used in request body. |
     | `NotFoundError` | 404 | The specified resource was not found. |
@@ -134,6 +136,10 @@ tags:
     description: Allows the client to authenticate themselves.
   - name: User
     description: Everything about user and account management.
+  - name: Board
+    description: Management of kanban boards.
+  - name: Member
+    description: Management of kanban board members.
 paths:
   /auth/token:
     post:
@@ -466,7 +472,6 @@ paths:
       summary: Retrieves the profile image of a specific user.
       description: |
         Retrieves the profile image of a specific user.
-        Only the profile image of a specific user can be retrieved.
       parameters:
         - name: id
           in: path
@@ -486,6 +491,448 @@ paths:
                 format: binary
         401:
           $ref: "#/components/responses/401"
+        404:
+          $ref: "#/components/responses/404"
+  /boards:
+    get:
+      tags:
+        - Board
+      summary: Returns all available boards.
+      description: >
+        Returns all available boards of the platform.  Only available for admin users.
+      parameters:
+        - name: page
+          in: query
+          description: Zero based index of page to load.
+          required: false
+          schema:
+            type: integer
+            example: 0
+        - name: perPage
+          in: query
+          description: Number of elements per page.
+          required: false
+          schema:
+            type: integer
+            example: 10
+      responses:
+        200:
+          description: Successfully fetched all available boards.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BoardPageDto"
+              example:
+                page: 0
+                perPage: 10
+                totalElements: 1
+                totalPages: 1
+                content:
+                  - id: 3377cf8f-da29-4aa7-9036-91951b8fce87
+                    title: Sample Board
+                    description: >
+                      This is a sample board.
+        401:
+          $ref: "#/components/responses/401"
+    post:
+      tags:
+        - Board
+      summary: Creates a new board.
+      description: >
+        Creates a new board.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateBoardDto"
+            example:
+              title: Sample Board
+              description: >
+                This is a sample board.
+      responses:
+        201:
+          description: Successfully created the new board.
+        401:
+          $ref: "#/components/responses/401"
+        422:
+          $ref: "#/components/responses/422"
+  /user/me/boards:
+    get:
+      tags:
+        - Board
+      summary: Returns all boards of currently authenticated user.
+      description: >
+        Returns all available boards for the currently authenticated user.
+      responses:
+        200:
+          description: Successfully fetched all available boards.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BoardPageDto"
+        401:
+          $ref: "#/components/responses/401"
+  /boards/{id}:
+    get:
+      tags:
+        - Board
+      summary: Returns a single board.
+      description: >
+        Returns a single board.
+      parameters:
+        - name: id
+          in: path
+          description: Unique identifier of the board.
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 3377cf8f-da29-4aa7-9036-91951b8fce87
+      responses:
+        200:
+          description: Successfully fetched the board.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BoardDto"
+              example:
+                id: 3377cf8f-da29-4aa7-9036-91951b8fce87
+                title: Sample Board
+                description: >
+                  This is a sample board.
+        401:
+          $ref: "#/components/responses/401"
+        403:
+          $ref: "#/components/responses/403"
+        404:
+          $ref: "#/components/responses/404"
+    patch:
+      tags:
+        - Board
+      summary: Updates the details of a single board.
+      description: >
+        Updates a board. Only available for admin users.
+      parameters:
+        - name: id
+          in: path
+          description: Unique identifier of the board.
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 3377cf8f-da29-4aa7-9036-91951b8fce87
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateBoardDto"
+            example:
+              description: >
+                This is a sample kanban board.
+      responses:
+        204:
+          description: Successfully updated the board.
+        401:
+          $ref: "#/components/responses/401"
+        403:
+          $ref: "#/components/responses/403"
+        404:
+          $ref: "#/components/responses/404"
+        422:
+          $ref: "#/components/responses/422"
+    delete:
+      tags:
+        - Board
+      summary: Deletes a single board.
+      description: >
+        Allows deleting a board. Only available for admin users.
+      parameters:
+        - name: id
+          in: path
+          description: Unique identifier of the board.
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 3377cf8f-da29-4aa7-9036-91951b8fce87
+      responses:
+        204:
+          description: Successfully deleted the selected board.
+        401:
+          $ref: "#/components/responses/401"
+        403:
+          $ref: "#/components/responses/403"
+        404:
+          $ref: "#/components/responses/404"
+  /boards/{id}/logo-image:
+    get:
+      tags:
+        - Board
+      summary: Retrieves the logo image of a board user.
+      description: |
+        Retrieves the logo image of a specific board.
+      parameters:
+        - name: id
+          in: path
+          description: Unique identifier of the board.
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 3377cf8f-da29-4aa7-9036-91951b8fce87
+      responses:
+        200:
+          description: Successfully fetched the logo image.
+          content:
+            text/plain:
+              schema:
+                type: string
+                format: binary
+        401:
+          $ref: "#/components/responses/401"
+        403:
+          $ref: "#/components/responses/403"
+        404:
+          $ref: "#/components/responses/404"
+    post:
+      tags:
+        - Board
+      summary: Uploads a logo image for board.
+      description: |
+        Uploads a logo image for the selected board. Only available for board administrators.
+      parameters:
+        - name: id
+          in: path
+          description: Unique identifier of the board.
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 3377cf8f-da29-4aa7-9036-91951b8fce87
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        204:
+          description: Successfully uploaded the logo image.
+        401:
+          $ref: "#/components/responses/401"
+        403:
+          $ref: "#/components/responses/403"
+        404:
+          $ref: "#/components/responses/404"
+    delete:
+      tags:
+        - Board
+      summary: Deletes the logo image of board.
+      description: |
+        Deletes the logo image of the selected board. Only available for board administrators.
+      parameters:
+        - name: id
+          in: path
+          description: Unique identifier of the board.
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 3377cf8f-da29-4aa7-9036-91951b8fce87
+      responses:
+        204:
+          description: Successfully deleted the logo image.
+        401:
+          $ref: "#/components/responses/401"
+        403:
+          $ref: "#/components/responses/403"
+        404:
+          $ref: "#/components/responses/404"
+  /boards/{boardId}/members:
+    get:
+      tags:
+        - Member
+      summary: Returns all members of a board.
+      description: >
+        Returns all members of a selected board
+      parameters:
+        - name: boardId
+          in: path
+          description: Unique identifier of the board.
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 3377cf8f-da29-4aa7-9036-91951b8fce87
+      responses:
+        200:
+          description: Successfully fetched all members of the board.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MemberDto"
+              example:
+                - id: af95613c-72e5-423b-996d-bcf496aa9e7a
+                  userId: 3377cf8f-da29-4aa7-9036-91951b8fce87
+                  role: MEMBER
+        401:
+          $ref: "#/components/responses/401"
+        403:
+          $ref: "#/components/responses/403"
+        404:
+          $ref: "#/components/responses/404"
+    post:
+      tags:
+        - Member
+      summary: Adds a new member to a board.
+      description: >
+        Adds a new member to a board. Only available for board administrators.
+      parameters:
+        - name: boardId
+          in: path
+          description: Unique identifier of the board.
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 3377cf8f-da29-4aa7-9036-91951b8fce87
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AddMemberDto"
+            example:
+              userId: 3377cf8f-da29-4aa7-9036-91951b8fce87
+              role: MEMBER
+      responses:
+        201:
+          description: Successfully added the member to the board.
+        401:
+          $ref: "#/components/responses/401"
+        403:
+          $ref: "#/components/responses/403"
+        404:
+          $ref: "#/components/responses/404"
+  /boards/{boardId}/members/{memberId}:
+    delete:
+      tags:
+        - Member
+      summary: Deletes a member from a board.
+      description: >
+        Deletes a member from a board. Only available for board administrators.
+      parameters:
+        - name: boardId
+          in: path
+          description: Unique identifier of the board.
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 3377cf8f-da29-4aa7-9036-91951b8fce87
+        - name: memberId
+          in: path
+          description: Unique identifier of the member.
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 3377cf8f-da29-4aa7-9036-91951b8fce87
+      responses:
+        204:
+          description: Successfully deleted the member from the board.
+        401:
+          $ref: "#/components/responses/401"
+        403:
+          $ref: "#/components/responses/403"
+        404:
+          $ref: "#/components/responses/404"
+    get:
+      tags:
+        - Member
+      summary: Returns a member of a board.
+      description: >
+        Returns a member of a board.
+      parameters:
+        - name: boardId
+          in: path
+          description: Unique identifier of the board.
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 3377cf8f-da29-4aa7-9036-91951b8fce87
+        - name: memberId
+          in: path
+          description: Unique identifier of the member.
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 3377cf8f-da29-4aa7-9036-91951b8fce87
+      responses:
+        200:
+          description: Successfully fetched the member of the board.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MemberDto"
+              example:
+                id: af95613c-72e5-423b-996d-bcf496aa9e7a
+                userId: 3377cf8f-da29-4aa7-9036-91951b8fce87
+                role: MEMBER
+        401:
+          $ref: "#/components/responses/401"
+        403:
+          $ref: "#/components/responses/403"
+        404:
+          $ref: "#/components/responses/404"
+    patch:
+      tags:
+        - Member
+      summary: Updates a member of a board.
+      description: >
+        Updates a member of a board. Only available for board administrators.
+      parameters:
+        - name: boardId
+          in: path
+          description: Unique identifier of the board.
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 3377cf8f-da29-4aa7-9036-91951b8fce87
+        - name: memberId
+          in: path
+          description: Unique identifier of the member.
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 3377cf8f-da29-4aa7-9036-91951b8fce87
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateMemberDto"
+            example:
+              role: MEMBER
+      responses:
+        204:
+          description: Successfully updated the member of the board.
+        401:
+          $ref: "#/components/responses/401"
+        403:
+          $ref: "#/components/responses/403"
         404:
           $ref: "#/components/responses/404"
 components:
@@ -686,6 +1133,102 @@ components:
           type: string
           description: Display name of user.
           maxLength: 256
+    BoardDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier of board.
+        name:
+          type: string
+          description: Name of the kanban board.
+        description:
+          type: string
+          description: Detailed description of the kanban board.
+      required:
+        - id
+        - name
+    BoardPageDto:
+      allOf:
+        - $ref: "#/components/schemas/PageDto"
+        - type: object
+          properties:
+            content:
+              type: array
+              items:
+                $ref: "#/components/schemas/BoardDto"
+          required:
+            - content
+    CreateBoardDto:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the kanban board.
+        description:
+          type: string
+          description: Detailed description of the kanban board.
+      required:
+        - name
+    UpdateBoardDto:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the kanban board.
+        description:
+          type: string
+          description: Detailed description of the kanban board.
+    MemberDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier of member.
+        userId:
+          type: string
+          format: uuid
+          description: Unique identifier of user.
+        role:
+          type: string
+          description: Role of user.
+          enum:
+            - MEMBER
+            - MAINTAINER
+            - ADMINISTRATOR
+      required:
+        - id
+        - userId
+        - role
+    AddMemberDto:
+      type: object
+      properties:
+        userId:
+          type: string
+          format: uuid
+          description: Unique identifier of user.
+        role:
+          type: string
+          description: Role of user.
+          enum:
+            - MEMBER
+            - MAINTAINER
+            - ADMINISTRATOR
+      required:
+        - userId
+        - role
+    UpdateMemberDto:
+      type: object
+      properties:
+        role:
+          type: string
+          description: Role of user.
+          enum:
+            - MEMBER
+            - MAINTAINER
+            - ADMINISTRATOR
   responses:
     500:
       description: An internal error has occurred on the server side.
