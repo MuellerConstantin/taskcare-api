@@ -1,6 +1,8 @@
 package de.mueller_constantin.taskcare.api.presentation.rest.v1.error;
 
 import de.mueller_constantin.taskcare.api.core.common.application.NoSuchEntityException;
+import de.mueller_constantin.taskcare.api.core.kanban.domain.BoardMemberAlreadyExistsException;
+import de.mueller_constantin.taskcare.api.core.kanban.domain.BoardMustBeAdministrableException;
 import de.mueller_constantin.taskcare.api.core.user.application.IllegalDefaultAdminAlterationException;
 import de.mueller_constantin.taskcare.api.core.user.application.UsernameAlreadyInUseException;
 import de.mueller_constantin.taskcare.api.core.user.application.IllegalImportedUserAlterationException;
@@ -302,6 +304,32 @@ public class RestErrorHandler extends ResponseEntityExceptionHandler {
                 .path(((ServletWebRequest) request).getRequest().getServletPath())
                 .detail(new ErrorDto.ValidationErrorDetails("username", "UniqueUsername",
                         getMessage("de.mueller_constantin.taskcare.api.infrastructure.validation.UniqueUsername.message", null)))
+                .build();
+
+        return new ResponseEntity<>(dto, new HttpHeaders(), HttpStatus.valueOf(dto.getStatus()));
+    }
+
+    @ExceptionHandler(BoardMustBeAdministrableException.class)
+    public ResponseEntity<Object> handleBoardMustBeAdministrable(BoardMustBeAdministrableException exc,
+                                                       WebRequest request) {
+        ErrorDto dto = ErrorDto.builder()
+                .error("BoardMustBeAdministrableError")
+                .timestamp(OffsetDateTime.now())
+                .status(HttpStatus.CONFLICT.value())
+                .path(((ServletWebRequest) request).getRequest().getServletPath())
+                .build();
+
+        return new ResponseEntity<>(dto, new HttpHeaders(), HttpStatus.valueOf(dto.getStatus()));
+    }
+
+    @ExceptionHandler(BoardMemberAlreadyExistsException.class)
+    public ResponseEntity<Object> handleBoardMemberAlreadyExists(BoardMemberAlreadyExistsException exc,
+                                                       WebRequest request) {
+        ErrorDto dto = ErrorDto.builder()
+                .error("BoardMemberAlreadyExistsError")
+                .timestamp(OffsetDateTime.now())
+                .status(HttpStatus.CONFLICT.value())
+                .path(((ServletWebRequest) request).getRequest().getServletPath())
                 .build();
 
         return new ResponseEntity<>(dto, new HttpHeaders(), HttpStatus.valueOf(dto.getStatus()));

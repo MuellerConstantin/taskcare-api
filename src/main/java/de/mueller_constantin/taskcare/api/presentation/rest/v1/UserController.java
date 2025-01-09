@@ -6,6 +6,7 @@ import de.mueller_constantin.taskcare.api.core.common.application.persistence.Me
 import de.mueller_constantin.taskcare.api.core.user.application.*;
 import de.mueller_constantin.taskcare.api.core.user.domain.UserProjection;
 import de.mueller_constantin.taskcare.api.infrastructure.security.CurrentPrincipal;
+import de.mueller_constantin.taskcare.api.infrastructure.security.Principal;
 import de.mueller_constantin.taskcare.api.presentation.rest.v1.dto.CreateUserDto;
 import de.mueller_constantin.taskcare.api.presentation.rest.v1.dto.PageDto;
 import de.mueller_constantin.taskcare.api.presentation.rest.v1.dto.UpdateUserDto;
@@ -19,7 +20,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -42,8 +42,8 @@ public class UserController {
 
     @GetMapping("/user/me")
     @JsonView(DefaultJsonViews.Me.class)
-    UserDto getCurrentUser(@CurrentPrincipal UserDetails userDetails) {
-        FindUserByUsernameQuery query = new FindUserByUsernameQuery(userDetails.getUsername());
+    UserDto getCurrentUser(@CurrentPrincipal Principal principal) {
+        FindUserByUsernameQuery query = new FindUserByUsernameQuery(principal.getUsername());
         UserProjection result = userService.query(query);
         return userDtoMapper.mapToDto(result);
     }
@@ -86,8 +86,8 @@ public class UserController {
 
     @PostMapping("/user/me/profile-image")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    void uploadProfileImage(@CurrentPrincipal UserDetails userDetails, @RequestParam("file") MultipartFile file) throws IOException {
-        FindUserByUsernameQuery query = new FindUserByUsernameQuery(userDetails.getUsername());
+    void uploadProfileImage(@CurrentPrincipal Principal principal, @RequestParam("file") MultipartFile file) throws IOException {
+        FindUserByUsernameQuery query = new FindUserByUsernameQuery(principal.getUsername());
         UserProjection result = userService.query(query);
 
         mediaStorage.save("/profile-images/" + result.getId().toString(), file.getContentType(), file.getBytes());
@@ -95,16 +95,16 @@ public class UserController {
 
     @DeleteMapping("/user/me/profile-image")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    void removeProfileImage(@CurrentPrincipal UserDetails userDetails) {
-        FindUserByUsernameQuery query = new FindUserByUsernameQuery(userDetails.getUsername());
+    void removeProfileImage(@CurrentPrincipal Principal principal) {
+        FindUserByUsernameQuery query = new FindUserByUsernameQuery(principal.getUsername());
         UserProjection result = userService.query(query);
 
         mediaStorage.delete("/profile-images/" + result.getId().toString());
     }
 
     @GetMapping("/user/me/profile-image")
-    ResponseEntity<byte[]> getProfileImage(@CurrentPrincipal UserDetails userDetails) {
-        FindUserByUsernameQuery query = new FindUserByUsernameQuery(userDetails.getUsername());
+    ResponseEntity<byte[]> getProfileImage(@CurrentPrincipal Principal principal) {
+        FindUserByUsernameQuery query = new FindUserByUsernameQuery(principal.getUsername());
         UserProjection result = userService.query(query);
 
         if(mediaStorage.exists("/profile-images/" + result.getId().toString())) {
