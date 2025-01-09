@@ -12,6 +12,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -41,6 +42,7 @@ public class BoardController {
     }
 
     @GetMapping("/boards/{id}")
+    @PreAuthorize("hasRole('ADMINISTRATOR') or @domainSecurityService.isBoardMember(#id, principal.getUserProjection().getId())")
     public BoardDto getBoard(@PathVariable UUID id) {
         return boardDtoMapper.mapToDto(boardService.query(FindBoardByIdQuery.builder()
                 .id(id)
@@ -48,6 +50,7 @@ public class BoardController {
     }
 
     @GetMapping("/boards")
+    @PreAuthorize("hasRole('ADMINISTRATOR')")
     public PageDto<BoardDto> getBoards(@RequestParam(required = false, defaultValue = "0") @Min(0) int page,
                                        @RequestParam(required = false, defaultValue = "25") @Min(0) int perPage) {
         return boardDtoMapper.mapToDto(boardService.query(FindAllBoardsQuery.builder()
@@ -67,6 +70,7 @@ public class BoardController {
 
     @DeleteMapping("/boards/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasRole('ADMINISTRATOR') or @domainSecurityService.isBoardMemberWithRole(#id, principal.getUserProjection().getId(), 'ADMINISTRATOR')")
     void deleteBoard(@PathVariable UUID id) {
         boardService.dispatch(DeleteBoardByIdCommand.builder()
                 .id(id)
@@ -75,6 +79,7 @@ public class BoardController {
 
     @PatchMapping("/boards/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasRole('ADMINISTRATOR') or @domainSecurityService.isBoardMemberWithRole(#id, principal.getUserProjection().getId(), 'ADMINISTRATOR')")
     void updateBoard(@PathVariable UUID id, @RequestBody @Valid UpdateBoardDto updateBoardDto) {
         boardService.dispatch(boardDtoMapper.mapToCommand(id, updateBoardDto));
     }

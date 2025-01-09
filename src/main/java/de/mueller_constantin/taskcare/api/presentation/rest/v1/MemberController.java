@@ -11,6 +11,7 @@ import de.mueller_constantin.taskcare.api.presentation.rest.v1.dto.mapper.Member
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -30,6 +31,7 @@ public class MemberController {
     }
 
     @GetMapping("/boards/{id}/members")
+    @PreAuthorize("hasRole('ADMINISTRATOR') or @domainSecurityService.isBoardMember(#id, principal.getUserProjection().getId())")
     public List<MemberDto> getMembers(@PathVariable UUID id) {
         return memberDtoMapper.mapToDto(new ArrayList<>(boardService.query(FindBoardByIdQuery.builder()
                 .id(id)
@@ -38,6 +40,7 @@ public class MemberController {
     }
 
     @GetMapping("/boards/{id}/members/{memberId}")
+    @PreAuthorize("hasRole('ADMINISTRATOR') or @domainSecurityService.isBoardMember(#id, principal.getUserProjection().getId())")
     public MemberDto getMember(@PathVariable UUID id, @PathVariable UUID memberId) {
         return memberDtoMapper.mapToDto(boardService.query(FindBoardByIdQuery.builder()
                 .id(id)
@@ -51,12 +54,14 @@ public class MemberController {
 
     @PostMapping("/boards/{id}/members")
     @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasRole('ADMINISTRATOR') or @domainSecurityService.isBoardMemberWithRole(#id, principal.getUserProjection().getId(), 'ADMINISTRATOR')")
     public void addMember(@PathVariable UUID id, @RequestBody @Valid AddMemberDto addMemberDto) {
         boardService.dispatch(memberDtoMapper.mapToCommand(id, addMemberDto));
     }
 
     @DeleteMapping("/boards/{id}/members/{memberId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasRole('ADMINISTRATOR') or @domainSecurityService.isBoardMemberWithRole(#id, principal.getUserProjection().getId(), 'ADMINISTRATOR')")
     public void removeMember(@PathVariable UUID id, @PathVariable UUID memberId) {
         boardService.dispatch(RemoveMemberByIdCommand.builder()
                 .boardId(id)
@@ -66,6 +71,7 @@ public class MemberController {
 
     @PatchMapping("/boards/{id}/members/{memberId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasRole('ADMINISTRATOR') or @domainSecurityService.isBoardMemberWithRole(#id, principal.getUserProjection().getId(), 'ADMINISTRATOR')")
     public void updateMemberRole(@PathVariable UUID id, @PathVariable UUID memberId,
                                  @RequestBody @Valid UpdateMemberDto updateMemberDto) {
         boardService.dispatch(memberDtoMapper.mapToCommand(id, memberId, updateMemberDto));
