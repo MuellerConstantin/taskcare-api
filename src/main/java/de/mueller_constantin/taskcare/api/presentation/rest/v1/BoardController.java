@@ -1,6 +1,9 @@
 package de.mueller_constantin.taskcare.api.presentation.rest.v1;
 
+import de.mueller_constantin.taskcare.api.core.common.application.NoSuchEntityException;
+import de.mueller_constantin.taskcare.api.core.common.application.persistence.MediaStorage;
 import de.mueller_constantin.taskcare.api.core.kanban.application.*;
+import de.mueller_constantin.taskcare.api.core.kanban.domain.BoardProjection;
 import de.mueller_constantin.taskcare.api.infrastructure.security.CurrentPrincipal;
 import de.mueller_constantin.taskcare.api.infrastructure.security.Principal;
 import de.mueller_constantin.taskcare.api.presentation.rest.v1.dto.BoardDto;
@@ -12,9 +15,13 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.UUID;
 
 @RestController
@@ -22,11 +29,13 @@ import java.util.UUID;
 public class BoardController {
     private final BoardService boardService;
     private final BoardDtoMapper boardDtoMapper;
+    private final MediaStorage mediaStorage;
 
     @Autowired
-    public BoardController(BoardService boardService, BoardDtoMapper boardDtoMapper) {
+    public BoardController(BoardService boardService, BoardDtoMapper boardDtoMapper, MediaStorage mediaStorage) {
         this.boardService = boardService;
         this.boardDtoMapper = boardDtoMapper;
+        this.mediaStorage = mediaStorage;
     }
 
     @GetMapping("/user/me/boards")
@@ -82,5 +91,43 @@ public class BoardController {
     @PreAuthorize("hasRole('ADMINISTRATOR') or @domainSecurityService.isBoardMemberWithRole(#id, principal.getUserProjection().getId(), 'ADMINISTRATOR')")
     void updateBoard(@PathVariable UUID id, @RequestBody @Valid UpdateBoardDto updateBoardDto) {
         boardService.dispatch(boardDtoMapper.mapToCommand(id, updateBoardDto));
+    }
+
+    @PostMapping("/boards/{id}/logo-image")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasRole('ADMINISTRATOR') or @domainSecurityService.isBoardMemberWithRole(#id, principal.getUserProjection().getId(), 'ADMINISTRATOR')")
+    void uploadLogoImage(@PathVariable UUID id, @RequestParam("file") MultipartFile file) throws IOException {
+        FindBoardByIdQuery query = new FindBoardByIdQuery(id);
+        BoardProjection result = boardService.query(query);
+
+        mediaStorage.save("/logo-images/" + result.getId().toString(), file.getContentType(), file.getBytes());
+    }
+
+    @DeleteMapping("/boards/{id}/logo-image")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasRole('ADMINISTRATOR') or @domainSecurityService.isBoardMemberWithRole(#id, principal.getUserProjection().getId(), 'ADMINISTRATOR')")
+    void removeProfileImage(@PathVariable UUID id) {
+        FindBoardByIdQuery query = new FindBoardByIdQuery(id);
+        BoardProjection result = boardService.query(query);
+
+        mediaStorage.delete("/logo-images/" + result.getId().toString());
+    }
+
+    @GetMapping("/boards/{id}/logo-image")
+    public ResponseEntity<byte[]> getLogoImage(@PathVariable UUID id) {
+        FindBoardByIdQuery query = new FindBoardByIdQuery(id);
+        BoardProjection result = boardService.query(query);
+
+        if(mediaStorage.exists("/logo-images/" + result.getId().toString())) {
+            String contentType = mediaStorage.contentType("/logo-images/" + result.getId().toString());
+            byte[] data = mediaStorage.load("/logo-images/" + result.getId().toString());
+
+            return ResponseEntity.ok()
+                    .contentType(MediaType.parseMediaType(contentType))
+                    .contentLength(data.length)
+                    .body(data);
+        } else {
+            throw new NoSuchEntityException();
+        }
     }
 }

@@ -2,12 +2,14 @@ package de.mueller_constantin.taskcare.api.core.kanban.application;
 
 import de.mueller_constantin.taskcare.api.core.common.application.NoSuchEntityException;
 import de.mueller_constantin.taskcare.api.core.common.application.event.DomainEventBus;
+import de.mueller_constantin.taskcare.api.core.common.application.persistence.MediaStorage;
 import de.mueller_constantin.taskcare.api.core.common.domain.DomainEvent;
 import de.mueller_constantin.taskcare.api.core.common.domain.Page;
 import de.mueller_constantin.taskcare.api.core.common.domain.PageInfo;
 import de.mueller_constantin.taskcare.api.core.kanban.application.persistence.BoardEventStoreRepository;
 import de.mueller_constantin.taskcare.api.core.kanban.application.persistence.BoardReadModelRepository;
 import de.mueller_constantin.taskcare.api.core.kanban.domain.BoardAggregate;
+import de.mueller_constantin.taskcare.api.core.kanban.domain.BoardDeletedEvent;
 import de.mueller_constantin.taskcare.api.core.kanban.domain.BoardProjection;
 import de.mueller_constantin.taskcare.api.core.kanban.domain.Role;
 import de.mueller_constantin.taskcare.api.core.user.application.ExistsUserByIdQuery;
@@ -22,18 +24,22 @@ public class BoardService {
     private final BoardEventStoreRepository boardEventStoreRepository;
     private final BoardReadModelRepository boardReadModelRepository;
     private final UserService userService;
+    private final MediaStorage mediaStorage;
     private final DomainEventBus domainEventBus;
 
     public BoardService(BoardEventStoreRepository boardEventStoreRepository,
                         BoardReadModelRepository boardReadModelRepository,
                         UserService userService,
+                        MediaStorage mediaStorage,
                         DomainEventBus domainEventBus) {
         this.boardEventStoreRepository = boardEventStoreRepository;
         this.boardReadModelRepository = boardReadModelRepository;
         this.userService = userService;
+        this.mediaStorage = mediaStorage;
         this.domainEventBus = domainEventBus;
 
         this.domainEventBus.subscribe(UserDeletedEvent.class, this::onUserDeletedEvent);
+        this.domainEventBus.subscribe(BoardDeletedEvent.class, this::onBoardDeletedEvent);
     }
 
     public void dispatch(@Valid CreateBoardCommand command) {
@@ -161,5 +167,13 @@ public class BoardService {
             boardAggregate.removeMember(memberId);
             boardEventStoreRepository.save(boardAggregate);
         });
+    }
+
+    protected void onBoardDeletedEvent(DomainEvent event) {
+        BoardDeletedEvent boardDeletedEvent = (BoardDeletedEvent) event;
+
+        if(mediaStorage.exists("/logo-images/" + boardDeletedEvent.getAggregateId().toString())) {
+            mediaStorage.delete("/logo-images/" + boardDeletedEvent.getAggregateId().toString());
+        }
     }
 }

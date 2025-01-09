@@ -35,7 +35,8 @@ public class CoreConfig {
     BoardService boardService(BoardEventStoreRepository boardEventStoreRepository,
                               BoardReadModelRepository boardReadModelRepository,
                               UserService userService,
+                              MediaStorage mediaStorage,
                               DomainEventBus domainEventBus) {
-        return new BoardService(boardEventStoreRepository, boardReadModelRepository, userService, domainEventBus);
+        return new BoardService(boardEventStoreRepository, boardReadModelRepository, userService, mediaStorage, domainEventBus);
     }
 }
