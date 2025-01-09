@@ -383,7 +383,8 @@ public class MySqlBoardCrudRepository implements BoardCrudRepository {
 
         parameters = new MapSqlParameterSource();
         parameters.addValue("boardId", projection.getId().toString());
-        parameters.addValue("memberIds", projection.getMembers().stream().map(MemberProjection::getId).collect(Collectors.toList()));
+        parameters.addValue("memberIds", projection.getMembers().stream().map(MemberProjection::getId)
+                .map(UUID::toString).collect(Collectors.toList()));
 
         query = """
             DELETE
