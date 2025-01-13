@@ -1,7 +1,7 @@
 package de.mueller_constantin.taskcare.api.presentation.rest.v1.dto.mapper;
 
-import de.mueller_constantin.taskcare.api.core.kanban.application.AddMemberByIdCommand;
-import de.mueller_constantin.taskcare.api.core.kanban.application.UpdateMemberByIdCommand;
+import de.mueller_constantin.taskcare.api.core.kanban.application.command.AddMemberByIdCommand;
+import de.mueller_constantin.taskcare.api.core.kanban.application.command.UpdateMemberByIdCommand;
 import de.mueller_constantin.taskcare.api.core.kanban.domain.MemberProjection;
 import de.mueller_constantin.taskcare.api.core.kanban.domain.Role;
 import de.mueller_constantin.taskcare.api.presentation.rest.v1.dto.AddMemberDto;

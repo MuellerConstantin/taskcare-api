@@ -1,7 +1,8 @@
 package de.mueller_constantin.taskcare.api.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import de.mueller_constantin.taskcare.api.core.user.application.UserService;
+import de.mueller_constantin.taskcare.api.core.user.application.UserReadService;
+import de.mueller_constantin.taskcare.api.core.user.application.UserWriteService;
 import de.mueller_constantin.taskcare.api.infrastructure.security.ldap.LdapSecurityProperties;
 import de.mueller_constantin.taskcare.api.infrastructure.security.ldap.LdapUserContextMapper;
 import de.mueller_constantin.taskcare.api.infrastructure.security.ldap.LdapUserMapper;
@@ -203,8 +204,10 @@ public class SecurityConfig {
         }
 
         @Bean
-        LdapUserContextMapper ldapUserContextMapper(UserService userService, LdapUserMapper ldapUserMapper) {
-            return new LdapUserContextMapper(userService, ldapUserMapper);
+        LdapUserContextMapper ldapUserContextMapper(UserWriteService userWriteService,
+                                                    UserReadService userReadService,
+                                                    LdapUserMapper ldapUserMapper) {
+            return new LdapUserContextMapper(userWriteService, userReadService, ldapUserMapper);
         }
 
         @Bean

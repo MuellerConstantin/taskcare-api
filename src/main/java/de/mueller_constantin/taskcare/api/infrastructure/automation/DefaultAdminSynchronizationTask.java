@@ -1,7 +1,7 @@
 package de.mueller_constantin.taskcare.api.infrastructure.automation;
 
-import de.mueller_constantin.taskcare.api.core.user.application.SyncDefaultAdminCommand;
-import de.mueller_constantin.taskcare.api.core.user.application.UserService;
+import de.mueller_constantin.taskcare.api.core.user.application.command.SyncDefaultAdminCommand;
+import de.mueller_constantin.taskcare.api.core.user.application.UserWriteService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,14 +14,14 @@ import org.springframework.stereotype.Component;
 @ConditionalOnProperty(prefix = "taskcare.automation.default-admin-synchronization", name = "enabled", havingValue = "true", matchIfMissing = true)
 @Slf4j
 public class DefaultAdminSynchronizationTask implements ApplicationListener<ApplicationStartedEvent> {
-    private final UserService userService;
+    private final UserWriteService userWriteService;
 
     private final String password;
 
     @Autowired
-    public DefaultAdminSynchronizationTask(UserService userService,
+    public DefaultAdminSynchronizationTask(UserWriteService userWriteService,
                                            @Value("${taskcare.automation.default-admin-synchronization.password:#{null}}") String password) {
-        this.userService = userService;
+        this.userWriteService = userWriteService;
         this.password = password;
     }
 
@@ -34,7 +34,7 @@ public class DefaultAdminSynchronizationTask implements ApplicationListener<Appl
 
         log.info("Syncing default admin user...");
 
-        this.userService.dispatch(SyncDefaultAdminCommand.builder()
+        this.userWriteService.dispatch(SyncDefaultAdminCommand.builder()
                 .password(this.password)
                 .build());
     }

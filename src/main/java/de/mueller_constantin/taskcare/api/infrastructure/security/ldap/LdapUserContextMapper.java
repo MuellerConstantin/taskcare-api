@@ -1,8 +1,9 @@
 package de.mueller_constantin.taskcare.api.infrastructure.security.ldap;
 
-import de.mueller_constantin.taskcare.api.core.user.application.FindUserByUsernameQuery;
-import de.mueller_constantin.taskcare.api.core.user.application.SyncLdapUserCommand;
-import de.mueller_constantin.taskcare.api.core.user.application.UserService;
+import de.mueller_constantin.taskcare.api.core.user.application.UserReadService;
+import de.mueller_constantin.taskcare.api.core.user.application.query.FindUserByUsernameQuery;
+import de.mueller_constantin.taskcare.api.core.user.application.command.SyncLdapUserCommand;
+import de.mueller_constantin.taskcare.api.core.user.application.UserWriteService;
 import de.mueller_constantin.taskcare.api.infrastructure.security.Principal;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ldap.core.DirContextAdapter;
@@ -15,19 +16,20 @@ import java.util.Collection;
 
 @RequiredArgsConstructor
 public class LdapUserContextMapper implements UserDetailsContextMapper {
-    private final UserService userService;
+    private final UserWriteService userWriteService;
+    private final UserReadService userReadService;
     private final LdapUserMapper ldapUserMapper;
 
     @Override
     public UserDetails mapUserFromContext(DirContextOperations ctx, String username, Collection<? extends GrantedAuthority> authorities) {
         LdapUser ldapUser = ldapUserMapper.mapFromContext(ctx);
 
-        this.userService.dispatch(SyncLdapUserCommand.builder()
+        this.userWriteService.dispatch(SyncLdapUserCommand.builder()
                 .username(ldapUser.getUsername())
                 .displayName(ldapUser.getDisplayName())
                 .build());
 
-        return new Principal(this.userService.query(new FindUserByUsernameQuery(ldapUser.getUsername())));
+        return new Principal(this.userReadService.query(new FindUserByUsernameQuery(ldapUser.getUsername())));
     }
 
     @Override

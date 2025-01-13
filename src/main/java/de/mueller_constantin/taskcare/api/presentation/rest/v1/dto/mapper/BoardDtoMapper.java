@@ -1,8 +1,8 @@
 package de.mueller_constantin.taskcare.api.presentation.rest.v1.dto.mapper;
 
 import de.mueller_constantin.taskcare.api.core.common.domain.Page;
-import de.mueller_constantin.taskcare.api.core.kanban.application.CreateBoardCommand;
-import de.mueller_constantin.taskcare.api.core.kanban.application.UpdateBoardByIdCommand;
+import de.mueller_constantin.taskcare.api.core.kanban.application.command.CreateBoardCommand;
+import de.mueller_constantin.taskcare.api.core.kanban.application.command.UpdateBoardByIdCommand;
 import de.mueller_constantin.taskcare.api.core.kanban.domain.BoardProjection;
 import de.mueller_constantin.taskcare.api.presentation.rest.v1.dto.BoardDto;
 import de.mueller_constantin.taskcare.api.presentation.rest.v1.dto.CreateBoardDto;
