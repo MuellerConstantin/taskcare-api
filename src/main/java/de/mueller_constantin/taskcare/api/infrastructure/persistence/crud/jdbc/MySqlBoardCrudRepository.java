@@ -2,6 +2,7 @@ package de.mueller_constantin.taskcare.api.infrastructure.persistence.crud.jdbc;
 
 import de.mueller_constantin.taskcare.api.core.common.domain.Page;
 import de.mueller_constantin.taskcare.api.core.common.domain.PageInfo;
+import de.mueller_constantin.taskcare.api.core.kanban.application.persistence.BoardReadModelRepository;
 import de.mueller_constantin.taskcare.api.core.kanban.domain.BoardProjection;
 import de.mueller_constantin.taskcare.api.core.kanban.domain.MemberProjection;
 import de.mueller_constantin.taskcare.api.core.kanban.domain.Role;
@@ -21,7 +22,7 @@ import java.util.stream.Collectors;
 @Component
 @Transactional
 @RequiredArgsConstructor
-public class MySqlBoardCrudRepository implements BoardCrudRepository {
+public class MySqlBoardCrudRepository implements BoardCrudRepository, BoardReadModelRepository {
     private final String BOARD_TABLE_NAME = "boards";
     private final String MEMBER_TABLE_NAME = "members";
 

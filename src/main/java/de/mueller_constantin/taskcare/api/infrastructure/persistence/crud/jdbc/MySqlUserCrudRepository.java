@@ -2,6 +2,7 @@ package de.mueller_constantin.taskcare.api.infrastructure.persistence.crud.jdbc;
 
 import de.mueller_constantin.taskcare.api.core.common.domain.Page;
 import de.mueller_constantin.taskcare.api.core.common.domain.PageInfo;
+import de.mueller_constantin.taskcare.api.core.user.application.persistence.UserReadModelRepository;
 import de.mueller_constantin.taskcare.api.core.user.domain.IdentityProvider;
 import de.mueller_constantin.taskcare.api.core.user.domain.Role;
 import de.mueller_constantin.taskcare.api.core.user.domain.UserProjection;
@@ -23,7 +24,7 @@ import java.util.UUID;
 @Component
 @Transactional
 @RequiredArgsConstructor
-public class MySqlUserCrudRepository implements UserCrudRepository {
+public class MySqlUserCrudRepository implements UserCrudRepository, UserReadModelRepository {
     private final String USER_TABLE_NAME = "users";
 
     private final NamedParameterJdbcTemplate jdbcTemplate;

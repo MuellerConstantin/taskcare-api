@@ -1,13 +1,11 @@
-package de.mueller_constantin.taskcare.api.infrastructure.persistence;
+package de.mueller_constantin.taskcare.api.infrastructure.persistence.es;
 
 import de.mueller_constantin.taskcare.api.core.common.domain.Page;
 import de.mueller_constantin.taskcare.api.core.common.domain.PageInfo;
 import de.mueller_constantin.taskcare.api.core.user.domain.UserAggregate;
 import de.mueller_constantin.taskcare.api.core.user.domain.UserProjection;
 import de.mueller_constantin.taskcare.api.core.user.application.persistence.UserEventStoreRepository;
-import de.mueller_constantin.taskcare.api.core.user.application.persistence.UserReadModelRepository;
 import de.mueller_constantin.taskcare.api.infrastructure.persistence.crud.UserCrudRepository;
-import de.mueller_constantin.taskcare.api.infrastructure.persistence.es.EventStore;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
@@ -20,7 +18,7 @@ import java.util.UUID;
 @Component
 @Transactional
 @RequiredArgsConstructor
-public class UserRepository implements UserEventStoreRepository, UserReadModelRepository {
+public class UserEventStoreRepositoryImpl implements UserEventStoreRepository {
     private final EventStore eventStore;
     private final UserCrudRepository userCrudRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
@@ -59,35 +57,5 @@ public class UserRepository implements UserEventStoreRepository, UserReadModelRe
     @Override
     public Optional<UserAggregate> load(UUID aggregateId, Integer version) {
         return eventStore.loadAggregate(aggregateId, UserAggregate.class, version);
-    }
-
-    @Override
-    public Optional<UserProjection> findByUsername(String username) {
-        return userCrudRepository.findByUsername(username);
-    }
-
-    @Override
-    public boolean existsByUsername(String username) {
-        return userCrudRepository.existsByUsername(username);
-    }
-
-    @Override
-    public Optional<UserProjection> findById(UUID id) {
-        return userCrudRepository.findById(id);
-    }
-
-    @Override
-    public boolean existsById(UUID id) {
-        return userCrudRepository.existsById(id);
-    }
-
-    @Override
-    public List<UserProjection> findAll() {
-        return userCrudRepository.findAll();
-    }
-
-    @Override
-    public Page<UserProjection> findAll(PageInfo pageInfo) {
-        return userCrudRepository.findAll(pageInfo);
     }
 }
