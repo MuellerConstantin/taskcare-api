@@ -1,17 +1,11 @@
-package de.mueller_constantin.taskcare.api.core.user.application.service;
+package de.mueller_constantin.taskcare.api.core.user.application;
 
 import de.mueller_constantin.taskcare.api.core.common.application.NoSuchEntityException;
 import de.mueller_constantin.taskcare.api.core.common.application.event.DomainEventBus;
 import de.mueller_constantin.taskcare.api.core.common.application.persistence.MediaStorage;
-import de.mueller_constantin.taskcare.api.core.common.domain.Page;
-import de.mueller_constantin.taskcare.api.core.common.domain.PageInfo;
-import de.mueller_constantin.taskcare.api.core.user.application.*;
 import de.mueller_constantin.taskcare.api.core.user.application.command.*;
 import de.mueller_constantin.taskcare.api.core.user.application.persistence.UserEventStoreRepository;
 import de.mueller_constantin.taskcare.api.core.user.application.persistence.UserReadModelRepository;
-import de.mueller_constantin.taskcare.api.core.user.application.query.FindAllUsersQuery;
-import de.mueller_constantin.taskcare.api.core.user.application.query.FindUserByIdQuery;
-import de.mueller_constantin.taskcare.api.core.user.application.query.FindUserByUsernameQuery;
 import de.mueller_constantin.taskcare.api.core.user.application.security.CredentialsEncoder;
 import de.mueller_constantin.taskcare.api.core.user.domain.IdentityProvider;
 import de.mueller_constantin.taskcare.api.core.user.domain.Role;
@@ -25,7 +19,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
