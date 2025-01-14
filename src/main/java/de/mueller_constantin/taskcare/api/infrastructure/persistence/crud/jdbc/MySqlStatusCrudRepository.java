@@ -244,9 +244,14 @@ public class MySqlStatusCrudRepository implements StatusCrudRepository {
     public void deleteAllNotInIdsForBoardId(List<UUID> ids, UUID boardId) {
         MapSqlParameterSource parameters = new MapSqlParameterSource();
         parameters.addValue("boardId", boardId.toString());
-        parameters.addValue("ids", ids.stream()
-                .map(UUID::toString)
-                .toList());
+
+        if(ids.isEmpty()) {
+            parameters.addValue("ids", List.of("-1"));
+        } else {
+            parameters.addValue("ids", ids.stream()
+                    .map(UUID::toString)
+                    .toList());
+        }
 
         String query = """
             DELETE
