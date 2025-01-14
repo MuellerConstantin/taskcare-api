@@ -38,4 +38,23 @@ public class DomainSecurityService {
             return false;
         }
     }
+
+    public boolean isBoardMemberWithAnyRole(UUID boardId, UUID userId, String... roles) {
+        try {
+            MemberProjection member = kanbanReadService.query(FindMemberByUserIdAndBoardIdQuery.builder()
+                    .userId(userId)
+                    .boardId(boardId)
+                    .build());
+
+            for (String role : roles) {
+                if (member.getRole().toString().equals(role)) {
+                    return true;
+                }
+            }
+
+            return false;
+        } catch(NoSuchEntityException e) {
+            return false;
+        }
+    }
 }

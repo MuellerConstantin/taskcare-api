@@ -140,6 +140,8 @@ tags:
     description: Management of kanban boards.
   - name: Member
     description: Management of kanban board members.
+  - name: Status
+    description: Allows to manage task statuses within a board.
 paths:
   /auth/token:
     post:
@@ -952,6 +954,199 @@ paths:
           $ref: "#/components/responses/403"
         404:
           $ref: "#/components/responses/404"
+  /boards/{boardId}/statuses:
+    get:
+      tags:
+        - Status
+      summary: Returns all statuses of a board.
+      description: >
+        Returns all statuses of a board.
+      parameters:
+        - name: boardId
+          in: path
+          description: Unique identifier of the board.
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 3377cf8f-da29-4aa7-9036-91951b8fce87
+        - name: page
+          in: query
+          description: Zero based index of page to load.
+          required: false
+          schema:
+            type: integer
+            example: 0
+        - name: perPage
+          in: query
+          description: Number of elements per page.
+          required: false
+          schema:
+            type: integer
+            example: 10
+      responses:
+        200:
+          description: Successfully fetched all members of the board.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MemberPageDto"
+              example:
+                page: 0
+                perPage: 10
+                totalElements: 1
+                totalPages: 1
+                content:
+                  - id: 037f610b-f09c-4648-8c08-39a3ade3f447
+                    name: To Do
+                    description: >
+                      Tasks that need to be done.
+        401:
+          $ref: "#/components/responses/401"
+        403:
+          $ref: "#/components/responses/403"
+    post:
+      tags:
+        - Status
+      summary: Creates a new status.
+      description: >
+        Creates a new status. Only available for board administrators.
+      parameters:
+        - name: boardId
+          in: path
+          description: Unique identifier of the board.
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 3377cf8f-da29-4aa7-9036-91951b8fce87
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AddStatusDto"
+            example:
+              name: To Do
+              description: >
+                Tasks that need to be done.
+      responses:
+        201:
+          description: Successfully created the status.
+        401:
+          $ref: "#/components/responses/401"
+        403:
+          $ref: "#/components/responses/403"
+  /boards/{boardId}/statuses/{statusId}:
+    get:
+      tags:
+        - Status
+      summary: Returns a single status.
+      description: >
+        Returns a single status.
+      parameters:
+        - name: boardId
+          in: path
+          description: Unique identifier of the board.
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 3377cf8f-da29-4aa7-9036-91951b8fce87
+        - name: statusId
+          in: path
+          description: Unique identifier of the status.
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 037f610b-f09c-4648-8c08-39a3ade3f447
+      responses:
+        200:
+          description: Successfully fetched the status.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StatusDto"
+              example:
+                id: 037f610b-f09c-4648-8c08-39a3ade3f447
+                name: To Do
+                description: >
+                  Tasks that need to be done.
+        401:
+          $ref: "#/components/responses/401"
+        403:
+          $ref: "#/components/responses/403"
+    delete:
+      tags:
+        - Status
+      summary: Deletes a single status.
+      description: >
+        Deletes a single status. Only available for board administrators.
+      parameters:
+        - name: boardId
+          in: path
+          description: Unique identifier of the board.
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 3377cf8f-da29-4aa7-9036-91951b8fce87
+        - name: statusId
+          in: path
+          description: Unique identifier of the status.
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 037f610b-f09c-4648-8c08-39a3ade3f447
+      responses:
+        204:
+          description: Successfully deleted the status.
+        401:
+          $ref: "#/components/responses/401"
+        403:
+          $ref: "#/components/responses/403"
+    patch:
+      tags:
+        - Status
+      summary: Updates the details of a single status.
+      description: >
+        Updates a status. Only available for board administrators.
+      parameters:
+        - name: boardId
+          in: path
+          description: Unique identifier of the board.
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 3377cf8f-da29-4aa7-9036-91951b8fce87
+        - name: statusId
+          in: path
+          description: Unique identifier of the status.
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 037f610b-f09c-4648-8c08-39a3ade3f447
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateStatusDto"
+            example:
+              name: To Do
+              description: >
+                Tasks that need to be done.
+      responses:
+        200:
+          description: Successfully updated the status.
+        401:
+          $ref: "#/components/responses/401"
+        403:
+          $ref: "#/components/responses/403"
 components:
   schemas:
     ValidationErrorDetailsDto:
@@ -1257,6 +1452,53 @@ components:
             - MEMBER
             - MAINTAINER
             - ADMINISTRATOR
+    StatusDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier of member.
+        name:
+          type: string
+          description: Name of status.
+        description:
+          type: string
+          description: Description of status.
+      required:
+        - id
+        - name
+    StatusPageDto:
+      allOf:
+        - $ref: "#/components/schemas/PageDto"
+        - type: object
+          properties:
+            content:
+              type: array
+              items:
+                $ref: "#/components/schemas/StatusDto"
+          required:
+            - content
+    AddStatusDto:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of status.
+        description:
+          type: string
+          description: Description of status.
+      required:
+        - name
+    UpdateStatusDto:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of status.
+        description:
+          type: string
+          description: Description of status.
   responses:
     500:
       description: An internal error has occurred on the server side.
