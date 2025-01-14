@@ -29,10 +29,18 @@ public class UpdateStatusByIdCommand implements Command {
     @Size(max = 1024)
     private String description;
 
-    public UpdateStatusByIdCommand(UUID boardId, UUID statusId, String name, String description) {
+    private boolean descriptionTouched;
+
+    public UpdateStatusByIdCommand(UUID boardId, UUID statusId, String name, String description, boolean descriptionTouched) {
         this.boardId = boardId;
         this.statusId = statusId;
         this.name = name;
         this.description = description;
+        this.descriptionTouched = descriptionTouched;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+        this.descriptionTouched = true;
     }
 }

@@ -125,7 +125,23 @@ public class KanbanWriteService {
         BoardAggregate boardAggregate = kanbanEventStoreRepository.load(command.getBoardId())
                 .orElseThrow(NoSuchEntityException::new);
 
-        boardAggregate.updateStatus(command.getStatusId(), command.getName(), command.getDescription());
+        String name = command.getName() != null ?
+                command.getName() :
+                boardAggregate.getStatuses().stream()
+                        .filter(s -> s.getId().equals(command.getStatusId()))
+                        .findFirst()
+                        .orElseThrow(NoSuchEntityException::new)
+                        .getName();
+
+        String description = command.isDescriptionTouched() ?
+                command.getDescription() :
+                boardAggregate.getStatuses().stream()
+                        .filter(s -> s.getId().equals(command.getStatusId()))
+                        .findFirst()
+                        .orElseThrow(NoSuchEntityException::new)
+                        .getDescription();
+
+        boardAggregate.updateStatus(command.getStatusId(), name, description);
         kanbanEventStoreRepository.save(boardAggregate);
     }
 
