@@ -105,6 +105,30 @@ public class KanbanWriteService {
         kanbanEventStoreRepository.save(boardAggregate);
     }
 
+    public void dispatch(@Valid AddStatusByIdCommand command) {
+        BoardAggregate boardAggregate = kanbanEventStoreRepository.load(command.getBoardId())
+                .orElseThrow(NoSuchEntityException::new);
+
+        boardAggregate.addStatus(command.getName(), command.getDescription());
+        kanbanEventStoreRepository.save(boardAggregate);
+    }
+
+    public void dispatch(@Valid RemoveStatusByIdCommand command) {
+        BoardAggregate boardAggregate = kanbanEventStoreRepository.load(command.getBoardId())
+                .orElseThrow(NoSuchEntityException::new);
+
+        boardAggregate.removeStatus(command.getStatusId());
+        kanbanEventStoreRepository.save(boardAggregate);
+    }
+
+    public void dispatch(@Valid UpdateStatusByIdCommand command) {
+        BoardAggregate boardAggregate = kanbanEventStoreRepository.load(command.getBoardId())
+                .orElseThrow(NoSuchEntityException::new);
+
+        boardAggregate.updateStatus(command.getStatusId(), command.getName(), command.getDescription());
+        kanbanEventStoreRepository.save(boardAggregate);
+    }
+
     protected void onUserDeletedEvent(DomainEvent event) {
         UserDeletedEvent userDeletedEvent = (UserDeletedEvent) event;
 

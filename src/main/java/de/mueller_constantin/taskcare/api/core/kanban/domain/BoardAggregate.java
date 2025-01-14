@@ -18,6 +18,7 @@ public class BoardAggregate extends Aggregate {
     private String name;
     private String description;
     private Set<Member> members = new HashSet<>();
+    private Set<Status> statuses = new HashSet<>();
 
     public BoardAggregate() {
         this(UUID.randomUUID(), 0, false);
@@ -30,18 +31,18 @@ public class BoardAggregate extends Aggregate {
     @Override
     protected void processEvent(DomainEvent event) throws IllegalArgumentException {
         if(event instanceof BoardCreatedEvent) {
-            this.setName(((BoardCreatedEvent) event).getName());
-            this.setDescription(((BoardCreatedEvent) event).getDescription());
-            this.addMember(((BoardCreatedEvent) event).getCreator());
+            this.name = ((BoardCreatedEvent) event).getName();
+            this.description = ((BoardCreatedEvent) event).getDescription();
+            this.members.add(((BoardCreatedEvent) event).getCreator());
             return;
         } else if(event instanceof BoardUpdatedEvent) {
-            this.setName(((BoardUpdatedEvent) event).getName());
-            this.setDescription(((BoardUpdatedEvent) event).getDescription());
+            this.name = ((BoardUpdatedEvent) event).getName();
+            this.description = ((BoardUpdatedEvent) event).getDescription();
             return;
         } else if(event instanceof BoardDeletedEvent) {
             return;
         } else if(event instanceof MemberAddedEvent) {
-            this.addMember(((MemberAddedEvent) event).getMember());
+            this.members.add(((MemberAddedEvent) event).getMember());
             return;
         } else if(event instanceof MemberRemovedEvent) {
             this.members.removeIf(m -> m.getId().equals(((MemberRemovedEvent) event).getMember().getId()));
@@ -53,21 +54,23 @@ public class BoardAggregate extends Aggregate {
                 }
             });
             return;
+        } else if(event instanceof StatusAddedEvent) {
+            this.statuses.add(((StatusAddedEvent) event).getStatus());
+            return;
+        } else if(event instanceof StatusRemovedEvent) {
+            this.statuses.removeIf(s -> s.getId().equals(((StatusRemovedEvent) event).getStatus().getId()));
+            return;
+        } else if(event instanceof StatusUpdatedEvent) {
+            this.statuses.forEach(status -> {
+                if(status.getId().equals(((StatusUpdatedEvent) event).getStatusId())) {
+                    status.setName(((StatusUpdatedEvent) event).getName());
+                    status.setDescription(((StatusUpdatedEvent) event).getDescription());
+                }
+            });
+            return;
         }
 
         throw new IllegalArgumentException("Unknown event type: %s".formatted(event.getClass()));
-    }
-
-    private void setName(String name) {
-        this.name = name;
-    }
-
-    private void setDescription(String description) {
-        this.description = description;
-    }
-
-    private void addMember(Member member) {
-        this.members.add(member);
     }
 
     @Override
@@ -159,6 +162,47 @@ public class BoardAggregate extends Aggregate {
                 .version(this.getNextVersion())
                 .memberId(member.getId())
                 .role(role)
+                .build()
+        );
+    }
+
+    public void addStatus(String name, String description) {
+        this.applyChange(StatusAddedEvent.builder()
+                .aggregateId(this.getId())
+                .version(this.getNextVersion())
+                .status(new Status(UUID.randomUUID(), this.getId(), name, description))
+                .build()
+        );
+    }
+
+    public void removeStatus(UUID statusId) {
+        Status status = this.statuses.stream().filter(s -> s.getId().equals(statusId)).findFirst().orElse(null);
+
+        if(status == null) {
+            throw new NoSuchEntityException();
+        }
+
+        this.applyChange(StatusRemovedEvent.builder()
+                .aggregateId(this.getId())
+                .version(this.getNextVersion())
+                .status(status)
+                .build()
+        );
+    }
+
+    public void updateStatus(UUID statusId, String name, String description) {
+        Status status = this.statuses.stream().filter(s -> s.getId().equals(statusId)).findFirst().orElse(null);
+
+        if(status == null) {
+            throw new NoSuchEntityException();
+        }
+
+        this.applyChange(StatusUpdatedEvent.builder()
+                .aggregateId(this.getId())
+                .version(this.getNextVersion())
+                .statusId(statusId)
+                .name(name)
+                .description(description)
                 .build()
         );
     }

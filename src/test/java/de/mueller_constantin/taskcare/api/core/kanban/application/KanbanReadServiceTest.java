@@ -5,14 +5,9 @@ import de.mueller_constantin.taskcare.api.core.common.domain.Page;
 import de.mueller_constantin.taskcare.api.core.common.domain.PageInfo;
 import de.mueller_constantin.taskcare.api.core.kanban.application.persistence.BoardReadModelRepository;
 import de.mueller_constantin.taskcare.api.core.kanban.application.persistence.MemberReadModelRepository;
-import de.mueller_constantin.taskcare.api.core.kanban.application.query.FindAllBoardsQuery;
-import de.mueller_constantin.taskcare.api.core.kanban.application.query.FindAllBoardsUserIsMemberQuery;
-import de.mueller_constantin.taskcare.api.core.kanban.application.query.FindAllMembersByBoardIdQuery;
-import de.mueller_constantin.taskcare.api.core.kanban.application.query.FindBoardByIdQuery;
-import de.mueller_constantin.taskcare.api.core.kanban.domain.BoardAggregate;
-import de.mueller_constantin.taskcare.api.core.kanban.domain.BoardProjection;
-import de.mueller_constantin.taskcare.api.core.kanban.domain.MemberProjection;
-import de.mueller_constantin.taskcare.api.core.kanban.domain.Role;
+import de.mueller_constantin.taskcare.api.core.kanban.application.persistence.StatusReadModelRepository;
+import de.mueller_constantin.taskcare.api.core.kanban.application.query.*;
+import de.mueller_constantin.taskcare.api.core.kanban.domain.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -38,6 +33,9 @@ class KanbanReadServiceTest {
     @Mock
     private MemberReadModelRepository memberReadModelRepository;
 
+    @Mock
+    private StatusReadModelRepository statusReadModelRepository;
+
     @InjectMocks
     private KanbanReadService kanbanReadService;
 
@@ -49,6 +47,7 @@ class KanbanReadServiceTest {
     private BoardAggregate boardAggregate;
     private BoardProjection boardProjection;
     private List<MemberProjection> memberProjections;
+    private List<StatusProjection> statusProjections;
 
     @BeforeEach
     void setUp() {
@@ -89,6 +88,24 @@ class KanbanReadServiceTest {
                         .id(this.dummyMemberId)
                         .userId(this.dummyUserId)
                         .role(Role.MEMBER)
+                        .build()
+        );
+
+        this.statusProjections = List.of(
+                StatusProjection.builder()
+                        .id(UUID.randomUUID())
+                        .name("To Do")
+                        .description("Tasks that need to be done")
+                        .build(),
+                StatusProjection.builder()
+                        .id(UUID.randomUUID())
+                        .name("In Progress")
+                        .description("Tasks that are currently in progress")
+                        .build(),
+                StatusProjection.builder()
+                        .id(UUID.randomUUID())
+                        .name("Done")
+                        .description("Tasks that have been completed")
                         .build()
         );
     }
@@ -160,5 +177,24 @@ class KanbanReadServiceTest {
                 .build());
 
         assertEquals(memberProjections, result.getContent());
+    }
+
+    @Test
+    void handleFindAllStatusesByBoardIdQuery() {
+        when(statusReadModelRepository.findAllByBoardId(eq(this.id), any(PageInfo.class))).thenReturn(Page.<StatusProjection>builder()
+                .content(statusProjections)
+                .info(PageInfo.builder()
+                        .page(0)
+                        .perPage(10)
+                        .build())
+                .build());
+
+        Page<StatusProjection> result = kanbanReadService.query(FindAllStatusesByBoardIdQuery.builder()
+                .boardId(this.id)
+                .page(0)
+                .perPage(10)
+                .build());
+
+        assertEquals(statusProjections, result.getContent());
     }
 }

@@ -8,6 +8,7 @@ import de.mueller_constantin.taskcare.api.core.kanban.application.KanbanWriteSer
 import de.mueller_constantin.taskcare.api.core.kanban.application.persistence.KanbanEventStoreRepository;
 import de.mueller_constantin.taskcare.api.core.kanban.application.persistence.BoardReadModelRepository;
 import de.mueller_constantin.taskcare.api.core.kanban.application.persistence.MemberReadModelRepository;
+import de.mueller_constantin.taskcare.api.core.kanban.application.persistence.StatusReadModelRepository;
 import de.mueller_constantin.taskcare.api.core.user.application.UserReadService;
 import de.mueller_constantin.taskcare.api.core.user.application.UserWriteService;
 import de.mueller_constantin.taskcare.api.core.user.application.persistence.UserEventStoreRepository;
@@ -50,7 +51,8 @@ public class CoreConfig {
 
     @Bean
     KanbanReadService kanbanReadService(BoardReadModelRepository boardReadModelRepository,
-                                        MemberReadModelRepository memberReadModelRepository) {
-        return new KanbanReadService(boardReadModelRepository, memberReadModelRepository);
+                                        MemberReadModelRepository memberReadModelRepository,
+                                        StatusReadModelRepository statusReadModelRepository) {
+        return new KanbanReadService(boardReadModelRepository, memberReadModelRepository, statusReadModelRepository);
     }
 }

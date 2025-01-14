@@ -4,8 +4,10 @@ import de.mueller_constantin.taskcare.api.core.kanban.application.persistence.Ka
 import de.mueller_constantin.taskcare.api.core.kanban.domain.BoardAggregate;
 import de.mueller_constantin.taskcare.api.core.kanban.domain.BoardProjection;
 import de.mueller_constantin.taskcare.api.core.kanban.domain.MemberProjection;
+import de.mueller_constantin.taskcare.api.core.kanban.domain.StatusProjection;
 import de.mueller_constantin.taskcare.api.infrastructure.persistence.crud.BoardCrudRepository;
 import de.mueller_constantin.taskcare.api.infrastructure.persistence.crud.MemberCrudRepository;
+import de.mueller_constantin.taskcare.api.infrastructure.persistence.crud.StatusCrudRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
@@ -23,6 +25,7 @@ public class KanbanEventStoreRepositoryImpl implements KanbanEventStoreRepositor
     private final EventStore eventStore;
     private final BoardCrudRepository boardCrudRepository;
     private final MemberCrudRepository memberCrudRepository;
+    private final StatusCrudRepository statusCrudRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
 
     @Override
@@ -49,12 +52,28 @@ public class KanbanEventStoreRepositoryImpl implements KanbanEventStoreRepositor
                             .build())
                     .toList();
 
+            List<StatusProjection> statusProjections = aggregate.getStatuses().stream()
+                    .map(s -> StatusProjection.builder()
+                                    .id(s.getId())
+                                    .boardId(s.getBoardId())
+                                    .name(s.getName())
+                                    .description(s.getDescription())
+                                    .build())
+                    .toList();
+
             // Delete removed members
             memberCrudRepository.deleteAllNotInIdsForBoardId(memberProjections.stream()
                     .map(MemberProjection::getId).collect(Collectors.toList()), aggregate.getId());
 
             // Create or update members
             memberCrudRepository.saveAllForBoardId(aggregate.getId(), memberProjections);
+
+            // Delete removed statuses
+            statusCrudRepository.deleteAllNotInIdsForBoardId(statusProjections.stream()
+                    .map(StatusProjection::getId).collect(Collectors.toList()), aggregate.getId());
+
+            // Create or update statuses
+            statusCrudRepository.saveAllForBoardId(aggregate.getId(), statusProjections);
 
             // Update board
             boardCrudRepository.save(boardProjection);

@@ -37,7 +37,7 @@ ALTER TABLE users ADD CONSTRAINT UNIQUE_USERNAME UNIQUE (username);
 CREATE TABLE IF NOT EXISTS boards (
     id VARCHAR(255) PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
-    description VARCHAR(255)
+    description VARCHAR(1024)
 );
 
 CREATE TABLE IF NOT EXISTS members (
@@ -50,3 +50,11 @@ CREATE TABLE IF NOT EXISTS members (
 );
 
 ALTER TABLE members ADD CONSTRAINT UNIQUE_BOARD_USER UNIQUE (board_id, user_id);
+
+CREATE TABLE IF NOT EXISTS statuses (
+    id VARCHAR(255) PRIMARY KEY,
+    board_id VARCHAR(255) NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    description VARCHAR(1024),
+    FOREIGN KEY (board_id) REFERENCES boards(id)
+);

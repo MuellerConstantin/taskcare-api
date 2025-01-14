@@ -32,53 +32,29 @@ public class UserAggregate extends Aggregate {
     @Override
     protected void processEvent(DomainEvent event) throws IllegalArgumentException {
         if(event instanceof UserCreatedEvent) {
-            this.setUsername(((UserCreatedEvent) event).getUsername());
-            this.setPassword(((UserCreatedEvent) event).getPassword());
-            this.setDisplayName(((UserCreatedEvent) event).getDisplayName());
-            this.setRole(((UserCreatedEvent) event).getRole());
-            this.setIdentityProvider(((UserCreatedEvent) event).getIdentityProvider());
-            this.setLocked(false);
+            this.username = ((UserCreatedEvent) event).getUsername();
+            this.password = ((UserCreatedEvent) event).getPassword();
+            this.displayName = ((UserCreatedEvent) event).getDisplayName();
+            this.role = ((UserCreatedEvent) event).getRole();
+            this.identityProvider = ((UserCreatedEvent) event).getIdentityProvider();
+            this.locked = false;
             return;
         } else if(event instanceof UserUpdatedEvent) {
-            this.setPassword(((UserUpdatedEvent) event).getPassword());
-            this.setDisplayName(((UserUpdatedEvent) event).getDisplayName());
-            this.setRole(((UserUpdatedEvent) event).getRole());
+            this.password = ((UserUpdatedEvent) event).getPassword();
+            this.displayName = ((UserUpdatedEvent) event).getDisplayName();
+            this.role = ((UserUpdatedEvent) event).getRole();
             return;
         } else if(event instanceof UserLockedEvent) {
-            this.setLocked(true);
+            this.locked = true;
             return;
         } else if(event instanceof UserUnlockedEvent) {
-            this.setLocked(false);
+            this.locked = false;
             return;
         } else if(event instanceof UserDeletedEvent) {
             return;
         }
 
         throw new IllegalArgumentException("Unknown event type: %s".formatted(event.getClass()));
-    }
-
-    private void setUsername(String username) {
-        this.username = username;
-    }
-
-    private void setPassword(String password) {
-        this.password = password;
-    }
-
-    private void setDisplayName(String displayName) {
-        this.displayName = displayName;
-    }
-
-    private void setRole(Role role) {
-        this.role = role;
-    }
-
-    private void setIdentityProvider(IdentityProvider identityProvider) {
-        this.identityProvider = identityProvider;
-    }
-
-    private void setLocked(boolean locked) {
-        this.locked = locked;
     }
 
     @Override
