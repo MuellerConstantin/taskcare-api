@@ -17,5 +17,4 @@ public class BoardProjection implements Projection {
     private final UUID id;
     private final String name;
     private final String description;
-    private final Set<MemberProjection> members;
 }

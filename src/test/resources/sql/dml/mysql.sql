@@ -10,6 +10,11 @@ VALUES ('8d031fe3-e445-4d51-8c70-ac3e3810da87', 'maxi123', '$2y$10$xHTfzAglrIZIS
 INSERT INTO users (id, username, password, display_name, role, identity_provider, locked)
 VALUES ('6aa18950-81e0-4ac4-ad3a-37437db5c957', 'erika123', '$2y$10$xHTfzAglrIZISiZf3vL8yeBP.1C9aBHlvof2kRoEF7YMV0YjdR75G', 'Erika Musterfrau', 'USER', 'LOCAL', false);
 
+-- # Aggregate - 6aa18950-81e0-4ac4-ad3a-37437db5c957
+
+INSERT INTO users (id, username, password, display_name, role, identity_provider, locked)
+VALUES ('7c559b1c-82b6-4e91-8e8e-c637c0bbda14', 'john123', '$2y$10$xHTfzAglrIZISiZf3vL8yeBP.1C9aBHlvof2kRoEF7YMV0YjdR75G', 'John Doe', 'USER', 'LOCAL', false);
+
 -- ### Seed 'boards' ###
 
 -- # Aggregate - 527c3e1e-6b2d-4887-a747-9dfb7cb3bb1e

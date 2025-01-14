@@ -4,8 +4,10 @@ import de.mueller_constantin.taskcare.api.core.common.domain.Entity;
 import de.mueller_constantin.taskcare.api.core.common.domain.Page;
 import de.mueller_constantin.taskcare.api.core.common.domain.PageInfo;
 import de.mueller_constantin.taskcare.api.core.kanban.application.persistence.BoardReadModelRepository;
+import de.mueller_constantin.taskcare.api.core.kanban.application.persistence.MemberReadModelRepository;
 import de.mueller_constantin.taskcare.api.core.kanban.application.query.FindAllBoardsQuery;
 import de.mueller_constantin.taskcare.api.core.kanban.application.query.FindAllBoardsUserIsMemberQuery;
+import de.mueller_constantin.taskcare.api.core.kanban.application.query.FindAllMembersByBoardIdQuery;
 import de.mueller_constantin.taskcare.api.core.kanban.application.query.FindBoardByIdQuery;
 import de.mueller_constantin.taskcare.api.core.kanban.domain.BoardAggregate;
 import de.mueller_constantin.taskcare.api.core.kanban.domain.BoardProjection;
@@ -20,7 +22,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -34,6 +35,9 @@ class KanbanReadServiceTest {
     @Mock
     private BoardReadModelRepository boardReadModelRepository;
 
+    @Mock
+    private MemberReadModelRepository memberReadModelRepository;
+
     @InjectMocks
     private KanbanReadService kanbanReadService;
 
@@ -44,6 +48,7 @@ class KanbanReadServiceTest {
     private UUID dummyMemberId;
     private BoardAggregate boardAggregate;
     private BoardProjection boardProjection;
+    private List<MemberProjection> memberProjections;
 
     @BeforeEach
     void setUp() {
@@ -72,18 +77,20 @@ class KanbanReadServiceTest {
                 .id(this.id)
                 .name("Test Board")
                 .description("Lorem ipsum dolor sit amet, consetetur sadipscing elitr")
-                .members(Set.of(
-                        MemberProjection.builder()
-                                .id(this.creatorMemberId)
-                                .userId(this.creatorUserId)
-                                .role(Role.ADMINISTRATOR)
-                                .build(),
-                        MemberProjection.builder()
-                                .id(this.dummyMemberId)
-                                .userId(this.dummyUserId)
-                                .role(Role.MEMBER)
-                                .build()))
                 .build();
+
+        this.memberProjections = List.of(
+                MemberProjection.builder()
+                        .id(this.creatorMemberId)
+                        .userId(this.creatorUserId)
+                        .role(Role.ADMINISTRATOR)
+                        .build(),
+                MemberProjection.builder()
+                        .id(this.dummyMemberId)
+                        .userId(this.dummyUserId)
+                        .role(Role.MEMBER)
+                        .build()
+        );
     }
 
     @Test
@@ -134,5 +141,24 @@ class KanbanReadServiceTest {
 
         assertEquals(boardProjection, result.getContent().get(0));
         verify(boardReadModelRepository, times(1)).findAllUserIsMember(eq(this.creatorUserId), any(PageInfo.class));
+    }
+
+    @Test
+    void handleFindAllMembersByBoardIdQuery() {
+        when(memberReadModelRepository.findAllByBoardId(eq(this.id), any(PageInfo.class))).thenReturn(Page.<MemberProjection>builder()
+                .content(memberProjections)
+                .info(PageInfo.builder()
+                        .page(0)
+                        .perPage(10)
+                        .build())
+                .build());
+
+        Page<MemberProjection> result = kanbanReadService.query(FindAllMembersByBoardIdQuery.builder()
+                .boardId(this.id)
+                .page(0)
+                .perPage(10)
+                .build());
+
+        assertEquals(memberProjections, result.getContent());
     }
 }

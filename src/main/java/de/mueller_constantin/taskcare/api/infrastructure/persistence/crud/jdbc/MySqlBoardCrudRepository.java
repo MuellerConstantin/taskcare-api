@@ -2,10 +2,7 @@ package de.mueller_constantin.taskcare.api.infrastructure.persistence.crud.jdbc;
 
 import de.mueller_constantin.taskcare.api.core.common.domain.Page;
 import de.mueller_constantin.taskcare.api.core.common.domain.PageInfo;
-import de.mueller_constantin.taskcare.api.core.kanban.application.persistence.BoardReadModelRepository;
 import de.mueller_constantin.taskcare.api.core.kanban.domain.BoardProjection;
-import de.mueller_constantin.taskcare.api.core.kanban.domain.MemberProjection;
-import de.mueller_constantin.taskcare.api.core.kanban.domain.Role;
 import de.mueller_constantin.taskcare.api.infrastructure.persistence.crud.BoardCrudRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -17,12 +14,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.ResultSet;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Component
 @Transactional
 @RequiredArgsConstructor
-public class MySqlBoardCrudRepository implements BoardCrudRepository, BoardReadModelRepository {
+public class MySqlBoardCrudRepository implements BoardCrudRepository {
     private final String BOARD_TABLE_NAME = "boards";
     private final String MEMBER_TABLE_NAME = "members";
 
@@ -31,24 +27,9 @@ public class MySqlBoardCrudRepository implements BoardCrudRepository, BoardReadM
     @Override
     public Optional<BoardProjection> findById(UUID id) {
         MapSqlParameterSource parameters = new MapSqlParameterSource();
-        parameters.addValue("boardId", id.toString());
-
-        String query = """
-            SELECT
-                id,
-                board_id,
-                user_id,
-                role
-            FROM %s
-            WHERE board_id = :boardId
-        """.formatted(MEMBER_TABLE_NAME);
-
-        Set<MemberProjection> memberProjections = new HashSet<>(jdbcTemplate.query(query, parameters, this::toMemberProjection));
-
-        parameters = new MapSqlParameterSource();
         parameters.addValue("id", id.toString());
 
-        query = """
+        String query = """
             SELECT
                 id,
                 name,
@@ -58,12 +39,8 @@ public class MySqlBoardCrudRepository implements BoardCrudRepository, BoardReadM
         """.formatted(BOARD_TABLE_NAME);
 
         try {
-            Optional<BoardProjection> boardProjection = Optional.ofNullable(
+            return Optional.ofNullable(
                     jdbcTemplate.queryForObject(query, parameters, this::toBoardProjection));
-
-            return boardProjection.map(projection -> projection.toBuilder()
-                    .members(memberProjections)
-                    .build());
         } catch (EmptyResultDataAccessException exc) {
             return Optional.empty();
         }
@@ -74,31 +51,12 @@ public class MySqlBoardCrudRepository implements BoardCrudRepository, BoardReadM
         String query = """
             SELECT
                 id,
-                board_id,
-                user_id,
-                role
-            FROM %s
-        """.formatted(MEMBER_TABLE_NAME);
-
-        List<MemberProjection> memberProjections = jdbcTemplate.query(query, this::toMemberProjection);
-
-        query = """
-            SELECT
-                id,
                 name,
                 description
             FROM %s
         """.formatted(BOARD_TABLE_NAME);
 
-        List<BoardProjection> boardProjections = jdbcTemplate.query(query, this::toBoardProjection);
-
-        return boardProjections.stream()
-                .map(projection -> projection.toBuilder()
-                        .members(memberProjections.stream()
-                                .filter(m -> m.getBoardId().equals(projection.getId()))
-                                .collect(Collectors.toSet()))
-                        .build())
-                .toList();
+        return jdbcTemplate.query(query, this::toBoardProjection);
     }
 
     @Override
@@ -127,32 +85,6 @@ public class MySqlBoardCrudRepository implements BoardCrudRepository, BoardReadM
         """.formatted(BOARD_TABLE_NAME);
 
         List<BoardProjection> boardProjections = jdbcTemplate.query(query, parameters, this::toBoardProjection);
-
-        parameters = new MapSqlParameterSource();
-        parameters.addValue("boardIds", boardProjections.stream()
-                .map(BoardProjection::getId)
-                .map(UUID::toString)
-                .toList());
-
-        query = """
-            SELECT
-                id,
-                board_id,
-                user_id,
-                role
-            FROM %s
-            WHERE board_id IN (:boardIds)
-        """.formatted(MEMBER_TABLE_NAME);
-
-        List<MemberProjection> memberProjections = jdbcTemplate.query(query, parameters, this::toMemberProjection);
-
-        boardProjections = boardProjections.stream()
-                .map(projection -> projection.toBuilder()
-                        .members(memberProjections.stream()
-                                .filter(m -> m.getBoardId().equals(projection.getId()))
-                                .collect(Collectors.toSet()))
-                        .build())
-                .toList();
 
         return Page.<BoardProjection>builder()
                 .content(boardProjections)
@@ -224,31 +156,6 @@ public class MySqlBoardCrudRepository implements BoardCrudRepository, BoardReadM
 
         List<BoardProjection> boardProjections = jdbcTemplate.query(query, parameters, this::toBoardProjection);
 
-        parameters = new MapSqlParameterSource();
-        parameters.addValue("boardIds", boardIds.stream()
-                .map(UUID::toString)
-                .toList());
-
-        query = """
-            SELECT
-                id,
-                board_id,
-                user_id,
-                role
-            FROM %s
-            WHERE board_id IN (:boardIds)
-        """.formatted(MEMBER_TABLE_NAME);
-
-        List<MemberProjection> memberProjections = jdbcTemplate.query(query, parameters, this::toMemberProjection);
-
-        boardProjections = boardProjections.stream()
-                .map(projection -> projection.toBuilder()
-                        .members(memberProjections.stream()
-                                .filter(m -> m.getBoardId().equals(projection.getId()))
-                                .collect(Collectors.toSet()))
-                        .build())
-                .toList();
-
         return Page.<BoardProjection>builder()
                 .content(boardProjections)
                 .info(PageInfo.builder()
@@ -292,32 +199,7 @@ public class MySqlBoardCrudRepository implements BoardCrudRepository, BoardReadM
             WHERE id IN (:boardIds)
         """.formatted(BOARD_TABLE_NAME);
 
-        List<BoardProjection> boardProjections = jdbcTemplate.query(query, parameters, this::toBoardProjection);
-
-        parameters = new MapSqlParameterSource();
-        parameters.addValue("boardIds", boardIds.stream()
-                .map(UUID::toString)
-                .toList());
-
-        query = """
-            SELECT
-                id,
-                board_id,
-                user_id,
-                role
-            FROM %s
-            WHERE board_id IN (:boardIds)
-        """.formatted(MEMBER_TABLE_NAME);
-
-        List<MemberProjection> memberProjections = jdbcTemplate.query(query, parameters, this::toMemberProjection);
-
-        return boardProjections.stream()
-                .map(projection -> projection.toBuilder()
-                        .members(memberProjections.stream()
-                                .filter(m -> m.getBoardId().equals(projection.getId()))
-                                .collect(Collectors.toSet()))
-                        .build())
-                .toList();
+        return jdbcTemplate.query(query, parameters, this::toBoardProjection);
     }
 
     @Override
@@ -379,91 +261,6 @@ public class MySqlBoardCrudRepository implements BoardCrudRepository, BoardReadM
         }
 
         jdbcTemplate.update(query, parameters);
-
-        // Delete removed members
-
-        parameters = new MapSqlParameterSource();
-        parameters.addValue("boardId", projection.getId().toString());
-        parameters.addValue("memberIds", projection.getMembers().stream().map(MemberProjection::getId)
-                .map(UUID::toString).collect(Collectors.toList()));
-
-        query = """
-            DELETE
-            FROM %s
-            WHERE board_id = :boardId AND id NOT IN (:memberIds)
-        """.formatted(MEMBER_TABLE_NAME);
-
-        jdbcTemplate.update(query, parameters);
-
-        // Save current members
-
-        parameters = new MapSqlParameterSource();
-        parameters.addValue("boardId", projection.getId().toString());
-
-        query = """
-            SELECT
-                id
-            FROM %s
-            WHERE board_id = :boardId
-        """.formatted(MEMBER_TABLE_NAME);
-
-        List<UUID> existingMemberIds = jdbcTemplate.query(query, parameters, (rs, rowNum) -> UUID.fromString(rs.getString("id")));
-        List<UUID> newMemberIds = projection.getMembers().stream().map(MemberProjection::getId).filter(id -> !existingMemberIds.contains(id)).toList();
-
-        if(!newMemberIds.isEmpty()) {
-            List<MapSqlParameterSource> parametersList = projection.getMembers().stream()
-                    .filter(m -> newMemberIds.contains(m.getId()))
-                    .map(member -> {
-                        MapSqlParameterSource nestedParameters = new MapSqlParameterSource();
-                        nestedParameters.addValue("id", member.getId().toString());
-                        nestedParameters.addValue("boardId", projection.getId().toString());
-                        nestedParameters.addValue("userId", member.getUserId().toString());
-                        nestedParameters.addValue("role", member.getRole().toString());
-                        return nestedParameters;
-                    })
-                    .toList();
-
-            query = """
-                INSERT INTO %s (
-                    id,
-                    board_id,
-                    user_id,
-                    role
-                ) VALUES (
-                    :id,
-                    :boardId,
-                    :userId,
-                    :role
-                )
-            """.formatted(MEMBER_TABLE_NAME);
-
-            jdbcTemplate.batchUpdate(query, parametersList.toArray(new MapSqlParameterSource[0]));
-        }
-
-        if(!projection.getMembers().isEmpty()) {
-            List<MapSqlParameterSource> parametersList = projection.getMembers().stream()
-                    .filter(m -> existingMemberIds.contains(m.getId()))
-                    .map(member -> {
-                        MapSqlParameterSource nestedParameters = new MapSqlParameterSource();
-                        nestedParameters.addValue("id", member.getId().toString());
-                        nestedParameters.addValue("boardId", projection.getId().toString());
-                        nestedParameters.addValue("userId", member.getUserId().toString());
-                        nestedParameters.addValue("role", member.getRole().toString());
-                        return nestedParameters;
-                    })
-                    .toList();
-
-            query = """
-                UPDATE %s
-                SET
-                    board_id = :boardId,
-                    user_id = :userId,
-                    role = :role
-                WHERE id = :id
-            """.formatted(MEMBER_TABLE_NAME);
-
-            jdbcTemplate.batchUpdate(query, parametersList.toArray(new MapSqlParameterSource[0]));
-        }
     }
 
     @Override
@@ -481,21 +278,6 @@ public class MySqlBoardCrudRepository implements BoardCrudRepository, BoardReadM
         Integer count = jdbcTemplate.queryForObject(query, parameters, Integer.class);
 
         return count != null && count > 0;
-    }
-
-    @SneakyThrows
-    private MemberProjection toMemberProjection(ResultSet resultSet, int rowNum) {
-        UUID id = UUID.fromString(resultSet.getString("id"));
-        UUID boardId = UUID.fromString(resultSet.getString("board_id"));
-        UUID userId = UUID.fromString(resultSet.getString("user_id"));
-        Role role = Role.valueOf(resultSet.getString("role"));
-
-        return MemberProjection.builder()
-                .id(id)
-                .boardId(boardId)
-                .userId(userId)
-                .role(role)
-                .build();
     }
 
     @SneakyThrows

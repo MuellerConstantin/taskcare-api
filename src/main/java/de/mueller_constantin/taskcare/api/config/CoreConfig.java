@@ -5,8 +5,9 @@ import de.mueller_constantin.taskcare.api.core.common.application.persistence.Me
 import de.mueller_constantin.taskcare.api.core.common.application.validation.DomainValidationAspect;
 import de.mueller_constantin.taskcare.api.core.kanban.application.KanbanReadService;
 import de.mueller_constantin.taskcare.api.core.kanban.application.KanbanWriteService;
-import de.mueller_constantin.taskcare.api.core.kanban.application.persistence.BoardEventStoreRepository;
+import de.mueller_constantin.taskcare.api.core.kanban.application.persistence.KanbanEventStoreRepository;
 import de.mueller_constantin.taskcare.api.core.kanban.application.persistence.BoardReadModelRepository;
+import de.mueller_constantin.taskcare.api.core.kanban.application.persistence.MemberReadModelRepository;
 import de.mueller_constantin.taskcare.api.core.user.application.UserReadService;
 import de.mueller_constantin.taskcare.api.core.user.application.UserWriteService;
 import de.mueller_constantin.taskcare.api.core.user.application.persistence.UserEventStoreRepository;
@@ -39,16 +40,17 @@ public class CoreConfig {
     }
 
     @Bean
-    KanbanWriteService kanbanWriteService(BoardEventStoreRepository boardEventStoreRepository,
+    KanbanWriteService kanbanWriteService(KanbanEventStoreRepository kanbanEventStoreRepository,
                                           BoardReadModelRepository boardReadModelRepository,
                                           UserReadService userReadService,
                                           MediaStorage mediaStorage,
                                           DomainEventBus domainEventBus) {
-        return new KanbanWriteService(boardEventStoreRepository, boardReadModelRepository, userReadService, mediaStorage, domainEventBus);
+        return new KanbanWriteService(kanbanEventStoreRepository, boardReadModelRepository, userReadService, mediaStorage, domainEventBus);
     }
 
     @Bean
-    KanbanReadService kanbanReadService(BoardReadModelRepository boardReadModelRepository) {
-        return new KanbanReadService(boardReadModelRepository);
+    KanbanReadService kanbanReadService(BoardReadModelRepository boardReadModelRepository,
+                                        MemberReadModelRepository memberReadModelRepository) {
+        return new KanbanReadService(boardReadModelRepository, memberReadModelRepository);
     }
 }

@@ -770,19 +770,36 @@ paths:
             type: string
             format: uuid
             example: 3377cf8f-da29-4aa7-9036-91951b8fce87
+        - name: page
+          in: query
+          description: Zero based index of page to load.
+          required: false
+          schema:
+            type: integer
+            example: 0
+        - name: perPage
+          in: query
+          description: Number of elements per page.
+          required: false
+          schema:
+            type: integer
+            example: 10
       responses:
         200:
           description: Successfully fetched all members of the board.
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/MemberDto"
+                $ref: "#/components/schemas/MemberPageDto"
               example:
-                - id: af95613c-72e5-423b-996d-bcf496aa9e7a
-                  userId: 3377cf8f-da29-4aa7-9036-91951b8fce87
-                  role: MEMBER
+                page: 0
+                perPage: 10
+                totalElements: 1
+                totalPages: 1
+                content:
+                  - id: af95613c-72e5-423b-996d-bcf496aa9e7a
+                    userId: 3377cf8f-da29-4aa7-9036-91951b8fce87
+                    role: MEMBER
         401:
           $ref: "#/components/responses/401"
         403:
@@ -1180,6 +1197,17 @@ components:
         description:
           type: string
           description: Detailed description of the kanban board.
+    MemberPageDto:
+      allOf:
+        - $ref: "#/components/schemas/PageDto"
+        - type: object
+          properties:
+            content:
+              type: array
+              items:
+                $ref: "#/components/schemas/MemberDto"
+          required:
+            - content
     MemberDto:
       type: object
       properties:

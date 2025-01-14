@@ -99,7 +99,7 @@ class MySqlUserCrudRepositoryTest {
     void findAll() {
         List<UserProjection> users = userCrudRepository.findAll();
 
-        assertEquals(2, users.size());
+        assertEquals(3, users.size());
     }
 
     @Test
@@ -110,8 +110,8 @@ class MySqlUserCrudRepositoryTest {
                 .build());
 
         assertEquals(1, page.getContent().size());
-        assertEquals(2, page.getInfo().getTotalElements());
-        assertEquals(2, page.getInfo().getTotalPages());
+        assertEquals(3, page.getInfo().getTotalElements());
+        assertEquals(3, page.getInfo().getTotalPages());
     }
 
     @TestConfiguration

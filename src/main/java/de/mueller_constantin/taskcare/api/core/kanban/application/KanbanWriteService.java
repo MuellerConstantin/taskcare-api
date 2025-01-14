@@ -5,14 +5,9 @@ import de.mueller_constantin.taskcare.api.core.common.application.event.DomainEv
 import de.mueller_constantin.taskcare.api.core.common.application.persistence.MediaStorage;
 import de.mueller_constantin.taskcare.api.core.common.application.validation.Validated;
 import de.mueller_constantin.taskcare.api.core.common.domain.DomainEvent;
-import de.mueller_constantin.taskcare.api.core.common.domain.Page;
-import de.mueller_constantin.taskcare.api.core.common.domain.PageInfo;
 import de.mueller_constantin.taskcare.api.core.kanban.application.command.*;
-import de.mueller_constantin.taskcare.api.core.kanban.application.persistence.BoardEventStoreRepository;
+import de.mueller_constantin.taskcare.api.core.kanban.application.persistence.KanbanEventStoreRepository;
 import de.mueller_constantin.taskcare.api.core.kanban.application.persistence.BoardReadModelRepository;
-import de.mueller_constantin.taskcare.api.core.kanban.application.query.FindAllBoardsQuery;
-import de.mueller_constantin.taskcare.api.core.kanban.application.query.FindAllBoardsUserIsMemberQuery;
-import de.mueller_constantin.taskcare.api.core.kanban.application.query.FindBoardByIdQuery;
 import de.mueller_constantin.taskcare.api.core.kanban.domain.BoardAggregate;
 import de.mueller_constantin.taskcare.api.core.kanban.domain.BoardDeletedEvent;
 import de.mueller_constantin.taskcare.api.core.kanban.domain.BoardProjection;
@@ -27,18 +22,18 @@ import java.util.UUID;
 
 @Validated
 public class KanbanWriteService {
-    private final BoardEventStoreRepository boardEventStoreRepository;
+    private final KanbanEventStoreRepository kanbanEventStoreRepository;
     private final BoardReadModelRepository boardReadModelRepository;
     private final UserReadService userReadService;
     private final MediaStorage mediaStorage;
     private final DomainEventBus domainEventBus;
 
-    public KanbanWriteService(BoardEventStoreRepository boardEventStoreRepository,
+    public KanbanWriteService(KanbanEventStoreRepository kanbanEventStoreRepository,
                               BoardReadModelRepository boardReadModelRepository,
                               UserReadService userReadService,
                               MediaStorage mediaStorage,
                               DomainEventBus domainEventBus) {
-        this.boardEventStoreRepository = boardEventStoreRepository;
+        this.kanbanEventStoreRepository = kanbanEventStoreRepository;
         this.boardReadModelRepository = boardReadModelRepository;
         this.userReadService = userReadService;
         this.mediaStorage = mediaStorage;
@@ -55,11 +50,11 @@ public class KanbanWriteService {
 
         BoardAggregate boardAggregate = new BoardAggregate();
         boardAggregate.create(command.getName(), command.getDescription(), command.getCreatorId());
-        boardEventStoreRepository.save(boardAggregate);
+        kanbanEventStoreRepository.save(boardAggregate);
     }
 
     public void dispatch(@Valid UpdateBoardByIdCommand command) {
-        BoardAggregate boardAggregate = boardEventStoreRepository.load(command.getId())
+        BoardAggregate boardAggregate = kanbanEventStoreRepository.load(command.getId())
                 .orElseThrow(NoSuchEntityException::new);
 
         String name = command.getName() != null ?
@@ -71,15 +66,15 @@ public class KanbanWriteService {
                 boardAggregate.getDescription();
 
         boardAggregate.update(name, description);
-        boardEventStoreRepository.save(boardAggregate);
+        kanbanEventStoreRepository.save(boardAggregate);
     }
 
     public void dispatch(@Valid DeleteBoardByIdCommand command) {
-        BoardAggregate boardAggregate = boardEventStoreRepository.load(command.getId())
+        BoardAggregate boardAggregate = kanbanEventStoreRepository.load(command.getId())
                 .orElseThrow(NoSuchEntityException::new);
 
         boardAggregate.delete();
-        boardEventStoreRepository.save(boardAggregate);
+        kanbanEventStoreRepository.save(boardAggregate);
     }
 
     public void dispatch(@Valid AddMemberByIdCommand command) {
@@ -87,27 +82,27 @@ public class KanbanWriteService {
             throw new NoSuchEntityException("User with id '" + command.getUserId() + "' does not exist");
         }
 
-        BoardAggregate boardAggregate = boardEventStoreRepository.load(command.getBoardId())
+        BoardAggregate boardAggregate = kanbanEventStoreRepository.load(command.getBoardId())
                 .orElseThrow(NoSuchEntityException::new);
 
         boardAggregate.addMember(command.getUserId(), command.getRole());
-        boardEventStoreRepository.save(boardAggregate);
+        kanbanEventStoreRepository.save(boardAggregate);
     }
 
     public void dispatch(@Valid RemoveMemberByIdCommand command) {
-        BoardAggregate boardAggregate = boardEventStoreRepository.load(command.getBoardId())
+        BoardAggregate boardAggregate = kanbanEventStoreRepository.load(command.getBoardId())
                 .orElseThrow(NoSuchEntityException::new);
 
         boardAggregate.removeMember(command.getMemberId());
-        boardEventStoreRepository.save(boardAggregate);
+        kanbanEventStoreRepository.save(boardAggregate);
     }
 
     public void dispatch(@Valid UpdateMemberByIdCommand command) {
-        BoardAggregate boardAggregate = boardEventStoreRepository.load(command.getBoardId())
+        BoardAggregate boardAggregate = kanbanEventStoreRepository.load(command.getBoardId())
                 .orElseThrow(NoSuchEntityException::new);
 
         boardAggregate.updateMember(command.getMemberId(), command.getRole());
-        boardEventStoreRepository.save(boardAggregate);
+        kanbanEventStoreRepository.save(boardAggregate);
     }
 
     protected void onUserDeletedEvent(DomainEvent event) {
@@ -119,7 +114,7 @@ public class KanbanWriteService {
                 .toList();
 
         boardIds.parallelStream().forEach(boardId -> {
-            BoardAggregate boardAggregate = boardEventStoreRepository.load(boardId)
+            BoardAggregate boardAggregate = kanbanEventStoreRepository.load(boardId)
                     .orElseThrow(NoSuchEntityException::new);
 
             boolean onlyMember = boardAggregate.getMembers().stream()
@@ -127,7 +122,7 @@ public class KanbanWriteService {
 
             if (onlyMember) {
                 boardAggregate.delete();
-                boardEventStoreRepository.save(boardAggregate);
+                kanbanEventStoreRepository.save(boardAggregate);
                 return;
             }
 
@@ -152,7 +147,7 @@ public class KanbanWriteService {
                     .getId();
 
             boardAggregate.removeMember(memberId);
-            boardEventStoreRepository.save(boardAggregate);
+            kanbanEventStoreRepository.save(boardAggregate);
         });
     }
 

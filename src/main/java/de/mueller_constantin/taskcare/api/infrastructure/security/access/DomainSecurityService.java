@@ -1,8 +1,10 @@
 package de.mueller_constantin.taskcare.api.infrastructure.security.access;
 
+import de.mueller_constantin.taskcare.api.core.common.application.NoSuchEntityException;
 import de.mueller_constantin.taskcare.api.core.kanban.application.KanbanReadService;
-import de.mueller_constantin.taskcare.api.core.kanban.application.query.FindBoardByIdQuery;
-import de.mueller_constantin.taskcare.api.core.kanban.domain.BoardProjection;
+import de.mueller_constantin.taskcare.api.core.kanban.application.query.ExistsMemberByUserIdAndBoardIdQuery;
+import de.mueller_constantin.taskcare.api.core.kanban.application.query.FindMemberByUserIdAndBoardIdQuery;
+import de.mueller_constantin.taskcare.api.core.kanban.domain.MemberProjection;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,18 +20,22 @@ public class DomainSecurityService {
     }
 
     public boolean isBoardMember(UUID boardId, UUID userId) {
-        BoardProjection board = kanbanReadService.query(FindBoardByIdQuery.builder()
-                .id(boardId)
+        return kanbanReadService.query(ExistsMemberByUserIdAndBoardIdQuery.builder()
+                .userId(userId)
+                .boardId(boardId)
                 .build());
-
-        return board.getMembers().stream().anyMatch(m -> m.getUserId().equals(userId));
     }
 
     public boolean isBoardMemberWithRole(UUID boardId, UUID userId, String role) {
-        BoardProjection board = kanbanReadService.query(FindBoardByIdQuery.builder()
-                .id(boardId)
-                .build());
+        try {
+            MemberProjection member = kanbanReadService.query(FindMemberByUserIdAndBoardIdQuery.builder()
+                    .userId(userId)
+                    .boardId(boardId)
+                    .build());
 
-        return board.getMembers().stream().anyMatch(m -> m.getUserId().equals(userId) && m.getRole().toString().equals(role));
+            return member.getRole().toString().equals(role);
+        } catch(NoSuchEntityException e) {
+            return false;
+        }
     }
 }

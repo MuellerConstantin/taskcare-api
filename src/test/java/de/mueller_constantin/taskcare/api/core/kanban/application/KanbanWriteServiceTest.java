@@ -4,7 +4,7 @@ import de.mueller_constantin.taskcare.api.core.common.application.NoSuchEntityEx
 import de.mueller_constantin.taskcare.api.core.common.application.event.DomainEventBus;
 import de.mueller_constantin.taskcare.api.core.common.domain.Entity;
 import de.mueller_constantin.taskcare.api.core.kanban.application.command.*;
-import de.mueller_constantin.taskcare.api.core.kanban.application.persistence.BoardEventStoreRepository;
+import de.mueller_constantin.taskcare.api.core.kanban.application.persistence.KanbanEventStoreRepository;
 import de.mueller_constantin.taskcare.api.core.kanban.application.persistence.BoardReadModelRepository;
 import de.mueller_constantin.taskcare.api.core.kanban.domain.*;
 import de.mueller_constantin.taskcare.api.core.user.application.UserReadService;
@@ -17,7 +17,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -29,7 +28,7 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class KanbanWriteServiceTest {
     @Mock
-    private BoardEventStoreRepository boardEventStoreRepository;
+    private KanbanEventStoreRepository kanbanEventStoreRepository;
 
     @Mock
     private BoardReadModelRepository boardReadModelRepository;
@@ -81,17 +80,6 @@ class KanbanWriteServiceTest {
                 .id(this.id)
                 .name("Test Board")
                 .description("Lorem ipsum dolor sit amet, consetetur sadipscing elitr")
-                .members(Set.of(
-                        MemberProjection.builder()
-                                .id(this.creatorMemberId)
-                                .userId(this.creatorUserId)
-                                .role(Role.ADMINISTRATOR)
-                                .build(),
-                        MemberProjection.builder()
-                                .id(this.dummyMemberId)
-                                .userId(this.dummyUserId)
-                                .role(Role.MEMBER)
-                                .build()))
                 .build();
     }
 
@@ -111,7 +99,7 @@ class KanbanWriteServiceTest {
     @Test
     void handleCreateBoardCommand() {
         when(userReadService.query(any(ExistsUserByIdQuery.class))).thenReturn(true);
-        doNothing().when(boardEventStoreRepository).save(any(BoardAggregate.class));
+        doNothing().when(kanbanEventStoreRepository).save(any(BoardAggregate.class));
 
         kanbanWriteService.dispatch(CreateBoardCommand.builder()
                 .name("Second Test Board")
@@ -120,26 +108,26 @@ class KanbanWriteServiceTest {
                 .build());
 
         verify(userReadService, times(1)).query(any(ExistsUserByIdQuery.class));
-        verify(boardEventStoreRepository, times(1)).save(any(BoardAggregate.class));
+        verify(kanbanEventStoreRepository, times(1)).save(any(BoardAggregate.class));
     }
 
     @Test
     void handleUpdateBoardByIdCommand() {
-        when(boardEventStoreRepository.load(id)).thenReturn(Optional.of(boardAggregate));
-        doNothing().when(boardEventStoreRepository).save(any(BoardAggregate.class));
+        when(kanbanEventStoreRepository.load(id)).thenReturn(Optional.of(boardAggregate));
+        doNothing().when(kanbanEventStoreRepository).save(any(BoardAggregate.class));
 
         kanbanWriteService.dispatch(UpdateBoardByIdCommand.builder()
                 .id(id)
                 .name("Another Test Board")
                 .build());
 
-        verify(boardEventStoreRepository, times(1)).load(id);
-        verify(boardEventStoreRepository, times(1)).save(any(BoardAggregate.class));
+        verify(kanbanEventStoreRepository, times(1)).load(id);
+        verify(kanbanEventStoreRepository, times(1)).save(any(BoardAggregate.class));
     }
 
     @Test
     void handleUpdateBoardByIdCommandUnknownId() {
-        when(boardEventStoreRepository.load(id)).thenReturn(Optional.empty());
+        when(kanbanEventStoreRepository.load(id)).thenReturn(Optional.empty());
 
         assertThrows(NoSuchEntityException.class, () -> {
             kanbanWriteService.dispatch(UpdateBoardByIdCommand.builder()
@@ -151,20 +139,20 @@ class KanbanWriteServiceTest {
 
     @Test
     void handleDeleteBoardByIdCommand() {
-        when(boardEventStoreRepository.load(id)).thenReturn(Optional.of(boardAggregate));
-        doNothing().when(boardEventStoreRepository).save(any(BoardAggregate.class));
+        when(kanbanEventStoreRepository.load(id)).thenReturn(Optional.of(boardAggregate));
+        doNothing().when(kanbanEventStoreRepository).save(any(BoardAggregate.class));
 
         kanbanWriteService.dispatch(DeleteBoardByIdCommand.builder()
                 .id(id)
                 .build());
 
-        verify(boardEventStoreRepository, times(1)).load(id);
-        verify(boardEventStoreRepository, times(1)).save(any(BoardAggregate.class));
+        verify(kanbanEventStoreRepository, times(1)).load(id);
+        verify(kanbanEventStoreRepository, times(1)).save(any(BoardAggregate.class));
     }
 
     @Test
     void handleDeleteBoardByIdCommandUnknownId() {
-        when(boardEventStoreRepository.load(id)).thenReturn(Optional.empty());
+        when(kanbanEventStoreRepository.load(id)).thenReturn(Optional.empty());
 
         assertThrows(NoSuchEntityException.class, () -> {
             kanbanWriteService.dispatch(DeleteBoardByIdCommand.builder()
@@ -176,8 +164,8 @@ class KanbanWriteServiceTest {
     @Test
     void handleAddMemberByIdCommand() {
         when(userReadService.query(any(ExistsUserByIdQuery.class))).thenReturn(true);
-        when(boardEventStoreRepository.load(id)).thenReturn(Optional.of(boardAggregate));
-        doNothing().when(boardEventStoreRepository).save(any(BoardAggregate.class));
+        when(kanbanEventStoreRepository.load(id)).thenReturn(Optional.of(boardAggregate));
+        doNothing().when(kanbanEventStoreRepository).save(any(BoardAggregate.class));
 
         kanbanWriteService.dispatch(AddMemberByIdCommand.builder()
                 .boardId(id)
@@ -188,7 +176,7 @@ class KanbanWriteServiceTest {
         assertEquals(3, boardAggregate.getMembers().size());
 
         verify(userReadService, times(1)).query(any(ExistsUserByIdQuery.class));
-        verify(boardEventStoreRepository, times(1)).save(any(BoardAggregate.class));
+        verify(kanbanEventStoreRepository, times(1)).save(any(BoardAggregate.class));
     }
 
     @Test
@@ -207,7 +195,7 @@ class KanbanWriteServiceTest {
     @Test
     void handleAddMemberByIdCommandWithAlreadyExistingMember() {
         when(userReadService.query(any(ExistsUserByIdQuery.class))).thenReturn(true);
-        when(boardEventStoreRepository.load(id)).thenReturn(Optional.of(boardAggregate));
+        when(kanbanEventStoreRepository.load(id)).thenReturn(Optional.of(boardAggregate));
 
         assertThrows(BoardMemberAlreadyExistsException.class, () -> {
             kanbanWriteService.dispatch(AddMemberByIdCommand.builder()
@@ -220,8 +208,8 @@ class KanbanWriteServiceTest {
 
     @Test
     void handleRemoveMemberByIdCommand() {
-        when(boardEventStoreRepository.load(id)).thenReturn(Optional.of(boardAggregate));
-        doNothing().when(boardEventStoreRepository).save(any(BoardAggregate.class));
+        when(kanbanEventStoreRepository.load(id)).thenReturn(Optional.of(boardAggregate));
+        doNothing().when(kanbanEventStoreRepository).save(any(BoardAggregate.class));
 
         kanbanWriteService.dispatch(RemoveMemberByIdCommand.builder()
                 .boardId(id)
@@ -230,12 +218,12 @@ class KanbanWriteServiceTest {
 
         assertEquals(1, boardAggregate.getMembers().size());
 
-        verify(boardEventStoreRepository, times(1)).save(any(BoardAggregate.class));
+        verify(kanbanEventStoreRepository, times(1)).save(any(BoardAggregate.class));
     }
 
     @Test
     void handleRemoveMemberByIdCommandWithMissingMember() {
-        when(boardEventStoreRepository.load(id)).thenReturn(Optional.of(boardAggregate));
+        when(kanbanEventStoreRepository.load(id)).thenReturn(Optional.of(boardAggregate));
 
         assertThrows(NoSuchEntityException.class, () -> {
             kanbanWriteService.dispatch(RemoveMemberByIdCommand.builder()
@@ -247,7 +235,7 @@ class KanbanWriteServiceTest {
 
     @Test
     void handleRemoveMemberByIdCommandRemoveLastAdmin() {
-        when(boardEventStoreRepository.load(id)).thenReturn(Optional.of(boardAggregate));
+        when(kanbanEventStoreRepository.load(id)).thenReturn(Optional.of(boardAggregate));
 
         assertThrows(BoardMustBeAdministrableException.class, () -> {
             kanbanWriteService.dispatch(RemoveMemberByIdCommand.builder()
@@ -259,8 +247,8 @@ class KanbanWriteServiceTest {
 
     @Test
     void handleUpdateMemberByIdCommand() {
-        when(boardEventStoreRepository.load(id)).thenReturn(Optional.of(boardAggregate));
-        doNothing().when(boardEventStoreRepository).save(any(BoardAggregate.class));
+        when(kanbanEventStoreRepository.load(id)).thenReturn(Optional.of(boardAggregate));
+        doNothing().when(kanbanEventStoreRepository).save(any(BoardAggregate.class));
 
         kanbanWriteService.dispatch(UpdateMemberByIdCommand.builder()
                 .boardId(id)
@@ -268,12 +256,12 @@ class KanbanWriteServiceTest {
                 .role(Role.MAINTAINER)
                 .build());
 
-        verify(boardEventStoreRepository, times(1)).save(any(BoardAggregate.class));
+        verify(kanbanEventStoreRepository, times(1)).save(any(BoardAggregate.class));
     }
 
     @Test
     void handleUpdateMemberByIdCommandWithMissingMember() {
-        when(boardEventStoreRepository.load(id)).thenReturn(Optional.of(boardAggregate));
+        when(kanbanEventStoreRepository.load(id)).thenReturn(Optional.of(boardAggregate));
 
         assertThrows(NoSuchEntityException.class, () -> {
             kanbanWriteService.dispatch(UpdateMemberByIdCommand.builder()
@@ -286,7 +274,7 @@ class KanbanWriteServiceTest {
 
     @Test
     void handleUpdateMemberByIdCommandChangeLastAdminRole() {
-        when(boardEventStoreRepository.load(id)).thenReturn(Optional.of(boardAggregate));
+        when(kanbanEventStoreRepository.load(id)).thenReturn(Optional.of(boardAggregate));
 
         assertThrows(BoardMustBeAdministrableException.class, () -> {
             kanbanWriteService.dispatch(UpdateMemberByIdCommand.builder()

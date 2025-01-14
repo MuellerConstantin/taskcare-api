@@ -3,8 +3,6 @@ package de.mueller_constantin.taskcare.api.infrastructure.persistence.crud.jdbc;
 import de.mueller_constantin.taskcare.api.core.common.domain.Page;
 import de.mueller_constantin.taskcare.api.core.common.domain.PageInfo;
 import de.mueller_constantin.taskcare.api.core.kanban.domain.BoardProjection;
-import de.mueller_constantin.taskcare.api.core.kanban.domain.MemberProjection;
-import de.mueller_constantin.taskcare.api.core.kanban.domain.Role;
 import de.mueller_constantin.taskcare.api.infrastructure.persistence.crud.BoardCrudRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,7 +19,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -45,7 +42,6 @@ class MySqlBoardCrudRepositoryTest {
 
         assertTrue(boardProjection.isPresent());
         assertEquals(UUID.fromString("527c3e1e-6b2d-4887-a747-9dfb7cb3bb1e"), boardProjection.get().getId());
-        assertEquals(2, boardProjection.get().getMembers().size());
     }
 
     @Test
@@ -99,11 +95,6 @@ class MySqlBoardCrudRepositoryTest {
                 .id(UUID.randomUUID())
                 .name("Kanban #3")
                 .description("Kanban Board #3")
-                .members(Set.of(MemberProjection.builder()
-                        .id(UUID.randomUUID())
-                        .userId(UUID.fromString("8d031fe3-e445-4d51-8c70-ac3e3810da87"))
-                        .role(Role.ADMINISTRATOR)
-                        .build()))
                 .build();
 
         boardCrudRepository.save(boardProjection);

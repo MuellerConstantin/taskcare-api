@@ -44,7 +44,7 @@ public class BoardAggregate extends Aggregate {
             this.addMember(((MemberAddedEvent) event).getMember());
             return;
         } else if(event instanceof MemberRemovedEvent) {
-            this.members.remove(((MemberRemovedEvent) event).getMember());
+            this.members.removeIf(m -> m.getId().equals(((MemberRemovedEvent) event).getMember().getId()));
             return;
         } else if(event instanceof MemberUpdatedEvent) {
             this.members.forEach(member -> {
