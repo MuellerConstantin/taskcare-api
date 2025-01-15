@@ -1,5 +1,7 @@
 package de.mueller_constantin.taskcare.api.core.board.application;
 
+import de.mueller_constantin.taskcare.api.core.board.application.persistence.ComponentReadModelRepository;
+import de.mueller_constantin.taskcare.api.core.board.domain.ComponentProjection;
 import de.mueller_constantin.taskcare.api.core.common.application.ApplicationService;
 import de.mueller_constantin.taskcare.api.core.common.application.NoSuchEntityException;
 import de.mueller_constantin.taskcare.api.core.common.domain.Page;
@@ -16,13 +18,16 @@ public class BoardReadService implements ApplicationService {
     private final BoardReadModelRepository boardReadModelRepository;
     private final MemberReadModelRepository memberReadModelRepository;
     private final StatusReadModelRepository statusReadModelRepository;
+    private final ComponentReadModelRepository componentReadModelRepository;
 
     public BoardReadService(BoardReadModelRepository boardReadModelRepository,
                             MemberReadModelRepository memberReadModelRepository,
-                            StatusReadModelRepository statusReadModelRepository) {
+                            StatusReadModelRepository statusReadModelRepository,
+                            ComponentReadModelRepository componentReadModelRepository) {
         this.boardReadModelRepository = boardReadModelRepository;
         this.memberReadModelRepository = memberReadModelRepository;
         this.statusReadModelRepository = statusReadModelRepository;
+        this.componentReadModelRepository = componentReadModelRepository;
     }
 
     public BoardProjection query(FindBoardByIdQuery query) {
@@ -74,6 +79,18 @@ public class BoardReadService implements ApplicationService {
 
     public StatusProjection query(FindStatusByIdAndBoardIdQuery query) {
         return statusReadModelRepository.findByIdAndBoardId(query.getId(), query.getBoardId())
+                .orElseThrow(NoSuchEntityException::new);
+    }
+
+    public Page<ComponentProjection> query(FindAllComponentsByBoardIdQuery query) {
+        return componentReadModelRepository.findAllByBoardId(query.getBoardId(), PageInfo.builder()
+                .page(query.getPage())
+                .perPage(query.getPerPage())
+                .build());
+    }
+
+    public ComponentProjection query(FindComponentByIdAndBoardIdQuery query) {
+        return componentReadModelRepository.findByIdAndBoardId(query.getId(), query.getBoardId())
                 .orElseThrow(NoSuchEntityException::new);
     }
 }

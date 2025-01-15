@@ -1,5 +1,6 @@
 package de.mueller_constantin.taskcare.api.core.board.application;
 
+import de.mueller_constantin.taskcare.api.core.board.application.persistence.ComponentReadModelRepository;
 import de.mueller_constantin.taskcare.api.core.common.domain.Entity;
 import de.mueller_constantin.taskcare.api.core.common.domain.Page;
 import de.mueller_constantin.taskcare.api.core.common.domain.PageInfo;
@@ -36,6 +37,9 @@ class BoardReadServiceTest {
     @Mock
     private StatusReadModelRepository statusReadModelRepository;
 
+    @Mock
+    private ComponentReadModelRepository componentReadModelRepository;
+
     @InjectMocks
     private BoardReadService boardReadService;
 
@@ -48,6 +52,7 @@ class BoardReadServiceTest {
     private BoardProjection boardProjection;
     private List<MemberProjection> memberProjections;
     private List<StatusProjection> statusProjections;
+    private List<ComponentProjection> componentProjections;
 
     @BeforeEach
     void setUp() {
@@ -106,6 +111,24 @@ class BoardReadServiceTest {
                         .id(UUID.randomUUID())
                         .name("Done")
                         .description("Tasks that have been completed")
+                        .build()
+        );
+
+        this.componentProjections = List.of(
+                ComponentProjection.builder()
+                        .id(UUID.randomUUID())
+                        .name("Component 1")
+                        .description("Description 1")
+                        .build(),
+                ComponentProjection.builder()
+                        .id(UUID.randomUUID())
+                        .name("Component 2")
+                        .description("Description 2")
+                        .build(),
+                ComponentProjection.builder()
+                        .id(UUID.randomUUID())
+                        .name("Component 3")
+                        .description("Description 3")
                         .build()
         );
     }
@@ -196,5 +219,24 @@ class BoardReadServiceTest {
                 .build());
 
         assertEquals(statusProjections, result.getContent());
+    }
+
+    @Test
+    void handleFindAllComponentsByBoardIdQuery() {
+        when(componentReadModelRepository.findAllByBoardId(eq(this.id), any(PageInfo.class))).thenReturn(Page.<ComponentProjection>builder()
+                .content(componentProjections)
+                .info(PageInfo.builder()
+                        .page(0)
+                        .perPage(10)
+                        .build())
+                .build());
+
+        Page<ComponentProjection> result = boardReadService.query(FindAllComponentsByBoardIdQuery.builder()
+                .boardId(this.id)
+                .page(0)
+                .perPage(10)
+                .build());
+
+        assertEquals(componentProjections, result.getContent());
     }
 }

@@ -1,11 +1,9 @@
 package de.mueller_constantin.taskcare.api.infrastructure.persistence.es;
 
 import de.mueller_constantin.taskcare.api.core.board.application.persistence.BoardEventStoreRepository;
-import de.mueller_constantin.taskcare.api.core.board.domain.BoardAggregate;
-import de.mueller_constantin.taskcare.api.core.board.domain.BoardProjection;
-import de.mueller_constantin.taskcare.api.core.board.domain.MemberProjection;
-import de.mueller_constantin.taskcare.api.core.board.domain.StatusProjection;
+import de.mueller_constantin.taskcare.api.core.board.domain.*;
 import de.mueller_constantin.taskcare.api.infrastructure.persistence.crud.BoardCrudRepository;
+import de.mueller_constantin.taskcare.api.infrastructure.persistence.crud.ComponentCrudRepository;
 import de.mueller_constantin.taskcare.api.infrastructure.persistence.crud.MemberCrudRepository;
 import de.mueller_constantin.taskcare.api.infrastructure.persistence.crud.StatusCrudRepository;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +24,7 @@ public class BoardEventStoreRepositoryImpl implements BoardEventStoreRepository 
     private final BoardCrudRepository boardCrudRepository;
     private final MemberCrudRepository memberCrudRepository;
     private final StatusCrudRepository statusCrudRepository;
+    private final ComponentCrudRepository componentCrudRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
 
     @Override
@@ -61,6 +60,15 @@ public class BoardEventStoreRepositoryImpl implements BoardEventStoreRepository 
                                     .build())
                     .toList();
 
+            List<ComponentProjection> componentProjections = aggregate.getComponents().stream()
+                    .map(c -> ComponentProjection.builder()
+                            .id(c.getId())
+                            .boardId(c.getBoardId())
+                            .name(c.getName())
+                            .description(c.getDescription())
+                            .build())
+                    .toList();
+
             // Delete removed members
             memberCrudRepository.deleteAllNotInIdsForBoardId(memberProjections.stream()
                     .map(MemberProjection::getId).collect(Collectors.toList()), aggregate.getId());
@@ -74,6 +82,13 @@ public class BoardEventStoreRepositoryImpl implements BoardEventStoreRepository 
 
             // Create or update statuses
             statusCrudRepository.saveAllForBoardId(aggregate.getId(), statusProjections);
+
+            // Delete removed components
+            componentCrudRepository.deleteAllNotInIdsForBoardId(componentProjections.stream()
+                    .map(ComponentProjection::getId).collect(Collectors.toList()), aggregate.getId());
+
+            // Create or update components
+            componentCrudRepository.saveAllForBoardId(aggregate.getId(), componentProjections);
 
             // Update board
             boardCrudRepository.save(boardProjection);

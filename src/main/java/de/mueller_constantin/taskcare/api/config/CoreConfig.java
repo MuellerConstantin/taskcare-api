@@ -1,14 +1,11 @@
 package de.mueller_constantin.taskcare.api.config;
 
+import de.mueller_constantin.taskcare.api.core.board.application.persistence.*;
 import de.mueller_constantin.taskcare.api.core.common.application.event.DomainEventBus;
 import de.mueller_constantin.taskcare.api.core.common.application.persistence.MediaStorage;
 import de.mueller_constantin.taskcare.api.core.common.application.validation.DomainValidationAspect;
 import de.mueller_constantin.taskcare.api.core.board.application.BoardReadService;
 import de.mueller_constantin.taskcare.api.core.board.application.BoardWriteService;
-import de.mueller_constantin.taskcare.api.core.board.application.persistence.BoardEventStoreRepository;
-import de.mueller_constantin.taskcare.api.core.board.application.persistence.BoardReadModelRepository;
-import de.mueller_constantin.taskcare.api.core.board.application.persistence.MemberReadModelRepository;
-import de.mueller_constantin.taskcare.api.core.board.application.persistence.StatusReadModelRepository;
 import de.mueller_constantin.taskcare.api.core.user.application.UserReadService;
 import de.mueller_constantin.taskcare.api.core.user.application.UserWriteService;
 import de.mueller_constantin.taskcare.api.core.user.application.persistence.UserEventStoreRepository;
@@ -52,7 +49,9 @@ public class CoreConfig {
     @Bean
     BoardReadService kanbanReadService(BoardReadModelRepository boardReadModelRepository,
                                        MemberReadModelRepository memberReadModelRepository,
-                                       StatusReadModelRepository statusReadModelRepository) {
-        return new BoardReadService(boardReadModelRepository, memberReadModelRepository, statusReadModelRepository);
+                                       StatusReadModelRepository statusReadModelRepository,
+                                       ComponentReadModelRepository componentReadModelRepository) {
+        return new BoardReadService(boardReadModelRepository,
+                memberReadModelRepository, statusReadModelRepository, componentReadModelRepository);
     }
 }

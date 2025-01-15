@@ -60,3 +60,15 @@ VALUES ('60d8b592-6916-4ac5-ab1c-1183577d5fc4', '527c3e1e-6b2d-4887-a747-9dfb7cb
 
 INSERT INTO statuses (id, board_id, name, description)
 VALUES ('9e3baa5e-0f1c-4ad1-b3d9-19f48e02c0a2', '527c3e1e-6b2d-4887-a747-9dfb7cb3bb1e', 'Done', 'Task has been completed.');
+
+-- ### Seed 'components' ###
+
+-- # Aggregate - 0ef48e1e-d77d-4335-8fd1-425d1b669014
+
+INSERT INTO components (id, board_id, name, description)
+VALUES ('0ef48e1e-d77d-4335-8fd1-425d1b669014', '527c3e1e-6b2d-4887-a747-9dfb7cb3bb1e', 'Frontend', 'Frontend Tasks');
+
+-- # Aggregate - 109aae63-2830-4255-b3e9-49bc0efe6b2f
+
+INSERT INTO components (id, board_id, name, description)
+VALUES ('109aae63-2830-4255-b3e9-49bc0efe6b2f', '527c3e1e-6b2d-4887-a747-9dfb7cb3bb1e', 'Backend', 'Backend Tasks');

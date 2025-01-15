@@ -7,25 +7,27 @@ import lombok.experimental.SuperBuilder;
 import java.util.UUID;
 
 /**
- * The status of a task. A status is a sub-step of the workflow used
- * in the board to process tasks. A task can be assigned a status to
- * represent the corresponding work step.
+ * A component is a sub-structure of a board that is used to
+ * divide the contents of the board into logical parts. Tasks can
+ * be assigned to components to organize them in a logical way.
+ * Basically, a component is a grouping of tasks and can be used to
+ * model subprojects or other logical groups of tasks.
  */
 @Getter
 @Setter(value = AccessLevel.PACKAGE)
 @ToString(callSuper = true)
 @SuperBuilder
 @EqualsAndHashCode(callSuper = true)
-public class Status extends Entity {
+public class Component extends Entity {
     private UUID boardId;
     private String name;
     private String description;
 
-    public Status() {
+    public Component() {
         super(UUID.randomUUID());
     }
 
-    public Status(UUID id, UUID boardId, String name, String description) {
+    public Component(UUID id, UUID boardId, String name, String description) {
         super(id);
         this.boardId = boardId;
         this.name = name;

@@ -8,6 +8,11 @@ import lombok.ToString;
 
 import java.util.UUID;
 
+/**
+ * Represents a user account. A user account is required to access
+ * the application. It is used for authentication and system-wide
+ * authorization.
+ */
 @Getter
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)

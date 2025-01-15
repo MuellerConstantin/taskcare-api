@@ -145,6 +145,46 @@ public class BoardWriteService {
         boardEventStoreRepository.save(boardAggregate);
     }
 
+    public void dispatch(@Valid AddComponentByIdCommand command) {
+        BoardAggregate boardAggregate = boardEventStoreRepository.load(command.getBoardId())
+                .orElseThrow(NoSuchEntityException::new);
+
+        boardAggregate.addComponent(command.getName(), command.getDescription());
+        boardEventStoreRepository.save(boardAggregate);
+    }
+
+    public void dispatch(@Valid RemoveComponentByIdCommand command) {
+        BoardAggregate boardAggregate = boardEventStoreRepository.load(command.getBoardId())
+                .orElseThrow(NoSuchEntityException::new);
+
+        boardAggregate.removeComponent(command.getComponentId());
+        boardEventStoreRepository.save(boardAggregate);
+    }
+
+    public void dispatch(@Valid UpdateComponentByIdCommand command) {
+        BoardAggregate boardAggregate = boardEventStoreRepository.load(command.getBoardId())
+                .orElseThrow(NoSuchEntityException::new);
+
+        String name = command.getName() != null ?
+                command.getName() :
+                boardAggregate.getComponents().stream()
+                        .filter(c -> c.getId().equals(command.getComponentId()))
+                        .findFirst()
+                        .orElseThrow(NoSuchEntityException::new)
+                        .getName();
+
+        String description = command.isDescriptionTouched() ?
+                command.getDescription() :
+                boardAggregate.getComponents().stream()
+                        .filter(c -> c.getId().equals(command.getComponentId()))
+                        .findFirst()
+                        .orElseThrow(NoSuchEntityException::new)
+                        .getDescription();
+
+        boardAggregate.updateComponent(command.getComponentId(), name, description);
+        boardEventStoreRepository.save(boardAggregate);
+    }
+
     protected void onUserDeletedEvent(DomainEvent event) {
         UserDeletedEvent userDeletedEvent = (UserDeletedEvent) event;
 

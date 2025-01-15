@@ -6,6 +6,11 @@ import lombok.experimental.SuperBuilder;
 
 import java.util.UUID;
 
+/**
+ * Represents a member of a board. A member is a user that is
+ * assigned to a board with a specific role and hence has access
+ * to the board and its contents.
+ */
 @Getter
 @Setter(value = AccessLevel.PACKAGE)
 @ToString(callSuper = true)

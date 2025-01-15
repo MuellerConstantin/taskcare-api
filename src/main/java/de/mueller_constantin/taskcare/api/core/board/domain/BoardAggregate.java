@@ -11,6 +11,10 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
+/**
+ * Represents a kanban board. In addition to its own details, a board
+ * also manages its members, permissions, statuses and components.
+ */
 @Getter
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
@@ -19,6 +23,7 @@ public class BoardAggregate extends Aggregate {
     private String description;
     private Set<Member> members = new HashSet<>();
     private Set<Status> statuses = new HashSet<>();
+    private Set<Component> components = new HashSet<>();
 
     public BoardAggregate() {
         this(UUID.randomUUID(), 0, false);
@@ -65,6 +70,20 @@ public class BoardAggregate extends Aggregate {
                 if(status.getId().equals(((StatusUpdatedEvent) event).getStatusId())) {
                     status.setName(((StatusUpdatedEvent) event).getName());
                     status.setDescription(((StatusUpdatedEvent) event).getDescription());
+                }
+            });
+            return;
+        } else if(event instanceof ComponentAddedEvent) {
+            this.components.add(((ComponentAddedEvent) event).getComponent());
+            return;
+        } else if(event instanceof ComponentRemovedEvent) {
+            this.components.removeIf(c -> c.getId().equals(((ComponentRemovedEvent) event).getComponent().getId()));
+            return;
+        } else if(event instanceof ComponentUpdatedEvent) {
+            this.components.forEach(component -> {
+                if(component.getId().equals(((ComponentUpdatedEvent) event).getComponentId())) {
+                    component.setName(((ComponentUpdatedEvent) event).getName());
+                    component.setDescription(((ComponentUpdatedEvent) event).getDescription());
                 }
             });
             return;
@@ -201,6 +220,47 @@ public class BoardAggregate extends Aggregate {
                 .aggregateId(this.getId())
                 .version(this.getNextVersion())
                 .statusId(statusId)
+                .name(name)
+                .description(description)
+                .build()
+        );
+    }
+
+    public void addComponent(String name, String description) {
+        this.applyChange(ComponentAddedEvent.builder()
+                .aggregateId(this.getId())
+                .version(this.getNextVersion())
+                .component(new Component(UUID.randomUUID(), this.getId(), name, description))
+                .build()
+        );
+    }
+
+    public void removeComponent(UUID componentId) {
+        Component component = this.components.stream().filter(c -> c.getId().equals(componentId)).findFirst().orElse(null);
+
+        if(component == null) {
+            throw new NoSuchEntityException();
+        }
+
+        this.applyChange(ComponentRemovedEvent.builder()
+                .aggregateId(this.getId())
+                .version(this.getNextVersion())
+                .component(component)
+                .build()
+        );
+    }
+
+    public void updateComponent(UUID componentId, String name, String description) {
+        Component component = this.components.stream().filter(c -> c.getId().equals(componentId)).findFirst().orElse(null);
+
+        if(component == null) {
+            throw new NoSuchEntityException();
+        }
+
+        this.applyChange(ComponentUpdatedEvent.builder()
+                .aggregateId(this.getId())
+                .version(this.getNextVersion())
+                .componentId(componentId)
                 .name(name)
                 .description(description)
                 .build()
