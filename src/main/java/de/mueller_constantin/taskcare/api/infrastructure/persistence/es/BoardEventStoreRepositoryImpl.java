@@ -69,6 +69,9 @@ public class BoardEventStoreRepositoryImpl implements BoardEventStoreRepository 
                             .build())
                     .toList();
 
+            // Update board
+            boardCrudRepository.save(boardProjection);
+
             // Delete removed members
             memberCrudRepository.deleteAllNotInIdsForBoardId(memberProjections.stream()
                     .map(MemberProjection::getId).collect(Collectors.toList()), aggregate.getId());
@@ -89,9 +92,6 @@ public class BoardEventStoreRepositoryImpl implements BoardEventStoreRepository 
 
             // Create or update components
             componentCrudRepository.saveAllForBoardId(aggregate.getId(), componentProjections);
-
-            // Update board
-            boardCrudRepository.save(boardProjection);
         }
 
         aggregate.getUncommittedEvents().forEach(applicationEventPublisher::publishEvent);
