@@ -1,9 +1,9 @@
 package de.mueller_constantin.taskcare.api.presentation.rest.v1.dto.mapper;
 
 import de.mueller_constantin.taskcare.api.core.common.domain.Page;
-import de.mueller_constantin.taskcare.api.core.kanban.application.command.AddStatusByIdCommand;
-import de.mueller_constantin.taskcare.api.core.kanban.application.command.UpdateStatusByIdCommand;
-import de.mueller_constantin.taskcare.api.core.kanban.domain.StatusProjection;
+import de.mueller_constantin.taskcare.api.core.board.application.command.AddStatusByIdCommand;
+import de.mueller_constantin.taskcare.api.core.board.application.command.UpdateStatusByIdCommand;
+import de.mueller_constantin.taskcare.api.core.board.domain.StatusProjection;
 import de.mueller_constantin.taskcare.api.presentation.rest.v1.dto.AddStatusDto;
 import de.mueller_constantin.taskcare.api.presentation.rest.v1.dto.PageDto;
 import de.mueller_constantin.taskcare.api.presentation.rest.v1.dto.StatusDto;

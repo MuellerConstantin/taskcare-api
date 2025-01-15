@@ -1,10 +1,10 @@
 package de.mueller_constantin.taskcare.api.presentation.rest.v1;
 
-import de.mueller_constantin.taskcare.api.core.kanban.application.KanbanReadService;
-import de.mueller_constantin.taskcare.api.core.kanban.application.KanbanWriteService;
-import de.mueller_constantin.taskcare.api.core.kanban.application.command.RemoveStatusByIdCommand;
-import de.mueller_constantin.taskcare.api.core.kanban.application.query.FindAllStatusesByBoardIdQuery;
-import de.mueller_constantin.taskcare.api.core.kanban.application.query.FindStatusByIdAndBoardIdQuery;
+import de.mueller_constantin.taskcare.api.core.board.application.BoardReadService;
+import de.mueller_constantin.taskcare.api.core.board.application.BoardWriteService;
+import de.mueller_constantin.taskcare.api.core.board.application.command.RemoveStatusByIdCommand;
+import de.mueller_constantin.taskcare.api.core.board.application.query.FindAllStatusesByBoardIdQuery;
+import de.mueller_constantin.taskcare.api.core.board.application.query.FindStatusByIdAndBoardIdQuery;
 import de.mueller_constantin.taskcare.api.presentation.rest.v1.dto.AddStatusDto;
 import de.mueller_constantin.taskcare.api.presentation.rest.v1.dto.PageDto;
 import de.mueller_constantin.taskcare.api.presentation.rest.v1.dto.StatusDto;
@@ -22,14 +22,14 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/v1")
 public class StatusController {
-    private final KanbanWriteService kanbanWriteService;
-    private final KanbanReadService kanbanReadService;
+    private final BoardWriteService boardWriteService;
+    private final BoardReadService boardReadService;
     private final StatusDtoMapper statusDtoMapper;
 
     @Autowired
-    public StatusController(KanbanWriteService kanbanWriteService, KanbanReadService kanbanReadService, StatusDtoMapper statusDtoMapper) {
-        this.kanbanWriteService = kanbanWriteService;
-        this.kanbanReadService = kanbanReadService;
+    public StatusController(BoardWriteService boardWriteService, BoardReadService boardReadService, StatusDtoMapper statusDtoMapper) {
+        this.boardWriteService = boardWriteService;
+        this.boardReadService = boardReadService;
         this.statusDtoMapper = statusDtoMapper;
     }
 
@@ -38,7 +38,7 @@ public class StatusController {
     public PageDto<StatusDto> getStatuses(@PathVariable UUID id,
                                           @RequestParam(required = false, defaultValue = "0") @Min(0) int page,
                                           @RequestParam(required = false, defaultValue = "25") @Min(0) int perPage) {
-        return statusDtoMapper.mapToDto(kanbanReadService.query(FindAllStatusesByBoardIdQuery.builder()
+        return statusDtoMapper.mapToDto(boardReadService.query(FindAllStatusesByBoardIdQuery.builder()
                 .boardId(id)
                 .page(page)
                 .perPage(perPage)
@@ -48,7 +48,7 @@ public class StatusController {
     @GetMapping("/boards/{id}/statuses/{statusId}")
     @PreAuthorize("hasRole('ADMINISTRATOR') or @domainSecurityService.isBoardMember(#id, principal.getUserProjection().getId())")
     public StatusDto getStatus(@PathVariable UUID id, @PathVariable UUID statusId) {
-        return statusDtoMapper.mapToDto(kanbanReadService.query(FindStatusByIdAndBoardIdQuery.builder()
+        return statusDtoMapper.mapToDto(boardReadService.query(FindStatusByIdAndBoardIdQuery.builder()
                 .id(statusId)
                 .boardId(id)
                 .build()));
@@ -58,14 +58,14 @@ public class StatusController {
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasRole('ADMINISTRATOR') or @domainSecurityService.isBoardMemberWithAnyRole(#id, principal.getUserProjection().getId(), 'ADMINISTRATOR', 'MAINTAINER')")
     public void addStatus(@PathVariable UUID id, @RequestBody @Valid AddStatusDto addStatusDto) {
-        kanbanWriteService.dispatch(statusDtoMapper.mapToCommand(id, addStatusDto));
+        boardWriteService.dispatch(statusDtoMapper.mapToCommand(id, addStatusDto));
     }
 
     @DeleteMapping("/boards/{id}/statuses/{statusId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("hasRole('ADMINISTRATOR') or @domainSecurityService.isBoardMemberWithAnyRole(#id, principal.getUserProjection().getId(), 'ADMINISTRATOR', 'MAINTAINER')")
     public void removeStatus(@PathVariable UUID id, @PathVariable UUID statusId) {
-        kanbanWriteService.dispatch(RemoveStatusByIdCommand.builder()
+        boardWriteService.dispatch(RemoveStatusByIdCommand.builder()
                 .boardId(id)
                 .statusId(statusId)
                 .build());
@@ -75,6 +75,6 @@ public class StatusController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("hasRole('ADMINISTRATOR') or @domainSecurityService.isBoardMemberWithAnyRole(#id, principal.getUserProjection().getId(), 'ADMINISTRATOR', 'MAINTAINER')")
     public void updateStatus(@PathVariable UUID id, @PathVariable UUID statusId, @RequestBody @Valid UpdateStatusDto updateStatusDto) {
-        kanbanWriteService.dispatch(statusDtoMapper.mapToCommand(id, statusId, updateStatusDto));
+        boardWriteService.dispatch(statusDtoMapper.mapToCommand(id, statusId, updateStatusDto));
     }
 }

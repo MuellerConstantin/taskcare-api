@@ -1,8 +1,8 @@
 package de.mueller_constantin.taskcare.api.presentation.rest.v1.error;
 
 import de.mueller_constantin.taskcare.api.core.common.application.NoSuchEntityException;
-import de.mueller_constantin.taskcare.api.core.kanban.domain.BoardMemberAlreadyExistsException;
-import de.mueller_constantin.taskcare.api.core.kanban.domain.BoardMustBeAdministrableException;
+import de.mueller_constantin.taskcare.api.core.board.domain.BoardMemberAlreadyExistsException;
+import de.mueller_constantin.taskcare.api.core.board.domain.BoardMustBeAdministrableException;
 import de.mueller_constantin.taskcare.api.core.user.application.IllegalDefaultAdminAlterationException;
 import de.mueller_constantin.taskcare.api.core.user.application.UsernameAlreadyInUseException;
 import de.mueller_constantin.taskcare.api.core.user.application.IllegalImportedUserAlterationException;

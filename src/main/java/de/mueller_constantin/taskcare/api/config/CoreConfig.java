@@ -3,12 +3,12 @@ package de.mueller_constantin.taskcare.api.config;
 import de.mueller_constantin.taskcare.api.core.common.application.event.DomainEventBus;
 import de.mueller_constantin.taskcare.api.core.common.application.persistence.MediaStorage;
 import de.mueller_constantin.taskcare.api.core.common.application.validation.DomainValidationAspect;
-import de.mueller_constantin.taskcare.api.core.kanban.application.KanbanReadService;
-import de.mueller_constantin.taskcare.api.core.kanban.application.KanbanWriteService;
-import de.mueller_constantin.taskcare.api.core.kanban.application.persistence.KanbanEventStoreRepository;
-import de.mueller_constantin.taskcare.api.core.kanban.application.persistence.BoardReadModelRepository;
-import de.mueller_constantin.taskcare.api.core.kanban.application.persistence.MemberReadModelRepository;
-import de.mueller_constantin.taskcare.api.core.kanban.application.persistence.StatusReadModelRepository;
+import de.mueller_constantin.taskcare.api.core.board.application.BoardReadService;
+import de.mueller_constantin.taskcare.api.core.board.application.BoardWriteService;
+import de.mueller_constantin.taskcare.api.core.board.application.persistence.BoardEventStoreRepository;
+import de.mueller_constantin.taskcare.api.core.board.application.persistence.BoardReadModelRepository;
+import de.mueller_constantin.taskcare.api.core.board.application.persistence.MemberReadModelRepository;
+import de.mueller_constantin.taskcare.api.core.board.application.persistence.StatusReadModelRepository;
 import de.mueller_constantin.taskcare.api.core.user.application.UserReadService;
 import de.mueller_constantin.taskcare.api.core.user.application.UserWriteService;
 import de.mueller_constantin.taskcare.api.core.user.application.persistence.UserEventStoreRepository;
@@ -41,18 +41,18 @@ public class CoreConfig {
     }
 
     @Bean
-    KanbanWriteService kanbanWriteService(KanbanEventStoreRepository kanbanEventStoreRepository,
-                                          BoardReadModelRepository boardReadModelRepository,
-                                          UserReadService userReadService,
-                                          MediaStorage mediaStorage,
-                                          DomainEventBus domainEventBus) {
-        return new KanbanWriteService(kanbanEventStoreRepository, boardReadModelRepository, userReadService, mediaStorage, domainEventBus);
+    BoardWriteService kanbanWriteService(BoardEventStoreRepository boardEventStoreRepository,
+                                         BoardReadModelRepository boardReadModelRepository,
+                                         UserReadService userReadService,
+                                         MediaStorage mediaStorage,
+                                         DomainEventBus domainEventBus) {
+        return new BoardWriteService(boardEventStoreRepository, boardReadModelRepository, userReadService, mediaStorage, domainEventBus);
     }
 
     @Bean
-    KanbanReadService kanbanReadService(BoardReadModelRepository boardReadModelRepository,
-                                        MemberReadModelRepository memberReadModelRepository,
-                                        StatusReadModelRepository statusReadModelRepository) {
-        return new KanbanReadService(boardReadModelRepository, memberReadModelRepository, statusReadModelRepository);
+    BoardReadService kanbanReadService(BoardReadModelRepository boardReadModelRepository,
+                                       MemberReadModelRepository memberReadModelRepository,
+                                       StatusReadModelRepository statusReadModelRepository) {
+        return new BoardReadService(boardReadModelRepository, memberReadModelRepository, statusReadModelRepository);
     }
 }

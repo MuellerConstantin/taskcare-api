@@ -1,10 +1,10 @@
 package de.mueller_constantin.taskcare.api.presentation.rest.v1.dto.mapper;
 
 import de.mueller_constantin.taskcare.api.core.common.domain.Page;
-import de.mueller_constantin.taskcare.api.core.kanban.application.command.AddMemberByIdCommand;
-import de.mueller_constantin.taskcare.api.core.kanban.application.command.UpdateMemberByIdCommand;
-import de.mueller_constantin.taskcare.api.core.kanban.domain.MemberProjection;
-import de.mueller_constantin.taskcare.api.core.kanban.domain.Role;
+import de.mueller_constantin.taskcare.api.core.board.application.command.AddMemberByIdCommand;
+import de.mueller_constantin.taskcare.api.core.board.application.command.UpdateMemberByIdCommand;
+import de.mueller_constantin.taskcare.api.core.board.domain.MemberProjection;
+import de.mueller_constantin.taskcare.api.core.board.domain.Role;
 import de.mueller_constantin.taskcare.api.presentation.rest.v1.dto.*;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

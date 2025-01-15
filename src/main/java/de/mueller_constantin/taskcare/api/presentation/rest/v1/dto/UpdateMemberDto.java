@@ -2,7 +2,7 @@ package de.mueller_constantin.taskcare.api.presentation.rest.v1.dto;
 
 import de.mueller_constantin.taskcare.api.core.common.application.validation.Enumerated;
 import de.mueller_constantin.taskcare.api.core.common.application.validation.NullOrNotEmpty;
-import de.mueller_constantin.taskcare.api.core.kanban.domain.Role;
+import de.mueller_constantin.taskcare.api.core.board.domain.Role;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

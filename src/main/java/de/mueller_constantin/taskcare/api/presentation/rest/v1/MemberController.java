@@ -1,10 +1,10 @@
 package de.mueller_constantin.taskcare.api.presentation.rest.v1;
 
-import de.mueller_constantin.taskcare.api.core.kanban.application.KanbanReadService;
-import de.mueller_constantin.taskcare.api.core.kanban.application.KanbanWriteService;
-import de.mueller_constantin.taskcare.api.core.kanban.application.query.FindAllMembersByBoardIdQuery;
-import de.mueller_constantin.taskcare.api.core.kanban.application.command.RemoveMemberByIdCommand;
-import de.mueller_constantin.taskcare.api.core.kanban.application.query.FindMemberByIdAndBoardIdQuery;
+import de.mueller_constantin.taskcare.api.core.board.application.BoardReadService;
+import de.mueller_constantin.taskcare.api.core.board.application.BoardWriteService;
+import de.mueller_constantin.taskcare.api.core.board.application.query.FindAllMembersByBoardIdQuery;
+import de.mueller_constantin.taskcare.api.core.board.application.command.RemoveMemberByIdCommand;
+import de.mueller_constantin.taskcare.api.core.board.application.query.FindMemberByIdAndBoardIdQuery;
 import de.mueller_constantin.taskcare.api.presentation.rest.v1.dto.AddMemberDto;
 import de.mueller_constantin.taskcare.api.presentation.rest.v1.dto.MemberDto;
 import de.mueller_constantin.taskcare.api.presentation.rest.v1.dto.PageDto;
@@ -22,16 +22,16 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/v1")
 public class MemberController {
-    private final KanbanWriteService kanbanWriteService;
-    private final KanbanReadService kanbanReadService;
+    private final BoardWriteService boardWriteService;
+    private final BoardReadService boardReadService;
     private final MemberDtoMapper memberDtoMapper;
 
     @Autowired
-    public MemberController(KanbanWriteService kanbanWriteService,
-                            KanbanReadService kanbanReadService,
+    public MemberController(BoardWriteService boardWriteService,
+                            BoardReadService boardReadService,
                             MemberDtoMapper memberDtoMapper) {
-        this.kanbanWriteService = kanbanWriteService;
-        this.kanbanReadService = kanbanReadService;
+        this.boardWriteService = boardWriteService;
+        this.boardReadService = boardReadService;
         this.memberDtoMapper = memberDtoMapper;
     }
 
@@ -40,7 +40,7 @@ public class MemberController {
     public PageDto<MemberDto> getMembers(@PathVariable UUID id,
                                          @RequestParam(required = false, defaultValue = "0") @Min(0) int page,
                                          @RequestParam(required = false, defaultValue = "25") @Min(0) int perPage) {
-        return memberDtoMapper.mapToDto(kanbanReadService.query(FindAllMembersByBoardIdQuery.builder()
+        return memberDtoMapper.mapToDto(boardReadService.query(FindAllMembersByBoardIdQuery.builder()
                 .boardId(id)
                 .page(page)
                 .perPage(perPage)
@@ -50,7 +50,7 @@ public class MemberController {
     @GetMapping("/boards/{boardId}/members/{memberId}")
     @PreAuthorize("hasRole('ADMINISTRATOR') or @domainSecurityService.isBoardMember(#id, principal.getUserProjection().getId())")
     public MemberDto getMember(@PathVariable UUID boardId, @PathVariable UUID memberId) {
-        return memberDtoMapper.mapToDto(kanbanReadService.query(FindMemberByIdAndBoardIdQuery.builder()
+        return memberDtoMapper.mapToDto(boardReadService.query(FindMemberByIdAndBoardIdQuery.builder()
                 .id(memberId)
                 .boardId(boardId)
                 .build()));
@@ -60,14 +60,14 @@ public class MemberController {
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasRole('ADMINISTRATOR') or @domainSecurityService.isBoardMemberWithRole(#id, principal.getUserProjection().getId(), 'ADMINISTRATOR')")
     public void addMember(@PathVariable UUID id, @RequestBody @Valid AddMemberDto addMemberDto) {
-        kanbanWriteService.dispatch(memberDtoMapper.mapToCommand(id, addMemberDto));
+        boardWriteService.dispatch(memberDtoMapper.mapToCommand(id, addMemberDto));
     }
 
     @DeleteMapping("/boards/{id}/members/{memberId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("hasRole('ADMINISTRATOR') or @domainSecurityService.isBoardMemberWithRole(#id, principal.getUserProjection().getId(), 'ADMINISTRATOR')")
     public void removeMember(@PathVariable UUID id, @PathVariable UUID memberId) {
-        kanbanWriteService.dispatch(RemoveMemberByIdCommand.builder()
+        boardWriteService.dispatch(RemoveMemberByIdCommand.builder()
                 .boardId(id)
                 .memberId(memberId)
                 .build());
@@ -78,6 +78,6 @@ public class MemberController {
     @PreAuthorize("hasRole('ADMINISTRATOR') or @domainSecurityService.isBoardMemberWithRole(#id, principal.getUserProjection().getId(), 'ADMINISTRATOR')")
     public void updateMemberRole(@PathVariable UUID id, @PathVariable UUID memberId,
                                  @RequestBody @Valid UpdateMemberDto updateMemberDto) {
-        kanbanWriteService.dispatch(memberDtoMapper.mapToCommand(id, memberId, updateMemberDto));
+        boardWriteService.dispatch(memberDtoMapper.mapToCommand(id, memberId, updateMemberDto));
     }
 }

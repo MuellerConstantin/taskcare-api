@@ -2,8 +2,8 @@ package de.mueller_constantin.taskcare.api.infrastructure.persistence.crud.jdbc;
 
 import de.mueller_constantin.taskcare.api.core.common.domain.Page;
 import de.mueller_constantin.taskcare.api.core.common.domain.PageInfo;
-import de.mueller_constantin.taskcare.api.core.kanban.domain.MemberProjection;
-import de.mueller_constantin.taskcare.api.core.kanban.domain.Role;
+import de.mueller_constantin.taskcare.api.core.board.domain.MemberProjection;
+import de.mueller_constantin.taskcare.api.core.board.domain.Role;
 import de.mueller_constantin.taskcare.api.infrastructure.persistence.crud.MemberCrudRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

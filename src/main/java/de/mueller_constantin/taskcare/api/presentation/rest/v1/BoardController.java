@@ -2,12 +2,12 @@ package de.mueller_constantin.taskcare.api.presentation.rest.v1;
 
 import de.mueller_constantin.taskcare.api.core.common.application.NoSuchEntityException;
 import de.mueller_constantin.taskcare.api.core.common.application.persistence.MediaStorage;
-import de.mueller_constantin.taskcare.api.core.kanban.application.*;
-import de.mueller_constantin.taskcare.api.core.kanban.application.command.DeleteBoardByIdCommand;
-import de.mueller_constantin.taskcare.api.core.kanban.application.query.FindAllBoardsQuery;
-import de.mueller_constantin.taskcare.api.core.kanban.application.query.FindAllBoardsUserIsMemberQuery;
-import de.mueller_constantin.taskcare.api.core.kanban.application.query.FindBoardByIdQuery;
-import de.mueller_constantin.taskcare.api.core.kanban.domain.BoardProjection;
+import de.mueller_constantin.taskcare.api.core.board.application.*;
+import de.mueller_constantin.taskcare.api.core.board.application.command.DeleteBoardByIdCommand;
+import de.mueller_constantin.taskcare.api.core.board.application.query.FindAllBoardsQuery;
+import de.mueller_constantin.taskcare.api.core.board.application.query.FindAllBoardsUserIsMemberQuery;
+import de.mueller_constantin.taskcare.api.core.board.application.query.FindBoardByIdQuery;
+import de.mueller_constantin.taskcare.api.core.board.domain.BoardProjection;
 import de.mueller_constantin.taskcare.api.infrastructure.security.CurrentPrincipal;
 import de.mueller_constantin.taskcare.api.infrastructure.security.Principal;
 import de.mueller_constantin.taskcare.api.presentation.rest.v1.dto.BoardDto;
@@ -31,18 +31,18 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/v1")
 public class BoardController {
-    private final KanbanWriteService kanbanWriteService;
-    private final KanbanReadService kanbanReadService;
+    private final BoardWriteService boardWriteService;
+    private final BoardReadService boardReadService;
     private final BoardDtoMapper boardDtoMapper;
     private final MediaStorage mediaStorage;
 
     @Autowired
-    public BoardController(KanbanWriteService kanbanWriteService,
-                           KanbanReadService kanbanReadService,
+    public BoardController(BoardWriteService boardWriteService,
+                           BoardReadService boardReadService,
                            BoardDtoMapper boardDtoMapper,
                            MediaStorage mediaStorage) {
-        this.kanbanWriteService = kanbanWriteService;
-        this.kanbanReadService = kanbanReadService;
+        this.boardWriteService = boardWriteService;
+        this.boardReadService = boardReadService;
         this.boardDtoMapper = boardDtoMapper;
         this.mediaStorage = mediaStorage;
     }
@@ -51,7 +51,7 @@ public class BoardController {
     public PageDto<BoardDto> getCurrentUsersBoards(@CurrentPrincipal Principal principal,
                                                    @RequestParam(required = false, defaultValue = "0") @Min(0) int page,
                                                    @RequestParam(required = false, defaultValue = "25") @Min(0) int perPage) {
-        return boardDtoMapper.mapToDto(kanbanReadService.query(FindAllBoardsUserIsMemberQuery.builder()
+        return boardDtoMapper.mapToDto(boardReadService.query(FindAllBoardsUserIsMemberQuery.builder()
                 .userId(principal.getUserProjection().getId())
                 .page(page)
                 .perPage(perPage)
@@ -62,7 +62,7 @@ public class BoardController {
     @GetMapping("/boards/{id}")
     @PreAuthorize("hasRole('ADMINISTRATOR') or @domainSecurityService.isBoardMember(#id, principal.getUserProjection().getId())")
     public BoardDto getBoard(@PathVariable UUID id) {
-        return boardDtoMapper.mapToDto(kanbanReadService.query(FindBoardByIdQuery.builder()
+        return boardDtoMapper.mapToDto(boardReadService.query(FindBoardByIdQuery.builder()
                 .id(id)
                 .build()));
     }
@@ -71,7 +71,7 @@ public class BoardController {
     @PreAuthorize("hasRole('ADMINISTRATOR')")
     public PageDto<BoardDto> getBoards(@RequestParam(required = false, defaultValue = "0") @Min(0) int page,
                                        @RequestParam(required = false, defaultValue = "25") @Min(0) int perPage) {
-        return boardDtoMapper.mapToDto(kanbanReadService.query(FindAllBoardsQuery.builder()
+        return boardDtoMapper.mapToDto(boardReadService.query(FindAllBoardsQuery.builder()
                 .page(page)
                 .perPage(perPage)
                 .build()
@@ -82,7 +82,7 @@ public class BoardController {
     @ResponseStatus(HttpStatus.CREATED)
     void createBoard(@CurrentPrincipal Principal principal,
                      @RequestBody @Valid CreateBoardDto createBoardDto) {
-        kanbanWriteService.dispatch(boardDtoMapper.mapToCommand(createBoardDto,
+        boardWriteService.dispatch(boardDtoMapper.mapToCommand(createBoardDto,
                 principal.getUserProjection().getId()));
     }
 
@@ -90,7 +90,7 @@ public class BoardController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("hasRole('ADMINISTRATOR') or @domainSecurityService.isBoardMemberWithRole(#id, principal.getUserProjection().getId(), 'ADMINISTRATOR')")
     void deleteBoard(@PathVariable UUID id) {
-        kanbanWriteService.dispatch(DeleteBoardByIdCommand.builder()
+        boardWriteService.dispatch(DeleteBoardByIdCommand.builder()
                 .id(id)
                 .build());
     }
@@ -99,7 +99,7 @@ public class BoardController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("hasRole('ADMINISTRATOR') or @domainSecurityService.isBoardMemberWithRole(#id, principal.getUserProjection().getId(), 'ADMINISTRATOR')")
     void updateBoard(@PathVariable UUID id, @RequestBody @Valid UpdateBoardDto updateBoardDto) {
-        kanbanWriteService.dispatch(boardDtoMapper.mapToCommand(id, updateBoardDto));
+        boardWriteService.dispatch(boardDtoMapper.mapToCommand(id, updateBoardDto));
     }
 
     @PostMapping("/boards/{id}/logo-image")
@@ -107,7 +107,7 @@ public class BoardController {
     @PreAuthorize("hasRole('ADMINISTRATOR') or @domainSecurityService.isBoardMemberWithRole(#id, principal.getUserProjection().getId(), 'ADMINISTRATOR')")
     void uploadLogoImage(@PathVariable UUID id, @RequestParam("file") MultipartFile file) throws IOException {
         FindBoardByIdQuery query = new FindBoardByIdQuery(id);
-        BoardProjection result = kanbanReadService.query(query);
+        BoardProjection result = boardReadService.query(query);
 
         mediaStorage.save("/logo-images/" + result.getId().toString(), file.getContentType(), file.getBytes());
     }
@@ -117,7 +117,7 @@ public class BoardController {
     @PreAuthorize("hasRole('ADMINISTRATOR') or @domainSecurityService.isBoardMemberWithRole(#id, principal.getUserProjection().getId(), 'ADMINISTRATOR')")
     void removeProfileImage(@PathVariable UUID id) {
         FindBoardByIdQuery query = new FindBoardByIdQuery(id);
-        BoardProjection result = kanbanReadService.query(query);
+        BoardProjection result = boardReadService.query(query);
 
         mediaStorage.delete("/logo-images/" + result.getId().toString());
     }
@@ -126,7 +126,7 @@ public class BoardController {
     @PreAuthorize("hasRole('ADMINISTRATOR') or @domainSecurityService.isBoardMember(#id, principal.getUserProjection().getId())")
     public ResponseEntity<byte[]> getLogoImage(@PathVariable UUID id) {
         FindBoardByIdQuery query = new FindBoardByIdQuery(id);
-        BoardProjection result = kanbanReadService.query(query);
+        BoardProjection result = boardReadService.query(query);
 
         if(mediaStorage.exists("/logo-images/" + result.getId().toString())) {
             String contentType = mediaStorage.contentType("/logo-images/" + result.getId().toString());
