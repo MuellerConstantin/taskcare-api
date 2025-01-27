@@ -141,8 +141,8 @@ public class MySqlUserCrudRepository implements UserCrudRepository {
         int totalPages = (int) Math.ceil((double) totalElements / pageInfo.getPerPage());
 
         MapSqlParameterSource parameters = new MapSqlParameterSource();
-        parameters.addValue("page", pageInfo.getPage());
-        parameters.addValue("perPage", pageInfo.getPerPage());
+        parameters.addValue("offset", pageInfo.getPage() * pageInfo.getPerPage());
+        parameters.addValue("limit", pageInfo.getPerPage());
 
         query = """
             SELECT
@@ -154,8 +154,8 @@ public class MySqlUserCrudRepository implements UserCrudRepository {
                 identity_provider,
                 locked
             FROM %s
-            LIMIT :perPage
-            OFFSET :page
+            LIMIT :limit
+            OFFSET :offset
         """.formatted(USER_TABLE_NAME);
 
         List<UserProjection> content = jdbcTemplate.query(query, parameters, this::toProjection);

@@ -72,8 +72,8 @@ public class MySqlBoardCrudRepository implements BoardCrudRepository {
         int totalPages = (int) Math.ceil((double) totalElements / pageInfo.getPerPage());
 
         MapSqlParameterSource parameters = new MapSqlParameterSource();
-        parameters.addValue("page", pageInfo.getPage());
-        parameters.addValue("perPage", pageInfo.getPerPage());
+        parameters.addValue("offset", pageInfo.getPage() * pageInfo.getPerPage());
+        parameters.addValue("limit", pageInfo.getPerPage());
 
         query = """
             SELECT
@@ -81,8 +81,8 @@ public class MySqlBoardCrudRepository implements BoardCrudRepository {
                 name,
                 description
             FROM %s
-            LIMIT :perPage
-            OFFSET :page
+            LIMIT :limit
+            OFFSET :offset
         """.formatted(BOARD_TABLE_NAME);
 
         List<BoardProjection> boardProjections = jdbcTemplate.query(query, parameters, this::toBoardProjection);
@@ -115,7 +115,7 @@ public class MySqlBoardCrudRepository implements BoardCrudRepository {
 
         parameters = new MapSqlParameterSource();
         parameters.addValue("userId", userId.toString());
-        parameters.addValue("perPage", pageInfo.getPerPage());
+        parameters.addValue("limit", pageInfo.getPerPage());
         parameters.addValue("offset", pageInfo.getPage() * pageInfo.getPerPage());
 
         query = """
@@ -123,7 +123,7 @@ public class MySqlBoardCrudRepository implements BoardCrudRepository {
                 DISTINCT board_id
             FROM %s
             WHERE user_id = :userId
-            LIMIT :perPage
+            LIMIT :limit
             OFFSET :offset
         """.formatted(MEMBER_TABLE_NAME);
 

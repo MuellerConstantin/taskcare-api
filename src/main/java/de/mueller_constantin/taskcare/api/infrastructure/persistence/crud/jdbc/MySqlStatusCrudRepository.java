@@ -74,8 +74,8 @@ public class MySqlStatusCrudRepository implements StatusCrudRepository {
         int totalPages = (int) Math.ceil((double) totalElements / pageInfo.getPerPage());
 
         MapSqlParameterSource parameters = new MapSqlParameterSource();
-        parameters.addValue("page", pageInfo.getPage());
-        parameters.addValue("perPage", pageInfo.getPerPage());
+        parameters.addValue("limit", pageInfo.getPage());
+        parameters.addValue("offset", pageInfo.getPerPage() * pageInfo.getPage());
 
         query = """
             SELECT
@@ -84,8 +84,8 @@ public class MySqlStatusCrudRepository implements StatusCrudRepository {
                 name,
                 description
             FROM %s
-            LIMIT :perPage
-            OFFSET :page
+            LIMIT :limit
+            OFFSET :offset
         """.formatted(STATUS_TABLE_NAME);
 
         List<StatusProjection> statusProjections = jdbcTemplate.query(query, parameters, this::toStatusProjection);
@@ -319,7 +319,7 @@ public class MySqlStatusCrudRepository implements StatusCrudRepository {
 
         parameters = new MapSqlParameterSource();
         parameters.addValue("boardId", boarId.toString());
-        parameters.addValue("perPage", pageInfo.getPerPage());
+        parameters.addValue("limit", pageInfo.getPerPage());
         parameters.addValue("offset", pageInfo.getPage() * pageInfo.getPerPage());
 
         query = """
@@ -330,7 +330,7 @@ public class MySqlStatusCrudRepository implements StatusCrudRepository {
                 description
             FROM %s
             WHERE board_id = :boardId
-            LIMIT :perPage
+            LIMIT :limit
             OFFSET :offset
         """.formatted(STATUS_TABLE_NAME);
 

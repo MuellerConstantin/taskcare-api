@@ -91,7 +91,7 @@ public class MySqlMemberCrudRepository implements MemberCrudRepository {
 
         parameters = new MapSqlParameterSource();
         parameters.addValue("boardId", boarId.toString());
-        parameters.addValue("perPage", pageInfo.getPerPage());
+        parameters.addValue("limit", pageInfo.getPerPage());
         parameters.addValue("offset", pageInfo.getPage() * pageInfo.getPerPage());
 
         query = """
@@ -102,7 +102,7 @@ public class MySqlMemberCrudRepository implements MemberCrudRepository {
                 role
             FROM %s
             WHERE board_id = :boardId
-            LIMIT :perPage
+            LIMIT :limit
             OFFSET :offset
         """.formatted(MEMBER_TABLE_NAME);
 
@@ -186,7 +186,7 @@ public class MySqlMemberCrudRepository implements MemberCrudRepository {
         int totalPages = (int) Math.ceil((double) totalElements / pageInfo.getPerPage());
 
         MapSqlParameterSource parameters = new MapSqlParameterSource();
-        parameters.addValue("perPage", pageInfo.getPerPage());
+        parameters.addValue("limit", pageInfo.getPerPage());
         parameters.addValue("offset", pageInfo.getPage() * pageInfo.getPerPage());
 
         query = """
@@ -196,7 +196,7 @@ public class MySqlMemberCrudRepository implements MemberCrudRepository {
                 user_id,
                 role
             FROM %s
-            LIMIT :perPage
+            LIMIT :limit
             OFFSET :offset
         """.formatted(MEMBER_TABLE_NAME);
 

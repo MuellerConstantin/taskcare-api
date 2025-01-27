@@ -74,8 +74,8 @@ public class MySqlComponentCrudRepository implements ComponentCrudRepository {
         int totalPages = (int) Math.ceil((double) totalElements / pageInfo.getPerPage());
 
         MapSqlParameterSource parameters = new MapSqlParameterSource();
-        parameters.addValue("page", pageInfo.getPage());
-        parameters.addValue("perPage", pageInfo.getPerPage());
+        parameters.addValue("offset", pageInfo.getPage() * pageInfo.getPerPage());
+        parameters.addValue("limit", pageInfo.getPerPage());
 
         query = """
             SELECT
@@ -84,8 +84,8 @@ public class MySqlComponentCrudRepository implements ComponentCrudRepository {
                 name,
                 description
             FROM %s
-            LIMIT :perPage
-            OFFSET :page
+            LIMIT :limit
+            OFFSET :offset
         """.formatted(COMPONENT_TABLE_NAME);
 
         List<ComponentProjection> componentProjections = jdbcTemplate.query(query, parameters, this::toComponentProjection);
@@ -319,7 +319,7 @@ public class MySqlComponentCrudRepository implements ComponentCrudRepository {
 
         parameters = new MapSqlParameterSource();
         parameters.addValue("boardId", boarId.toString());
-        parameters.addValue("perPage", pageInfo.getPerPage());
+        parameters.addValue("limit", pageInfo.getPerPage());
         parameters.addValue("offset", pageInfo.getPage() * pageInfo.getPerPage());
 
         query = """
@@ -330,7 +330,7 @@ public class MySqlComponentCrudRepository implements ComponentCrudRepository {
                 description
             FROM %s
             WHERE board_id = :boardId
-            LIMIT :perPage
+            LIMIT :limit
             OFFSET :offset
         """.formatted(COMPONENT_TABLE_NAME);
 
