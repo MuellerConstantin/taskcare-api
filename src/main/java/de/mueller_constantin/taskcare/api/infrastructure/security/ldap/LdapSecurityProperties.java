@@ -29,5 +29,6 @@ public class LdapSecurityProperties {
     public static class LdapSyncProperties {
         private String usernameField;
         private String displayNameField;
+        private String photoField;
     }
 }

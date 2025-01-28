@@ -12,4 +12,5 @@ import lombok.NoArgsConstructor;
 public class LdapUser {
     private String username;
     private String displayName;
+    private byte[] photo;
 }

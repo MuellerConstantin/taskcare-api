@@ -13,6 +13,7 @@ import de.mueller_constantin.taskcare.api.core.user.application.security.Credent
 import de.mueller_constantin.taskcare.api.core.user.domain.*;
 import jakarta.validation.Valid;
 
+import java.util.Objects;
 import java.util.Optional;
 
 @Validated
@@ -91,7 +92,7 @@ public class UserWriteService implements ApplicationService {
             userAggregate.create(command.getUsername(), null, command.getDisplayName(), Role.USER, IdentityProvider.LDAP);
             userEventStoreRepository.save(userAggregate);
         } else {
-            if(!userProjection.get().getDisplayName().equals(command.getDisplayName())) {
+            if(!Objects.equals(userProjection.get().getDisplayName(), command.getDisplayName())) {
                 UserAggregate userAggregate = userEventStoreRepository.load(userProjection.get().getId())
                         .orElseThrow(NoSuchEntityException::new);
 

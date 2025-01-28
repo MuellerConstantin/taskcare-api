@@ -1,6 +1,7 @@
 package de.mueller_constantin.taskcare.api.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import de.mueller_constantin.taskcare.api.core.common.application.persistence.MediaStorage;
 import de.mueller_constantin.taskcare.api.core.user.application.UserReadService;
 import de.mueller_constantin.taskcare.api.core.user.application.UserWriteService;
 import de.mueller_constantin.taskcare.api.infrastructure.security.ldap.LdapSecurityProperties;
@@ -206,8 +207,9 @@ public class SecurityConfig {
         @Bean
         LdapUserContextMapper ldapUserContextMapper(UserWriteService userWriteService,
                                                     UserReadService userReadService,
+                                                    MediaStorage mediaStorage,
                                                     LdapUserMapper ldapUserMapper) {
-            return new LdapUserContextMapper(userWriteService, userReadService, ldapUserMapper);
+            return new LdapUserContextMapper(userWriteService, userReadService, mediaStorage, ldapUserMapper);
         }
 
         @Bean
