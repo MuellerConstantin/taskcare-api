@@ -32,7 +32,7 @@ public class UserReadService implements ApplicationService {
         return userReadModelRepository.findAll(PageInfo.builder()
                 .page(query.getPage())
                 .perPage(query.getPerPage())
-                .build());
+                .build(), query.getSearch());
     }
 
     public boolean query(ExistsUserByIdQuery query) {

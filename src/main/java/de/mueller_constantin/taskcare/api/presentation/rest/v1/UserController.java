@@ -16,6 +16,7 @@ import de.mueller_constantin.taskcare.api.presentation.rest.v1.dto.PageDto;
 import de.mueller_constantin.taskcare.api.presentation.rest.v1.dto.UpdateUserDto;
 import de.mueller_constantin.taskcare.api.presentation.rest.v1.dto.UserDto;
 import de.mueller_constantin.taskcare.api.presentation.rest.v1.dto.mapper.UserDtoMapper;
+import de.mueller_constantin.taskcare.api.presentation.rest.v1.dto.search.SearchFilter;
 import de.mueller_constantin.taskcare.api.presentation.rest.v1.dto.view.DefaultJsonViews;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
@@ -70,10 +71,12 @@ public class UserController {
 
     @GetMapping("/users")
     PageDto<UserDto> getAllUsers(@RequestParam(required = false, defaultValue = "0") @Min(0) int page,
-                                 @RequestParam(required = false, defaultValue = "25") @Min(0) int perPage) {
+                                 @RequestParam(required = false, defaultValue = "25") @Min(0) int perPage,
+                                 @RequestParam(required = false) @SearchFilter String search) {
         return userDtoMapper.mapToDto(userReadService.query(FindAllUsersQuery.builder()
                 .page(page)
                 .perPage(perPage)
+                .search(search)
                 .build()
         ));
     }

@@ -1,5 +1,6 @@
 package de.mueller_constantin.taskcare.api.presentation.rest.v1.error;
 
+import cz.jirutka.rsql.parser.RSQLParserException;
 import de.mueller_constantin.taskcare.api.core.common.application.NoSuchEntityException;
 import de.mueller_constantin.taskcare.api.core.board.domain.BoardMemberAlreadyExistsException;
 import de.mueller_constantin.taskcare.api.core.board.domain.BoardMustBeAdministrableException;
@@ -8,6 +9,7 @@ import de.mueller_constantin.taskcare.api.core.user.application.UsernameAlreadyI
 import de.mueller_constantin.taskcare.api.core.user.application.IllegalImportedUserAlterationException;
 import de.mueller_constantin.taskcare.api.infrastructure.security.token.InvalidTokenException;
 import de.mueller_constantin.taskcare.api.presentation.rest.v1.dto.ErrorDto;
+import de.mueller_constantin.taskcare.api.presentation.rest.v1.dto.search.InvalidSearchParameterException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -355,6 +357,34 @@ public class RestErrorHandler extends ResponseEntityExceptionHandler {
                 .error("IllegalImportedUserAlterationError")
                 .timestamp(OffsetDateTime.now())
                 .status(HttpStatus.CONFLICT.value())
+                .path(((ServletWebRequest) request).getRequest().getServletPath())
+                .build();
+
+        return new ResponseEntity<>(dto, new HttpHeaders(), HttpStatus.valueOf(dto.getStatus()));
+    }
+
+    @ExceptionHandler(InvalidSearchParameterException.class)
+    public ResponseEntity<Object> handleInvalidSearchParameter(InvalidSearchParameterException exc,
+                                                               WebRequest request) {
+        ErrorDto dto = ErrorDto.builder()
+                .error("InvalidSearchParameterError")
+                .timestamp(OffsetDateTime.now())
+                .status(HttpStatus.BAD_REQUEST.value())
+                .path(((ServletWebRequest) request).getRequest().getServletPath())
+                .detail(new ErrorDto.InvalidParameterErrorDetails(exc.getParameterName(),
+                        getMessage("de.mueller_constantin.taskcare.api.infrastructure.validation.NotSupported.message", null)))
+                .build();
+
+        return new ResponseEntity<>(dto, new HttpHeaders(), HttpStatus.valueOf(dto.getStatus()));
+    }
+
+    @ExceptionHandler(RSQLParserException.class)
+    public ResponseEntity<Object> handleRSQLParserException(RSQLParserException exc,
+                                                            WebRequest request) {
+        ErrorDto dto = ErrorDto.builder()
+                .error("MalformedSearchFilterError")
+                .timestamp(OffsetDateTime.now())
+                .status(HttpStatus.BAD_REQUEST.value())
                 .path(((ServletWebRequest) request).getRequest().getServletPath())
                 .build();
 

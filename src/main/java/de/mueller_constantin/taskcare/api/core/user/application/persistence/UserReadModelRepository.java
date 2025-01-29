@@ -14,6 +14,8 @@ public interface UserReadModelRepository extends ReadModelRepository {
 
     Page<UserProjection> findAll(PageInfo pageInfo);
 
+    Page<UserProjection> findAll(PageInfo pageInfo, String predicate);
+
     Optional<UserProjection> findById(UUID id);
 
     Optional<UserProjection> findByUsername(String username);

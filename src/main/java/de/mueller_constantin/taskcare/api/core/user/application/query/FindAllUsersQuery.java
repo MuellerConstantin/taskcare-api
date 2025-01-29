@@ -13,4 +13,5 @@ import lombok.NoArgsConstructor;
 public class FindAllUsersQuery implements Query {
     private int page;
     private int perPage;
+    private String search;
 }

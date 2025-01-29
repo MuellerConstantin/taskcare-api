@@ -6,6 +6,7 @@ import de.mueller_constantin.taskcare.api.core.user.domain.IdentityProvider;
 import de.mueller_constantin.taskcare.api.core.user.domain.Role;
 import de.mueller_constantin.taskcare.api.core.user.domain.UserProjection;
 import de.mueller_constantin.taskcare.api.infrastructure.persistence.crud.UserCrudRepository;
+import de.mueller_constantin.taskcare.api.infrastructure.persistence.crud.jdbc.rsql.MySqlUserRSQLConverter;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -157,6 +158,61 @@ public class MySqlUserCrudRepository implements UserCrudRepository {
             LIMIT :limit
             OFFSET :offset
         """.formatted(USER_TABLE_NAME);
+
+        List<UserProjection> content = jdbcTemplate.query(query, parameters, this::toProjection);
+
+        return Page.<UserProjection>builder()
+                .content(content)
+                .info(PageInfo.builder()
+                        .page(pageInfo.getPage())
+                        .perPage(pageInfo.getPerPage())
+                        .totalElements(totalElements)
+                        .totalPages(totalPages)
+                        .build())
+                .build();
+    }
+
+    @Override
+    public Page<UserProjection> findAll(PageInfo pageInfo, String predicate) {
+        if(predicate == null) {
+            return findAll(pageInfo);
+        }
+
+        MySqlUserRSQLConverter converter = new MySqlUserRSQLConverter();
+        converter.parse(predicate);
+
+        MapSqlParameterSource parameters = new MapSqlParameterSource();
+        parameters.addValues(converter.getParameters().getValues());
+
+        String query = """
+            SELECT
+                COUNT(*)
+            FROM %s
+            WHERE %s
+        """.formatted(USER_TABLE_NAME, converter.getQuery());
+
+        Integer totalElements = jdbcTemplate.queryForObject(query, parameters, Integer.class);
+        int totalPages = (int) Math.ceil((double) totalElements / pageInfo.getPerPage());
+
+        parameters = new MapSqlParameterSource();
+        parameters.addValue("offset", pageInfo.getPage() * pageInfo.getPerPage());
+        parameters.addValue("limit", pageInfo.getPerPage());
+        parameters.addValues(converter.getParameters().getValues());
+
+        query = """
+            SELECT
+                id,
+                username,
+                password,
+                display_name,
+                role,
+                identity_provider,
+                locked
+            FROM %s
+            WHERE %s
+            LIMIT :limit
+            OFFSET :offset
+        """.formatted(USER_TABLE_NAME, converter.getQuery());
 
         List<UserProjection> content = jdbcTemplate.query(query, parameters, this::toProjection);
 
