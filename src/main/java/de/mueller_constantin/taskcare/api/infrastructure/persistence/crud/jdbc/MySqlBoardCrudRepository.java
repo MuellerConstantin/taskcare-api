@@ -4,6 +4,7 @@ import de.mueller_constantin.taskcare.api.core.common.domain.Page;
 import de.mueller_constantin.taskcare.api.core.common.domain.PageInfo;
 import de.mueller_constantin.taskcare.api.core.board.domain.BoardProjection;
 import de.mueller_constantin.taskcare.api.infrastructure.persistence.crud.BoardCrudRepository;
+import de.mueller_constantin.taskcare.api.infrastructure.persistence.crud.jdbc.rsql.MySqlBoardRSQLConverter;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -99,6 +100,57 @@ public class MySqlBoardCrudRepository implements BoardCrudRepository {
     }
 
     @Override
+    public Page<BoardProjection> findAll(PageInfo pageInfo, String predicate) {
+        if(predicate == null) {
+            return findAll(pageInfo);
+        }
+
+        MySqlBoardRSQLConverter converter = new MySqlBoardRSQLConverter();
+        converter.parse(predicate);
+
+        MapSqlParameterSource parameters = new MapSqlParameterSource();
+        parameters.addValues(converter.getParameters().getValues());
+
+        String query = """
+            SELECT
+                COUNT(*)
+            FROM %s
+            WHERE %s
+        """.formatted(BOARD_TABLE_NAME, converter.getQuery());
+
+        Integer totalElements = jdbcTemplate.queryForObject(query, parameters, Integer.class);
+        int totalPages = (int) Math.ceil((double) totalElements / pageInfo.getPerPage());
+
+        parameters = new MapSqlParameterSource();
+        parameters.addValue("offset", pageInfo.getPage() * pageInfo.getPerPage());
+        parameters.addValue("limit", pageInfo.getPerPage());
+        parameters.addValues(converter.getParameters().getValues());
+
+        query = """
+            SELECT
+                id,
+                name,
+                description
+            FROM %s
+            WHERE %s
+            LIMIT :limit
+            OFFSET :offset
+        """.formatted(BOARD_TABLE_NAME, converter.getQuery());
+
+        List<BoardProjection> boardProjections = jdbcTemplate.query(query, parameters, this::toBoardProjection);
+
+        return Page.<BoardProjection>builder()
+                .content(boardProjections)
+                .info(PageInfo.builder()
+                        .page(pageInfo.getPage())
+                        .perPage(pageInfo.getPerPage())
+                        .totalElements(totalElements)
+                        .totalPages(totalPages)
+                        .build())
+                .build();
+    }
+
+    @Override
     public Page<BoardProjection> findAllUserIsMember(UUID userId, PageInfo pageInfo) {
         MapSqlParameterSource parameters = new MapSqlParameterSource();
         parameters.addValue("userId", userId.toString());
@@ -126,6 +178,84 @@ public class MySqlBoardCrudRepository implements BoardCrudRepository {
             LIMIT :limit
             OFFSET :offset
         """.formatted(MEMBER_TABLE_NAME);
+
+        List<UUID> boardIds = jdbcTemplate.query(query, parameters, (rs, rowNum) -> UUID.fromString(rs.getString("board_id")));
+
+        if (boardIds.isEmpty()) {
+            return Page.<BoardProjection>builder()
+                    .content(Collections.emptyList())
+                    .info(PageInfo.builder()
+                            .page(pageInfo.getPage())
+                            .perPage(pageInfo.getPerPage())
+                            .totalElements(totalElements)
+                            .totalPages(totalPages)
+                            .build())
+                    .build();
+        }
+
+        parameters = new MapSqlParameterSource();
+        parameters.addValue("boardIds", boardIds.stream()
+                .map(UUID::toString)
+                .toList());
+
+        query = """
+            SELECT
+                id,
+                name,
+                description
+            FROM %s
+            WHERE id IN (:boardIds)
+        """.formatted(BOARD_TABLE_NAME);
+
+        List<BoardProjection> boardProjections = jdbcTemplate.query(query, parameters, this::toBoardProjection);
+
+        return Page.<BoardProjection>builder()
+                .content(boardProjections)
+                .info(PageInfo.builder()
+                        .page(pageInfo.getPage())
+                        .perPage(pageInfo.getPerPage())
+                        .totalElements(totalElements)
+                        .totalPages(totalPages)
+                        .build())
+                .build();
+    }
+
+    @Override
+    public Page<BoardProjection> findAllUserIsMember(UUID userId, PageInfo pageInfo, String predicate) {
+        if(predicate == null) {
+            return findAllUserIsMember(userId, pageInfo);
+        }
+
+        MySqlBoardRSQLConverter converter = new MySqlBoardRSQLConverter();
+        converter.parse(predicate);
+
+        MapSqlParameterSource parameters = new MapSqlParameterSource();
+        parameters.addValues(converter.getParameters().getValues());
+
+        String query = """
+            SELECT
+                COUNT(DISTINCT board_id)
+            FROM %s
+            WHERE user_id = :userId AND %s
+        """.formatted(MEMBER_TABLE_NAME, converter.getQuery());
+
+        Integer totalElements = jdbcTemplate.queryForObject(query, parameters, Integer.class);
+        int totalPages = (int) Math.ceil((double) totalElements / pageInfo.getPerPage());
+
+        parameters = new MapSqlParameterSource();
+        parameters.addValue("userId", userId.toString());
+        parameters.addValue("limit", pageInfo.getPerPage());
+        parameters.addValue("offset", pageInfo.getPage() * pageInfo.getPerPage());
+        parameters.addValues(converter.getParameters().getValues());
+
+        query = """
+            SELECT
+                DISTINCT board_id
+            FROM %s
+            WHERE user_id = :userId AND %s
+            LIMIT :limit
+            OFFSET :offset
+        """.formatted(MEMBER_TABLE_NAME, converter.getQuery());
 
         List<UUID> boardIds = jdbcTemplate.query(query, parameters, (rs, rowNum) -> UUID.fromString(rs.getString("board_id")));
 

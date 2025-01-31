@@ -15,6 +15,7 @@ import de.mueller_constantin.taskcare.api.presentation.rest.v1.dto.CreateBoardDt
 import de.mueller_constantin.taskcare.api.presentation.rest.v1.dto.PageDto;
 import de.mueller_constantin.taskcare.api.presentation.rest.v1.dto.UpdateBoardDto;
 import de.mueller_constantin.taskcare.api.presentation.rest.v1.dto.mapper.BoardDtoMapper;
+import de.mueller_constantin.taskcare.api.presentation.rest.v1.dto.search.SearchFilter;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,11 +51,13 @@ public class BoardController {
     @GetMapping("/user/me/boards")
     public PageDto<BoardDto> getCurrentUsersBoards(@CurrentPrincipal Principal principal,
                                                    @RequestParam(required = false, defaultValue = "0") @Min(0) int page,
-                                                   @RequestParam(required = false, defaultValue = "25") @Min(0) int perPage) {
+                                                   @RequestParam(required = false, defaultValue = "25") @Min(0) int perPage,
+                                                   @RequestParam(required = false) @SearchFilter String search) {
         return boardDtoMapper.mapToDto(boardReadService.query(FindAllBoardsUserIsMemberQuery.builder()
                 .userId(principal.getUserProjection().getId())
                 .page(page)
                 .perPage(perPage)
+                .search(search)
                 .build()
         ));
     }
@@ -70,10 +73,12 @@ public class BoardController {
     @GetMapping("/boards")
     @PreAuthorize("hasRole('ADMINISTRATOR')")
     public PageDto<BoardDto> getBoards(@RequestParam(required = false, defaultValue = "0") @Min(0) int page,
-                                       @RequestParam(required = false, defaultValue = "25") @Min(0) int perPage) {
+                                       @RequestParam(required = false, defaultValue = "25") @Min(0) int perPage,
+                                       @RequestParam(required = false) @SearchFilter String search) {
         return boardDtoMapper.mapToDto(boardReadService.query(FindAllBoardsQuery.builder()
                 .page(page)
                 .perPage(perPage)
+                .search(search)
                 .build()
         ));
     }

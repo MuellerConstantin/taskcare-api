@@ -39,14 +39,14 @@ public class BoardReadService implements ApplicationService {
         return boardReadModelRepository.findAllUserIsMember(query.getUserId(), PageInfo.builder()
                 .page(query.getPage())
                 .perPage(query.getPerPage())
-                .build());
+                .build(), query.getSearch());
     }
 
     public Page<BoardProjection> query(FindAllBoardsQuery query) {
         return boardReadModelRepository.findAll(PageInfo.builder()
                 .page(query.getPage())
                 .perPage(query.getPerPage())
-                .build());
+                .build(), query.getSearch());
     }
 
     public MemberProjection query(FindMemberByIdAndBoardIdQuery query) {

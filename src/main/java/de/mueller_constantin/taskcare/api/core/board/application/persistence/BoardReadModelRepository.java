@@ -16,7 +16,11 @@ public interface BoardReadModelRepository extends ReadModelRepository {
 
     Page<BoardProjection> findAll(PageInfo pageInfo);
 
+    Page<BoardProjection> findAll(PageInfo pageInfo, String predicate);
+
     Page<BoardProjection> findAllUserIsMember(UUID userId, PageInfo pageInfo);
+
+    Page<BoardProjection> findAllUserIsMember(UUID userId, PageInfo pageInfo, String predicate);
 
     List<BoardProjection> findAllUserIsMember(UUID userId);
 

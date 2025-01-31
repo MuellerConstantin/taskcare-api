@@ -16,4 +16,5 @@ public class FindAllBoardsUserIsMemberQuery implements Query {
     private UUID userId;
     private int page;
     private int perPage;
+    private String search;
 }

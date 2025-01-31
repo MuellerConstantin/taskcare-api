@@ -13,4 +13,5 @@ import lombok.NoArgsConstructor;
 public class FindAllBoardsQuery implements Query {
     private int page;
     private int perPage;
+    private String search;
 }
