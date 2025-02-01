@@ -63,6 +63,24 @@ info:
     items by default.
     ---
     
+    ## Filtering
+    
+    Endpoints that load subsets of collections usually support filtering of the results.
+    There may be exceptions in individual cases. To filter the results, the RSQL query
+    language is used in combination with the HTTP query parameter `search`.
+    
+    ```
+    ?search="username=='maxi123'"
+    ```
+    
+    ---
+    **NOTE**
+
+    When filtering a collection, not all fields of a Data Transfer Object (DTO) necessarily
+    have to be supported. In individual cases, only a subset of the available fields may
+    be supported.
+    ---
+    
     ## Error Handling
     
     All endpoints of the API return a well-defined error response in case of an
@@ -92,6 +110,7 @@ info:
     | `InvalidPayloadFormatError` | 400 | If request body was malformed. |
     | `MissingPathVariableError` | 400 | If a required path variable is missing. |
     | `MissingQueryParameterError` | 400 | If a required query parameter is missing. |
+    | `InvalidSearchParameterError` | 400 | If a used search parameter is invalid. |
     
     ### Error Details
     
@@ -102,6 +121,7 @@ info:
     - `TypeMismatchError`
     - `MissingPathVariableError`
     - `MissingQueryParameterError`
+    - `InvalidSearchParameterError`
     
     ## Authentication
     
@@ -236,6 +256,13 @@ paths:
           schema:
             type: integer
             example: 25
+        - name: search
+          in: query
+          description: Search query for filtering collection.
+          required: false
+          schema:
+            type: string
+            format: rsql
       responses:
         200:
           description: Successfully fetched all available users.
@@ -517,6 +544,13 @@ paths:
           schema:
             type: integer
             example: 10
+        - name: search
+          in: query
+          description: Search query for filtering collection.
+          required: false
+          schema:
+            type: string
+            format: rsql
       responses:
         200:
           description: Successfully fetched all available boards.
@@ -566,6 +600,28 @@ paths:
       summary: Returns all boards of currently authenticated user.
       description: >
         Returns all available boards for the currently authenticated user.
+      parameters:
+        - name: page
+          in: query
+          description: Zero based index of page to load.
+          required: false
+          schema:
+            type: integer
+            example: 0
+        - name: perPage
+          in: query
+          description: Number of elements per page.
+          required: false
+          schema:
+            type: integer
+            example: 10
+        - name: search
+          in: query
+          description: Search query for filtering collection.
+          required: false
+          schema:
+            type: string
+            format: rsql
       responses:
         200:
           description: Successfully fetched all available boards.
@@ -573,6 +629,73 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/BoardPageDto"
+              example:
+                page: 0
+                perPage: 10
+                totalElements: 1
+                totalPages: 1
+                content:
+                  - id: 3377cf8f-da29-4aa7-9036-91951b8fce87
+                    title: Sample Board
+                    description: >
+                      This is a sample board.
+        401:
+          $ref: "#/components/responses/401"
+  /users/{userId}/boards:
+    get:
+      tags:
+        - Board
+      summary: Returns all boards a user is a member of.
+      description: >
+        Returns all available boards a user is a member of. Only
+        available for admin users.
+      parameters:
+        - name: userId
+          in: path
+          description: Unique identifier of the user.
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 3377cf8f-da29-4aa7-9036-91951b8fce87
+        - name: page
+          in: query
+          description: Zero based index of page to load.
+          required: false
+          schema:
+            type: integer
+            example: 0
+        - name: perPage
+          in: query
+          description: Number of elements per page.
+          required: false
+          schema:
+            type: integer
+            example: 10
+        - name: search
+          in: query
+          description: Search query for filtering collection.
+          required: false
+          schema:
+            type: string
+            format: rsql
+      responses:
+        200:
+          description: Successfully fetched all available boards.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BoardPageDto"
+              example:
+                page: 0
+                perPage: 10
+                totalElements: 1
+                totalPages: 1
+                content:
+                  - id: 3377cf8f-da29-4aa7-9036-91951b8fce87
+                    title: Sample Board
+                    description: >
+                      This is a sample board.
         401:
           $ref: "#/components/responses/401"
   /boards/{id}:
