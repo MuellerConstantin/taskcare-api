@@ -62,6 +62,21 @@ public class BoardController {
         ));
     }
 
+    @GetMapping("/users/{id}/boards")
+    @PreAuthorize("hasRole('ADMINISTRATOR')")
+    public PageDto<BoardDto> getBoardsByUserId(@PathVariable UUID id,
+                                               @RequestParam(required = false, defaultValue = "0") @Min(0) int page,
+                                               @RequestParam(required = false, defaultValue = "25") @Min(0) int perPage,
+                                               @RequestParam(required = false) @SearchFilter String search) {
+        return boardDtoMapper.mapToDto(boardReadService.query(FindAllBoardsUserIsMemberQuery.builder()
+                .userId(id)
+                .page(page)
+                .perPage(perPage)
+                .search(search)
+                .build()
+        ));
+    }
+
     @GetMapping("/boards/{id}")
     @PreAuthorize("hasRole('ADMINISTRATOR') or @domainSecurityService.isBoardMember(#id, principal.getUserProjection().getId())")
     public BoardDto getBoard(@PathVariable UUID id) {
