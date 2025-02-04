@@ -230,14 +230,19 @@ public class MySqlBoardCrudRepository implements BoardCrudRepository {
         converter.parse(predicate);
 
         MapSqlParameterSource parameters = new MapSqlParameterSource();
+        parameters.addValue("userId", userId.toString());
         parameters.addValues(converter.getParameters().getValues());
 
         String query = """
             SELECT
-                COUNT(DISTINCT board_id)
+                COUNT(DISTINCT id)
             FROM %s
-            WHERE user_id = :userId AND %s
-        """.formatted(MEMBER_TABLE_NAME, converter.getQuery());
+            WHERE id IN (
+                SELECT board_id
+                FROM %s
+                WHERE user_id = :userId
+            ) AND %s
+        """.formatted(BOARD_TABLE_NAME, MEMBER_TABLE_NAME, converter.getQuery());
 
         Integer totalElements = jdbcTemplate.queryForObject(query, parameters, Integer.class);
         int totalPages = (int) Math.ceil((double) totalElements / pageInfo.getPerPage());
@@ -250,14 +255,18 @@ public class MySqlBoardCrudRepository implements BoardCrudRepository {
 
         query = """
             SELECT
-                DISTINCT board_id
+                DISTINCT id
             FROM %s
-            WHERE user_id = :userId AND %s
+            WHERE id IN (
+                SELECT board_id
+                FROM %s
+                WHERE user_id = :userId
+            ) AND %s
             LIMIT :limit
             OFFSET :offset
-        """.formatted(MEMBER_TABLE_NAME, converter.getQuery());
+        """.formatted(BOARD_TABLE_NAME, MEMBER_TABLE_NAME, converter.getQuery());
 
-        List<UUID> boardIds = jdbcTemplate.query(query, parameters, (rs, rowNum) -> UUID.fromString(rs.getString("board_id")));
+        List<UUID> boardIds = jdbcTemplate.query(query, parameters, (rs, rowNum) -> UUID.fromString(rs.getString("id")));
 
         if (boardIds.isEmpty()) {
             return Page.<BoardProjection>builder()
