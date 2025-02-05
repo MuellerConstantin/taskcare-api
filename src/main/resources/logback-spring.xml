@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <include resource="org/springframework/boot/logging/logback/defaults.xml" />
+
+    <timestamp key="LOG_FILE_TIMESTAMP" datePattern="yyyyMMdd'T'HHmmss"/>
+
+    <springProfile name="test">
+        <include resource="org/springframework/boot/logging/logback/console-appender.xml"/>
+
+        <root level="DEBUG">
+            <appender-ref ref="CONSOLE"/>
+        </root>
+    </springProfile>
+
+    <springProfile name="default | dev | prod">
+        <include resource="org/springframework/boot/logging/logback/console-appender.xml"/>
+
+        <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+            <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+                <level>${FILE_LOG_THRESHOLD}</level>
+            </filter>
+            <file>logs/taskcare-api-${LOG_FILE_TIMESTAMP}.log</file>
+            <append>true</append>
+            <encoder>
+                <pattern>${FILE_LOG_PATTERN}</pattern>
+                <charset>${FILE_LOG_CHARSET}</charset>
+            </encoder>
+        </appender>
+
+        <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="FILE"/>
+        </root>
+    </springProfile>
+</configuration>
