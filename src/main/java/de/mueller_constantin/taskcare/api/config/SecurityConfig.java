@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import de.mueller_constantin.taskcare.api.core.common.application.persistence.MediaStorage;
 import de.mueller_constantin.taskcare.api.core.user.application.UserReadService;
 import de.mueller_constantin.taskcare.api.core.user.application.UserWriteService;
+import de.mueller_constantin.taskcare.api.infrastructure.security.ldap.FailsafeLdapAuthenticationProvider;
 import de.mueller_constantin.taskcare.api.infrastructure.security.ldap.LdapSecurityProperties;
 import de.mueller_constantin.taskcare.api.infrastructure.security.ldap.LdapUserContextMapper;
 import de.mueller_constantin.taskcare.api.infrastructure.security.ldap.LdapUserMapper;
@@ -185,7 +186,7 @@ public class SecurityConfig {
 
         @Bean
         LdapAuthenticationProvider ldapAuthenticationProvider(LdapUserContextMapper ldapUserContextMapper) {
-            LdapAuthenticationProvider ldapAuthenticationProvider = new LdapAuthenticationProvider(authenticator(), authoritiesPopulator());
+            FailsafeLdapAuthenticationProvider ldapAuthenticationProvider = new FailsafeLdapAuthenticationProvider(authenticator(), authoritiesPopulator());
             ldapAuthenticationProvider.setUserDetailsContextMapper(ldapUserContextMapper);
 
             return ldapAuthenticationProvider;
