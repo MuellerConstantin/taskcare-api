@@ -5,7 +5,15 @@
     <timestamp key="LOG_FILE_TIMESTAMP" datePattern="yyyyMMdd'T'HHmmss"/>
 
     <springProfile name="test">
-        <include resource="org/springframework/boot/logging/logback/console-appender.xml"/>
+        <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+            <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+                <level>${CONSOLE_LOG_THRESHOLD}</level>
+            </filter>
+            <encoder>
+                <pattern>${CONSOLE_LOG_PATTERN}</pattern>
+                <charset>${CONSOLE_LOG_CHARSET}</charset>
+            </encoder>
+        </appender>
 
         <root level="DEBUG">
             <appender-ref ref="CONSOLE"/>
@@ -13,11 +21,30 @@
     </springProfile>
 
     <springProfile name="default | dev | prod">
-        <include resource="org/springframework/boot/logging/logback/console-appender.xml"/>
+        <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+            <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+                <level>${CONSOLE_LOG_THRESHOLD}</level>
+            </filter>
+            <filter class="de.mueller_constantin.taskcare.api.infrastructure.logging.logback.ExceptionBlockFilter">
+                <exceptionClassName>de.mueller_constantin.taskcare.api.infrastructure.security.token.InvalidTokenException</exceptionClassName>
+            </filter>
+            <filter class="de.mueller_constantin.taskcare.api.infrastructure.logging.logback.ExceptionThrottlingFilter">
+                <exceptionClassName>org.springframework.ldap.CommunicationException</exceptionClassName>
+                <enableCauseMatching>true</enableCauseMatching>
+                <maxSkipped>100</maxSkipped>
+            </filter>
+            <encoder>
+                <pattern>${CONSOLE_LOG_PATTERN}</pattern>
+                <charset>${CONSOLE_LOG_CHARSET}</charset>
+            </encoder>
+        </appender>
 
         <appender name="FILE" class="ch.qos.logback.core.FileAppender">
             <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
                 <level>${FILE_LOG_THRESHOLD}</level>
+            </filter>
+            <filter class="de.mueller_constantin.taskcare.api.infrastructure.logging.logback.ExceptionThrottlingFilter">
+                <exceptionClassName>de.mueller_constantin.taskcare.api.infrastructure.security.token.InvalidTokenException</exceptionClassName>
             </filter>
             <file>logs/taskcare-api-${LOG_FILE_TIMESTAMP}.log</file>
             <append>true</append>
