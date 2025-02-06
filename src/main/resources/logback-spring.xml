@@ -46,7 +46,7 @@
             <filter class="de.mueller_constantin.taskcare.api.infrastructure.logging.logback.ExceptionThrottlingFilter">
                 <exceptionClassName>de.mueller_constantin.taskcare.api.infrastructure.security.token.InvalidTokenException</exceptionClassName>
             </filter>
-            <file>logs/taskcare-api-${LOG_FILE_TIMESTAMP}.log</file>
+            <file>${LOG_PATH}/taskcare-api-${LOG_FILE_TIMESTAMP}.log</file>
             <append>true</append>
             <encoder>
                 <pattern>${FILE_LOG_PATTERN}</pattern>

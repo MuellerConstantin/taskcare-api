@@ -1,3 +1,6 @@
+logging:
+  file:
+    path: ./logs
 spring:
   application:
     name: taskcare-api
