@@ -35,9 +35,16 @@ directory service is required for this. However, the use of such a service is op
 
 ## Deployment
 
-As mentioned above, the TaskCare service is generally operated on-premise. After providing required third-party
-services and the appropriate configuration, the service can be started. Because the application is written in
-Java and based on the Java Virtual Machine (JVM), a Java Runtime Environment (JRE) is required. The exact
+As mentioned above, the TaskCare service is generally operated on-premise. For error-free operation, the
+application must also be configured accordingly. Third-party services must be made known and settings made.
+For a detailed overview of the configuration, see [here](./configuration.md). The application can run
+either as system software (standalone) or in a container. Depending on this, either Docker or a Java
+Runtime Environment (JRE) is required.
+
+### Standalone
+
+Because the application is written in Java and based on the Java Virtual Machine (JVM), a Java Runtime
+Environment (JRE) is required, if the application is to run in standalone mode. The exact version of the JRE
 version depends on the used TaskCare release.
 
 ---
@@ -48,15 +55,13 @@ start-up. Because of this no Java EE application server is required, a JRE is su
 
 ---
 
-For error-free operation, the application must also be configured accordingly. Third-party services must be
-made known and settings made. For a detailed overview of the configuration, see [here](./configuration.md).
 If all requirements have been met, the application can be started via JRE with the following command:
 
 ```shell
 java -jar taskcare-api-<VERSION>.jar
 ```
 
-### Build application
+#### Build application
 
 If for any reason a pre-built binary cannot be used, for example during development, it is possible to build the
 application manually¹. The custom binary can be built with the Maven build system using a local installation.
@@ -75,3 +80,31 @@ The resulting artifact, usually located in the project's target directory (`targ
     <a href="https://adoptium.net/">Java Development Kit (JDK)</a> and <a href="https://maven.apache.org/">Apache Maven</a>
     are required.
 </small>
+
+### Container
+
+The application can also be run in a container using the provided or self-built Docker image. This does not
+require a Java Runtime Environment (JRE) installation on the target system, but an installation of the Docker
+Engine.
+
+Even with container deployment, the application still has to be configured. This is basically the same as for
+standalone operation. When using a configuration file, however, it must be ensured that this is made accessible
+to the container, for example by mounting a volume. Alternatively, the container can be configured using
+system environment variables. For configuration details see [configuration](./configuration.md).
+
+The release in the form of a Docker image can be started as follows:
+
+```shell
+docker run -d -p 8080:8080 -v <CONFIG_PATH>:/usr/local/etc/taskcare/api -v <LOGS_PATH>:/usr/local/var/log/taskcare/api taskcare/api:<VERSION>
+```
+
+#### Build image
+
+Should it be necessary in the development phase or for other reasons to build the Docker image directly
+from the source code, this is also possible. No Java development tools or installations are required for
+this either, the image is built in multi-stage operation on a Docker basis. The provided Dockerfile can
+be used to build:
+
+```shell
+docker build -t taskcare/api:<VERSION> .
+```

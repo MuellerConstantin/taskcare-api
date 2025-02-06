@@ -258,10 +258,11 @@ gradle-app.setting
 
 ### TaskCare ###
 
-# Configuration files
-*-dev.yml
-*-dev.yaml
-*-dev.properties
+# Configuration
+config/
+
+# Logs
+logs/
 
 ### VisualStudioCode ###
 .vscode/*
