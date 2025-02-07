@@ -40,6 +40,10 @@ public class BoardEventStoreRepositoryImpl implements BoardEventStoreRepository 
                     .id(aggregate.getId())
                     .name(aggregate.getName())
                     .description(aggregate.getDescription())
+                    .columns(aggregate.getColumns().stream()
+                            .map(Column::getStatusId)
+                            .map(ColumnProjection::new)
+                            .collect(Collectors.toList()))
                     .build();
 
             List<MemberProjection> memberProjections = aggregate.getMembers().stream()

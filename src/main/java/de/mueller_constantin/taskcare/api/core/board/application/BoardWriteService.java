@@ -66,6 +66,11 @@ public class BoardWriteService {
                 boardAggregate.getDescription();
 
         boardAggregate.update(name, description);
+
+        if(command.getColumns() != null) {
+            boardAggregate.updateLayout(command.getColumns());
+        }
+
         boardEventStoreRepository.save(boardAggregate);
     }
 

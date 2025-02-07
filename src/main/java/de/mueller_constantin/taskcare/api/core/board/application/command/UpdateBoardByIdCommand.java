@@ -8,6 +8,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
 import java.util.UUID;
 
 @NoArgsConstructor
@@ -25,12 +26,15 @@ public class UpdateBoardByIdCommand implements Command {
     @Size(max = 1024)
     private String description;
 
+    private List<UUID> columns;
+
     private boolean descriptionTouched;
 
-    public UpdateBoardByIdCommand(UUID id, String name, String description, boolean descriptionTouched) {
+    public UpdateBoardByIdCommand(UUID id, String name, String description, List<UUID> columns, boolean descriptionTouched) {
         this.id = id;
         this.name = name;
         this.description = description;
+        this.columns = columns;
         this.descriptionTouched = descriptionTouched;
     }
 

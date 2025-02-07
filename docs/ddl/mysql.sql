@@ -65,3 +65,11 @@ CREATE TABLE IF NOT EXISTS components (
     description VARCHAR(1024),
     FOREIGN KEY (board_id) REFERENCES boards(id)
 );
+
+CREATE TABLE IF NOT EXISTS columns (
+    board_id VARCHAR(255) NOT NULL,
+    status_id VARCHAR(255) NOT NULL,
+    position INT NOT NULL,
+    FOREIGN KEY (board_id) REFERENCES boards(id),
+    FOREIGN KEY (status_id) REFERENCES statuses(id)
+);

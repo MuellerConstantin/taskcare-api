@@ -1,5 +1,6 @@
 package de.mueller_constantin.taskcare.api.infrastructure.persistence.crud.jdbc;
 
+import de.mueller_constantin.taskcare.api.core.board.domain.ColumnProjection;
 import de.mueller_constantin.taskcare.api.core.common.domain.Page;
 import de.mueller_constantin.taskcare.api.core.common.domain.PageInfo;
 import de.mueller_constantin.taskcare.api.core.board.domain.BoardProjection;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.*;
 
 @Component
@@ -24,6 +26,7 @@ public class MySqlBoardCrudRepository implements BoardCrudRepository {
     private final String MEMBER_TABLE_NAME = "members";
     private final String STATUS_TABLE_NAME = "statuses";
     private final String COMPONENT_TABLE_NAME = "components";
+    private final String COLUMN_TABLE_NAME = "columns";
 
     private final NamedParameterJdbcTemplate jdbcTemplate;
 
@@ -34,6 +37,16 @@ public class MySqlBoardCrudRepository implements BoardCrudRepository {
 
         String query = """
             SELECT
+                status_id
+            FROM %s
+            WHERE board_id = :id
+            ORDER BY position
+        """.formatted(COLUMN_TABLE_NAME);
+
+        List<ColumnProjection> columns = jdbcTemplate.query(query, parameters, this::toColumnProjection);
+
+        query = """
+            SELECT
                 id,
                 name,
                 description
@@ -43,7 +56,8 @@ public class MySqlBoardCrudRepository implements BoardCrudRepository {
 
         try {
             return Optional.ofNullable(
-                    jdbcTemplate.queryForObject(query, parameters, this::toBoardProjection));
+                    jdbcTemplate.queryForObject(query, parameters, this::toBoardProjection))
+                    .map(b -> b.toBuilder().columns(columns).build());
         } catch (EmptyResultDataAccessException exc) {
             return Optional.empty();
         }
@@ -59,7 +73,42 @@ public class MySqlBoardCrudRepository implements BoardCrudRepository {
             FROM %s
         """.formatted(BOARD_TABLE_NAME);
 
-        return jdbcTemplate.query(query, this::toBoardProjection);
+        List<BoardProjection> boardProjections = jdbcTemplate.query(query, this::toBoardProjection);
+
+        if(boardProjections.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        MapSqlParameterSource parameters = new MapSqlParameterSource();
+        parameters.addValue("boardIds", boardProjections.stream()
+                .map(BoardProjection::getId).map(UUID::toString).toList());
+
+        query = """
+            SELECT
+                status_id,
+                board_id
+            FROM %s
+            WHERE board_id IN (:boardIds)
+            ORDER BY status_id, position
+        """.formatted(COLUMN_TABLE_NAME);
+
+        Map<UUID, List<ColumnProjection>> columns = jdbcTemplate.query(query, parameters, rs -> {
+            Map<UUID, List<ColumnProjection>> column_mapping = new HashMap<>();
+
+            while(rs.next()) {
+                UUID boardId = UUID.fromString(rs.getString("board_id"));
+                ColumnProjection columnProjection = toColumnProjection(rs, 1);
+
+                column_mapping.putIfAbsent(boardId, new ArrayList<>());
+                column_mapping.get(boardId).add(columnProjection);
+            }
+
+            return column_mapping;
+        });
+
+        return boardProjections.stream().map(b -> b.toBuilder()
+                .columns(columns.getOrDefault(b.getId(), Collections.emptyList()))
+                .build()).toList();
     }
 
     @Override
@@ -88,6 +137,49 @@ public class MySqlBoardCrudRepository implements BoardCrudRepository {
         """.formatted(BOARD_TABLE_NAME);
 
         List<BoardProjection> boardProjections = jdbcTemplate.query(query, parameters, this::toBoardProjection);
+
+        if(boardProjections.isEmpty()) {
+            return Page.<BoardProjection>builder()
+                    .content(Collections.emptyList())
+                    .info(PageInfo.builder()
+                            .page(pageInfo.getPage())
+                            .perPage(pageInfo.getPerPage())
+                            .totalElements(totalElements)
+                            .totalPages(totalPages)
+                            .build())
+                    .build();
+        }
+
+        parameters = new MapSqlParameterSource();
+        parameters.addValue("boardIds", boardProjections.stream()
+                .map(BoardProjection::getId).map(UUID::toString).toList());
+
+        query = """
+            SELECT
+                status_id,
+                board_id
+            FROM %s
+            WHERE board_id IN (:boardIds)
+            ORDER BY status_id, position
+        """.formatted(COLUMN_TABLE_NAME);
+
+        Map<UUID, List<ColumnProjection>> columns = jdbcTemplate.query(query, parameters, rs -> {
+            Map<UUID, List<ColumnProjection>> column_mapping = new HashMap<>();
+
+            while(rs.next()) {
+                UUID boardId = UUID.fromString(rs.getString("board_id"));
+                ColumnProjection columnProjection = toColumnProjection(rs, 1);
+
+                column_mapping.putIfAbsent(boardId, new ArrayList<>());
+                column_mapping.get(boardId).add(columnProjection);
+            }
+
+            return column_mapping;
+        });
+
+        boardProjections = boardProjections.stream().map(b -> b.toBuilder()
+                .columns(columns.getOrDefault(b.getId(), Collections.emptyList()))
+                .build()).toList();
 
         return Page.<BoardProjection>builder()
                 .content(boardProjections)
@@ -139,6 +231,49 @@ public class MySqlBoardCrudRepository implements BoardCrudRepository {
         """.formatted(BOARD_TABLE_NAME, converter.getQuery());
 
         List<BoardProjection> boardProjections = jdbcTemplate.query(query, parameters, this::toBoardProjection);
+
+        if(boardProjections.isEmpty()) {
+            return Page.<BoardProjection>builder()
+                    .content(Collections.emptyList())
+                    .info(PageInfo.builder()
+                            .page(pageInfo.getPage())
+                            .perPage(pageInfo.getPerPage())
+                            .totalElements(totalElements)
+                            .totalPages(totalPages)
+                            .build())
+                    .build();
+        }
+
+        parameters = new MapSqlParameterSource();
+        parameters.addValue("boardIds", boardProjections.stream()
+                .map(BoardProjection::getId).map(UUID::toString).toList());
+
+        query = """
+            SELECT
+                status_id,
+                board_id
+            FROM %s
+            WHERE board_id IN (:boardIds)
+            ORDER BY status_id, position
+        """.formatted(COLUMN_TABLE_NAME);
+
+        Map<UUID, List<ColumnProjection>> columns = jdbcTemplate.query(query, parameters, rs -> {
+            Map<UUID, List<ColumnProjection>> column_mapping = new HashMap<>();
+
+            while(rs.next()) {
+                UUID boardId = UUID.fromString(rs.getString("board_id"));
+                ColumnProjection columnProjection = toColumnProjection(rs, 1);
+
+                column_mapping.putIfAbsent(boardId, new ArrayList<>());
+                column_mapping.get(boardId).add(columnProjection);
+            }
+
+            return column_mapping;
+        });
+
+        boardProjections = boardProjections.stream().map(b -> b.toBuilder()
+                .columns(columns.getOrDefault(b.getId(), Collections.emptyList()))
+                .build()).toList();
 
         return Page.<BoardProjection>builder()
                 .content(boardProjections)
@@ -209,6 +344,49 @@ public class MySqlBoardCrudRepository implements BoardCrudRepository {
         """.formatted(BOARD_TABLE_NAME);
 
         List<BoardProjection> boardProjections = jdbcTemplate.query(query, parameters, this::toBoardProjection);
+
+        if(boardProjections.isEmpty()) {
+            return Page.<BoardProjection>builder()
+                    .content(Collections.emptyList())
+                    .info(PageInfo.builder()
+                            .page(pageInfo.getPage())
+                            .perPage(pageInfo.getPerPage())
+                            .totalElements(totalElements)
+                            .totalPages(totalPages)
+                            .build())
+                    .build();
+        }
+
+        parameters = new MapSqlParameterSource();
+        parameters.addValue("boardIds", boardProjections.stream()
+                .map(BoardProjection::getId).map(UUID::toString).toList());
+
+        query = """
+            SELECT
+                status_id,
+                board_id
+            FROM %s
+            WHERE board_id IN (:boardIds)
+            ORDER BY status_id, position
+        """.formatted(COLUMN_TABLE_NAME);
+
+        Map<UUID, List<ColumnProjection>> columns = jdbcTemplate.query(query, parameters, rs -> {
+            Map<UUID, List<ColumnProjection>> column_mapping = new HashMap<>();
+
+            while(rs.next()) {
+                UUID boardId = UUID.fromString(rs.getString("board_id"));
+                ColumnProjection columnProjection = toColumnProjection(rs, 1);
+
+                column_mapping.putIfAbsent(boardId, new ArrayList<>());
+                column_mapping.get(boardId).add(columnProjection);
+            }
+
+            return column_mapping;
+        });
+
+        boardProjections = boardProjections.stream().map(b -> b.toBuilder()
+                .columns(columns.getOrDefault(b.getId(), Collections.emptyList()))
+                .build()).toList();
 
         return Page.<BoardProjection>builder()
                 .content(boardProjections)
@@ -297,6 +475,49 @@ public class MySqlBoardCrudRepository implements BoardCrudRepository {
 
         List<BoardProjection> boardProjections = jdbcTemplate.query(query, parameters, this::toBoardProjection);
 
+        if(boardProjections.isEmpty()) {
+            return Page.<BoardProjection>builder()
+                    .content(Collections.emptyList())
+                    .info(PageInfo.builder()
+                            .page(pageInfo.getPage())
+                            .perPage(pageInfo.getPerPage())
+                            .totalElements(totalElements)
+                            .totalPages(totalPages)
+                            .build())
+                    .build();
+        }
+
+        parameters = new MapSqlParameterSource();
+        parameters.addValue("boardIds", boardProjections.stream()
+                .map(BoardProjection::getId).map(UUID::toString).toList());
+
+        query = """
+            SELECT
+                status_id,
+                board_id
+            FROM %s
+            WHERE board_id IN (:boardIds)
+            ORDER BY status_id, position
+        """.formatted(COLUMN_TABLE_NAME);
+
+        Map<UUID, List<ColumnProjection>> columns = jdbcTemplate.query(query, parameters, rs -> {
+            Map<UUID, List<ColumnProjection>> column_mapping = new HashMap<>();
+
+            while(rs.next()) {
+                UUID boardId = UUID.fromString(rs.getString("board_id"));
+                ColumnProjection columnProjection = toColumnProjection(rs, 1);
+
+                column_mapping.putIfAbsent(boardId, new ArrayList<>());
+                column_mapping.get(boardId).add(columnProjection);
+            }
+
+            return column_mapping;
+        });
+
+        boardProjections = boardProjections.stream().map(b -> b.toBuilder()
+                .columns(columns.getOrDefault(b.getId(), Collections.emptyList()))
+                .build()).toList();
+
         return Page.<BoardProjection>builder()
                 .content(boardProjections)
                 .info(PageInfo.builder()
@@ -340,7 +561,42 @@ public class MySqlBoardCrudRepository implements BoardCrudRepository {
             WHERE id IN (:boardIds)
         """.formatted(BOARD_TABLE_NAME);
 
-        return jdbcTemplate.query(query, parameters, this::toBoardProjection);
+        List<BoardProjection> boardProjections = jdbcTemplate.query(query, parameters, this::toBoardProjection);
+
+        if(boardProjections.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        parameters = new MapSqlParameterSource();
+        parameters.addValue("boardIds", boardProjections.stream()
+                .map(BoardProjection::getId).map(UUID::toString).toList());
+
+        query = """
+            SELECT
+                status_id,
+                board_id
+            FROM %s
+            WHERE board_id IN (:boardIds)
+            ORDER BY status_id, position
+        """.formatted(COLUMN_TABLE_NAME);
+
+        Map<UUID, List<ColumnProjection>> columns = jdbcTemplate.query(query, parameters, rs -> {
+            Map<UUID, List<ColumnProjection>> column_mapping = new HashMap<>();
+
+            while(rs.next()) {
+                UUID boardId = UUID.fromString(rs.getString("board_id"));
+                ColumnProjection columnProjection = toColumnProjection(rs, 1);
+
+                column_mapping.putIfAbsent(boardId, new ArrayList<>());
+                column_mapping.get(boardId).add(columnProjection);
+            }
+
+            return column_mapping;
+        });
+
+        return boardProjections.stream().map(b -> b.toBuilder()
+                .columns(columns.getOrDefault(b.getId(), Collections.emptyList()))
+                .build()).toList();
     }
 
     @Override
@@ -353,6 +609,17 @@ public class MySqlBoardCrudRepository implements BoardCrudRepository {
             FROM %s
             WHERE board_id = :boardId
         """.formatted(MEMBER_TABLE_NAME);
+
+        jdbcTemplate.update(query, parameters);
+
+        parameters = new MapSqlParameterSource();
+        parameters.addValue("boardId", id.toString());
+
+        query = """
+            DELETE
+            FROM %s
+            WHERE board_id = :boardId
+        """.formatted(COLUMN_TABLE_NAME);
 
         jdbcTemplate.update(query, parameters);
 
@@ -395,11 +662,49 @@ public class MySqlBoardCrudRepository implements BoardCrudRepository {
         boolean exists = existsById(projection.getId());
 
         MapSqlParameterSource parameters = new MapSqlParameterSource();
+        parameters.addValue("boardId", projection.getId().toString());
+
+        String query = """
+            DELETE
+            FROM %s
+            WHERE board_id = :boardId
+        """.formatted(COLUMN_TABLE_NAME);
+
+        jdbcTemplate.update(query, parameters);
+
+        if(projection.getColumns() != null && !projection.getColumns().isEmpty()) {
+            List<MapSqlParameterSource> parametersList = new ArrayList<>();
+
+            for(int index = 0; index < projection.getColumns().size(); index++) {
+                ColumnProjection column = projection.getColumns().get(index);
+                MapSqlParameterSource nestedParameters = new MapSqlParameterSource();
+
+                nestedParameters.addValue("status_id", column.getStatusId().toString());
+                nestedParameters.addValue("board_id", projection.getId().toString());
+                nestedParameters.addValue("position", index);
+
+                parametersList.add(nestedParameters);
+            }
+
+            query = """
+                INSERT INTO %s (
+                    status_id,
+                    board_id,
+                    position
+                ) VALUES (
+                    :status_id,
+                    :board_id,
+                    :position
+                )
+            """.formatted(COLUMN_TABLE_NAME);
+
+            jdbcTemplate.batchUpdate(query, parametersList.toArray(new MapSqlParameterSource[0]));
+        }
+
+        parameters = new MapSqlParameterSource();
         parameters.addValue("id", projection.getId().toString());
         parameters.addValue("name", projection.getName());
         parameters.addValue("description", projection.getDescription());
-
-        String query;
 
         if(exists) {
             query = """
@@ -453,6 +758,15 @@ public class MySqlBoardCrudRepository implements BoardCrudRepository {
                 .id(id)
                 .name(name)
                 .description(description)
+                .build();
+    }
+
+    @SneakyThrows
+    private ColumnProjection toColumnProjection(ResultSet resultSet, int rowNum) {
+        UUID statusId = UUID.fromString(resultSet.getString("status_id"));
+
+        return ColumnProjection.builder()
+                .statusId(statusId)
                 .build();
     }
 }

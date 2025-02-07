@@ -1,5 +1,6 @@
 package de.mueller_constantin.taskcare.api.presentation.rest.v1.dto.mapper;
 
+import de.mueller_constantin.taskcare.api.core.board.domain.ColumnProjection;
 import de.mueller_constantin.taskcare.api.core.common.domain.Page;
 import de.mueller_constantin.taskcare.api.core.board.application.command.CreateBoardCommand;
 import de.mueller_constantin.taskcare.api.core.board.application.command.UpdateBoardByIdCommand;
@@ -32,5 +33,9 @@ public interface BoardDtoMapper {
     @Named("unwrapOptional")
     default <T> T unwrapOptional(Optional<T> optional) {
         return optional.orElse(null);
+    }
+
+    default String mapColumn(ColumnProjection columnProjection) {
+        return columnProjection.getStatusId().toString();
     }
 }

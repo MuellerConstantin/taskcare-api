@@ -8,6 +8,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
 import java.util.Optional;
 
 @AllArgsConstructor
@@ -17,6 +18,7 @@ import java.util.Optional;
 public class UpdateBoardDto {
     private String name;
     private String description;
+    private List<String> columns;
 
     @JsonIgnore
     private boolean descriptionTouched;

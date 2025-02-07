@@ -6,16 +6,16 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 
-import java.util.List;
 import java.util.UUID;
 
 @Getter
 @ToString
 @EqualsAndHashCode
 @Builder(toBuilder = true)
-public class BoardProjection implements Projection {
-    private final UUID id;
-    private final String name;
-    private final String description;
-    private final List<ColumnProjection> columns;
+public class ColumnProjection implements Projection {
+    private final UUID statusId;
+
+    public ColumnProjection(UUID statusId) {
+        this.statusId = statusId;
+    }
 }

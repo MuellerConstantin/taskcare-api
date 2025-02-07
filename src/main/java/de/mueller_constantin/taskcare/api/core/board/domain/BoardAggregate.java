@@ -7,9 +7,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Represents a kanban board. In addition to its own details, a board
@@ -24,6 +22,7 @@ public class BoardAggregate extends Aggregate {
     private Set<Member> members = new HashSet<>();
     private Set<Status> statuses = new HashSet<>();
     private Set<Component> components = new HashSet<>();
+    private List<Column> columns = new ArrayList<>();
 
     public BoardAggregate() {
         this(UUID.randomUUID(), 0, false);
@@ -64,6 +63,7 @@ public class BoardAggregate extends Aggregate {
             return;
         } else if(event instanceof StatusRemovedEvent) {
             this.statuses.removeIf(s -> s.getId().equals(((StatusRemovedEvent) event).getStatus().getId()));
+            this.columns.removeIf(c -> c.getStatusId().equals(((StatusRemovedEvent) event).getStatus().getId()));
             return;
         } else if(event instanceof StatusUpdatedEvent) {
             this.statuses.forEach(status -> {
@@ -86,6 +86,9 @@ public class BoardAggregate extends Aggregate {
                     component.setDescription(((ComponentUpdatedEvent) event).getDescription());
                 }
             });
+            return;
+        } else if(event instanceof LayoutChangedEvent) {
+            this.columns = new ArrayList<>(((LayoutChangedEvent) event).getColumns());
             return;
         }
 
@@ -263,6 +266,21 @@ public class BoardAggregate extends Aggregate {
                 .componentId(componentId)
                 .name(name)
                 .description(description)
+                .build()
+        );
+    }
+
+    public void updateLayout(List<UUID> statusIds) {
+        statusIds.forEach(statusId -> {
+            if(this.statuses.stream().noneMatch(s -> s.getId().equals(statusId))) {
+                throw new NoSuchEntityException();
+            }
+        });
+
+        this.applyChange(LayoutChangedEvent.builder()
+                .aggregateId(this.getId())
+                .version(this.getNextVersion())
+                .columns(statusIds.stream().map(Column::new).toList())
                 .build()
         );
     }
