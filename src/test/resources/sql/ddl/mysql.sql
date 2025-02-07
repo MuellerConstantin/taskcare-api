@@ -21,8 +21,7 @@ CREATE TABLE IF NOT EXISTS members (
     board_id VARCHAR(255) NOT NULL,
     user_id VARCHAR(255) NOT NULL,
     role VARCHAR(255) NOT NULL,
-    FOREIGN KEY (board_id) REFERENCES boards(id),
-    FOREIGN KEY (user_id) REFERENCES users(id)
+    FOREIGN KEY (board_id) REFERENCES boards(id)
 );
 
 ALTER TABLE members ADD CONSTRAINT UNIQUE_BOARD_USER UNIQUE (board_id, user_id);

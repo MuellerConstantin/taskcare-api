@@ -98,7 +98,7 @@ class UserReadServiceTest {
 
     @Test
     void handleFindAllUsersQuery() {
-        when(userReadModelRepository.findAll(any(PageInfo.class))).thenReturn(Page.<UserProjection>builder()
+        when(userReadModelRepository.findAll(any(PageInfo.class), eq(null))).thenReturn(Page.<UserProjection>builder()
                 .content(List.of(userProjection))
                 .info(PageInfo.builder()
                         .page(0)
@@ -112,6 +112,6 @@ class UserReadServiceTest {
                 .build());
 
         assertEquals(userProjection, result.getContent().get(0));
-        verify(userReadModelRepository, times(1)).findAll(any(PageInfo.class));
+        verify(userReadModelRepository, times(1)).findAll(any(PageInfo.class), eq(null));
     }
 }

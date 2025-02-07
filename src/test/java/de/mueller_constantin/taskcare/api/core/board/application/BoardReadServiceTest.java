@@ -146,7 +146,7 @@ class BoardReadServiceTest {
 
     @Test
     void handleFindAllBoardsQuery() {
-        when(boardReadModelRepository.findAll(any(PageInfo.class))).thenReturn(Page.<BoardProjection>builder()
+        when(boardReadModelRepository.findAll(any(PageInfo.class), eq(null))).thenReturn(Page.<BoardProjection>builder()
                 .content(List.of(boardProjection))
                 .info(PageInfo.builder()
                         .page(0)
@@ -160,12 +160,12 @@ class BoardReadServiceTest {
                 .build());
 
         assertEquals(boardProjection, result.getContent().get(0));
-        verify(boardReadModelRepository, times(1)).findAll(any(PageInfo.class));
+        verify(boardReadModelRepository, times(1)).findAll(any(PageInfo.class), eq(null));
     }
 
     @Test
     void handleFindAllBoardsUserIsMemberQuery() {
-        when(boardReadModelRepository.findAllUserIsMember(eq(this.creatorUserId), any(PageInfo.class))).thenReturn(Page.<BoardProjection>builder()
+        when(boardReadModelRepository.findAllUserIsMember(eq(this.creatorUserId), any(PageInfo.class), eq(null))).thenReturn(Page.<BoardProjection>builder()
                 .content(List.of(boardProjection))
                 .info(PageInfo.builder()
                         .page(0)
@@ -180,7 +180,7 @@ class BoardReadServiceTest {
                 .build());
 
         assertEquals(boardProjection, result.getContent().get(0));
-        verify(boardReadModelRepository, times(1)).findAllUserIsMember(eq(this.creatorUserId), any(PageInfo.class));
+        verify(boardReadModelRepository, times(1)).findAllUserIsMember(eq(this.creatorUserId), any(PageInfo.class), eq(null));
     }
 
     @Test

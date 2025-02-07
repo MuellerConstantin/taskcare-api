@@ -23,6 +23,7 @@ public class MySqlBoardCrudRepository implements BoardCrudRepository {
     private final String BOARD_TABLE_NAME = "boards";
     private final String MEMBER_TABLE_NAME = "members";
     private final String STATUS_TABLE_NAME = "statuses";
+    private final String COMPONENT_TABLE_NAME = "components";
 
     private final NamedParameterJdbcTemplate jdbcTemplate;
 
@@ -363,6 +364,17 @@ public class MySqlBoardCrudRepository implements BoardCrudRepository {
             FROM %s
             WHERE board_id = :boardId
         """.formatted(STATUS_TABLE_NAME);
+
+        jdbcTemplate.update(query, parameters);
+
+        parameters = new MapSqlParameterSource();
+        parameters.addValue("boardId", id.toString());
+
+        query = """
+            DELETE
+            FROM %s
+            WHERE board_id = :boardId
+        """.formatted(COMPONENT_TABLE_NAME);
 
         jdbcTemplate.update(query, parameters);
 
