@@ -185,7 +185,7 @@ class BoardReadServiceTest {
 
     @Test
     void handleFindAllMembersByBoardIdQuery() {
-        when(memberReadModelRepository.findAllByBoardId(eq(this.id), any(PageInfo.class))).thenReturn(Page.<MemberProjection>builder()
+        when(memberReadModelRepository.findAllByBoardId(eq(this.id), any(PageInfo.class), any())).thenReturn(Page.<MemberProjection>builder()
                 .content(memberProjections)
                 .info(PageInfo.builder()
                         .page(0)

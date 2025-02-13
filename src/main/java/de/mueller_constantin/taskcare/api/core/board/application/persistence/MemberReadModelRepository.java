@@ -15,5 +15,7 @@ public interface MemberReadModelRepository extends ReadModelRepository {
 
     Page<MemberProjection> findAllByBoardId(UUID boarId, PageInfo pageInfo);
 
+    Page<MemberProjection> findAllByBoardId(UUID boarId, PageInfo pageInfo, String predicate);
+
     boolean existsByUserIdAndBoardId(UUID userId, UUID boardId);
 }

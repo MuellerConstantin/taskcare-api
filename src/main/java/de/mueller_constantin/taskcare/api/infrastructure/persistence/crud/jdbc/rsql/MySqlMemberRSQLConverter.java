@@ -9,16 +9,16 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 
 import java.util.Set;
 
-public class MySqlBoardRSQLConverter {
+public class MySqlMemberRSQLConverter {
     private final RSQLParser parser;
-    private final MySqlBoardRSQLVisitor visitor;
+    private final MySqlMemberRSQLVisitor visitor;
 
-    public MySqlBoardRSQLConverter() {
+    public MySqlMemberRSQLConverter() {
         Set<ComparisonOperator> operators = RSQLOperators.defaultOperators();
         operators.add(new ComparisonOperator("=like="));
 
         parser = new RSQLParser(operators);
-        visitor = new MySqlBoardRSQLVisitor();
+        visitor = new MySqlMemberRSQLVisitor();
     }
 
     @Getter

@@ -58,7 +58,7 @@ public class BoardReadService implements ApplicationService {
         return memberReadModelRepository.findAllByBoardId(query.getBoardId(), PageInfo.builder()
                 .page(query.getPage())
                 .perPage(query.getPerPage())
-                .build());
+                .build(), query.getSearch());
     }
 
     public MemberProjection query(FindMemberByUserIdAndBoardIdQuery query) {

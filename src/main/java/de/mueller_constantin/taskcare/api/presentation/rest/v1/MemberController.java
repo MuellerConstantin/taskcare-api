@@ -10,6 +10,7 @@ import de.mueller_constantin.taskcare.api.presentation.rest.v1.dto.MemberDto;
 import de.mueller_constantin.taskcare.api.presentation.rest.v1.dto.PageDto;
 import de.mueller_constantin.taskcare.api.presentation.rest.v1.dto.UpdateMemberDto;
 import de.mueller_constantin.taskcare.api.presentation.rest.v1.dto.mapper.MemberDtoMapper;
+import de.mueller_constantin.taskcare.api.presentation.rest.v1.dto.search.SearchFilter;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,11 +40,13 @@ public class MemberController {
     @PreAuthorize("hasRole('ADMINISTRATOR') or @domainSecurityService.isBoardMember(#id, principal.getUserProjection().getId())")
     public PageDto<MemberDto> getMembers(@PathVariable UUID id,
                                          @RequestParam(required = false, defaultValue = "0") @Min(0) int page,
-                                         @RequestParam(required = false, defaultValue = "25") @Min(0) int perPage) {
+                                         @RequestParam(required = false, defaultValue = "25") @Min(0) int perPage,
+                                         @RequestParam(required = false) @SearchFilter String search) {
         return memberDtoMapper.mapToDto(boardReadService.query(FindAllMembersByBoardIdQuery.builder()
                 .boardId(id)
                 .page(page)
                 .perPage(perPage)
+                .search(search)
                 .build()));
     }
 
