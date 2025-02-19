@@ -16,4 +16,5 @@ public class FindAllStatusesByBoardIdQuery implements Query {
     private UUID boardId;
     private int page;
     private int perPage;
+    private String search;
 }

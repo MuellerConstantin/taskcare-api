@@ -1114,6 +1114,13 @@ paths:
           schema:
             type: integer
             example: 10
+        - name: search
+          in: query
+          description: Search query for filtering collection.
+          required: false
+          schema:
+            type: string
+            format: rsql
       responses:
         200:
           description: Successfully fetched all members of the board.

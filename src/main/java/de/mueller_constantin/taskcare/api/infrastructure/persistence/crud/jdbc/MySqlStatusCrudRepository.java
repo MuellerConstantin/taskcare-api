@@ -4,6 +4,7 @@ import de.mueller_constantin.taskcare.api.core.common.domain.Page;
 import de.mueller_constantin.taskcare.api.core.common.domain.PageInfo;
 import de.mueller_constantin.taskcare.api.core.board.domain.StatusProjection;
 import de.mueller_constantin.taskcare.api.infrastructure.persistence.crud.StatusCrudRepository;
+import de.mueller_constantin.taskcare.api.infrastructure.persistence.crud.jdbc.rsql.MySqlStatusRSQLConverter;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -333,6 +334,60 @@ public class MySqlStatusCrudRepository implements StatusCrudRepository {
             LIMIT :limit
             OFFSET :offset
         """.formatted(STATUS_TABLE_NAME);
+
+        List<StatusProjection> statusProjections = jdbcTemplate.query(query, parameters, this::toStatusProjection);
+
+        return Page.<StatusProjection>builder()
+                .content(statusProjections)
+                .info(PageInfo.builder()
+                        .page(pageInfo.getPage())
+                        .perPage(pageInfo.getPerPage())
+                        .totalElements(count)
+                        .totalPages(totalPages)
+                        .build())
+                .build();
+    }
+
+    @Override
+    public Page<StatusProjection> findAllByBoardId(UUID boarId, PageInfo pageInfo, String predicate) {
+        if(predicate == null) {
+            return findAllByBoardId(boarId, pageInfo);
+        }
+
+        MySqlStatusRSQLConverter converter = new MySqlStatusRSQLConverter();
+        converter.parse(predicate);
+
+        MapSqlParameterSource parameters = new MapSqlParameterSource();
+        parameters.addValue("boardId", boarId.toString());
+        parameters.addValues(converter.getParameters().getValues());
+
+        String query = """
+            SELECT
+                COUNT(*)
+            FROM %s
+            WHERE board_id = :boardId AND %s
+        """.formatted(STATUS_TABLE_NAME, converter.getQuery());
+
+        Integer count = jdbcTemplate.queryForObject(query, parameters, Integer.class);
+        int totalPages = (int) Math.ceil((double) count / pageInfo.getPerPage());
+
+        parameters = new MapSqlParameterSource();
+        parameters.addValue("boardId", boarId.toString());
+        parameters.addValue("limit", pageInfo.getPerPage());
+        parameters.addValue("offset", pageInfo.getPage() * pageInfo.getPerPage());
+        parameters.addValues(converter.getParameters().getValues());
+
+        query = """
+            SELECT
+                id,
+                board_id,
+                name,
+                description
+            FROM %s
+            WHERE board_id = :boardId AND %s
+            LIMIT :limit
+            OFFSET :offset
+        """.formatted(STATUS_TABLE_NAME, converter.getQuery());
 
         List<StatusProjection> statusProjections = jdbcTemplate.query(query, parameters, this::toStatusProjection);
 

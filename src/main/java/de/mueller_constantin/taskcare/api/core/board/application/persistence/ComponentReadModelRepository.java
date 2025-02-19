@@ -12,4 +12,6 @@ public interface ComponentReadModelRepository extends ReadModelRepository {
     Optional<ComponentProjection> findByIdAndBoardId(UUID id, UUID boardId);
 
     Page<ComponentProjection> findAllByBoardId(UUID boarId, PageInfo pageInfo);
+
+    Page<ComponentProjection> findAllByBoardId(UUID boarId, PageInfo pageInfo, String predicate);
 }

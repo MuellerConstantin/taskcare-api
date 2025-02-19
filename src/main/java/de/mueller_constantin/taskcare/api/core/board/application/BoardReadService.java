@@ -74,7 +74,7 @@ public class BoardReadService implements ApplicationService {
         return statusReadModelRepository.findAllByBoardId(query.getBoardId(), PageInfo.builder()
                 .page(query.getPage())
                 .perPage(query.getPerPage())
-                .build());
+                .build(), query.getSearch());
     }
 
     public StatusProjection query(FindStatusByIdAndBoardIdQuery query) {
@@ -86,7 +86,7 @@ public class BoardReadService implements ApplicationService {
         return componentReadModelRepository.findAllByBoardId(query.getBoardId(), PageInfo.builder()
                 .page(query.getPage())
                 .perPage(query.getPerPage())
-                .build());
+                .build(), query.getSearch());
     }
 
     public ComponentProjection query(FindComponentByIdAndBoardIdQuery query) {

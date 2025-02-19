@@ -4,6 +4,7 @@ import de.mueller_constantin.taskcare.api.core.board.domain.ComponentProjection;
 import de.mueller_constantin.taskcare.api.core.common.domain.Page;
 import de.mueller_constantin.taskcare.api.core.common.domain.PageInfo;
 import de.mueller_constantin.taskcare.api.infrastructure.persistence.crud.ComponentCrudRepository;
+import de.mueller_constantin.taskcare.api.infrastructure.persistence.crud.jdbc.rsql.MySqlComponentRSQLConverter;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -333,6 +334,60 @@ public class MySqlComponentCrudRepository implements ComponentCrudRepository {
             LIMIT :limit
             OFFSET :offset
         """.formatted(COMPONENT_TABLE_NAME);
+
+        List<ComponentProjection> componentProjections = jdbcTemplate.query(query, parameters, this::toComponentProjection);
+
+        return Page.<ComponentProjection>builder()
+                .content(componentProjections)
+                .info(PageInfo.builder()
+                        .page(pageInfo.getPage())
+                        .perPage(pageInfo.getPerPage())
+                        .totalElements(count)
+                        .totalPages(totalPages)
+                        .build())
+                .build();
+    }
+
+    @Override
+    public Page<ComponentProjection> findAllByBoardId(UUID boarId, PageInfo pageInfo, String predicate) {
+        if(predicate == null) {
+            return findAllByBoardId(boarId, pageInfo);
+        }
+
+        MySqlComponentRSQLConverter converter = new MySqlComponentRSQLConverter();
+        converter.parse(predicate);
+
+        MapSqlParameterSource parameters = new MapSqlParameterSource();
+        parameters.addValue("boardId", boarId.toString());
+        parameters.addValues(converter.getParameters().getValues());
+
+        String query = """
+            SELECT
+                COUNT(*)
+            FROM %s
+            WHERE board_id = :boardId AND %s
+        """.formatted(COMPONENT_TABLE_NAME, converter.getQuery());
+
+        Integer count = jdbcTemplate.queryForObject(query, parameters, Integer.class);
+        int totalPages = (int) Math.ceil((double) count / pageInfo.getPerPage());
+
+        parameters = new MapSqlParameterSource();
+        parameters.addValue("boardId", boarId.toString());
+        parameters.addValue("limit", pageInfo.getPerPage());
+        parameters.addValue("offset", pageInfo.getPage() * pageInfo.getPerPage());
+        parameters.addValues(converter.getParameters().getValues());
+
+        query = """
+            SELECT
+                id,
+                board_id,
+                name,
+                description
+            FROM %s
+            WHERE board_id = :boardId AND %s
+            LIMIT :limit
+            OFFSET :offset
+        """.formatted(COMPONENT_TABLE_NAME, converter.getQuery());
 
         List<ComponentProjection> componentProjections = jdbcTemplate.query(query, parameters, this::toComponentProjection);
 
