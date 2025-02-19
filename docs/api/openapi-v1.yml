@@ -162,6 +162,8 @@ tags:
     description: Management of kanban board members.
   - name: Status
     description: Allows to manage task statuses within a board.
+  - name: Component
+    description: Allows to manage components within a board.
 paths:
   /auth/token:
     post:
@@ -1278,8 +1280,208 @@ paths:
               description: >
                 Tasks that need to be done.
       responses:
-        200:
+        204:
           description: Successfully updated the status.
+        401:
+          $ref: "#/components/responses/401"
+        403:
+          $ref: "#/components/responses/403"
+  /boards/{boardId}/components:
+    get:
+      tags:
+        - Component
+      summary: Returns all components of a board.
+      description: >
+        Returns all components of a board.
+      parameters:
+        - name: boardId
+          in: path
+          description: Unique identifier of the board.
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 3377cf8f-da29-4aa7-9036-91951b8fce87
+        - name: page
+          in: query
+          description: Zero based index of page to load.
+          required: false
+          schema:
+            type: integer
+            example: 0
+        - name: perPage
+          in: query
+          description: Number of elements per page.
+          required: false
+          schema:
+            type: integer
+            example: 10
+        - name: search
+          in: query
+          description: Search query for filtering collection.
+          required: false
+          schema:
+            type: string
+            format: rsql
+      responses:
+        200:
+          description: Successfully fetched all members of the board.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MemberPageDto"
+              example:
+                page: 0
+                perPage: 10
+                totalElements: 1
+                totalPages: 1
+                content:
+                  - id: 037f610b-f09c-4648-8c08-39a3ade3f447
+                    name: Component A
+                    description: >
+                      A sample component.
+        401:
+          $ref: "#/components/responses/401"
+        403:
+          $ref: "#/components/responses/403"
+    post:
+      tags:
+        - Component
+      summary: Creates a new component.
+      description: >
+        Creates a new component. Only available for board administrators.
+      parameters:
+        - name: boardId
+          in: path
+          description: Unique identifier of the board.
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 3377cf8f-da29-4aa7-9036-91951b8fce87
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AddComponentDto"
+            example:
+              name: Component A
+              description: >
+                A sample component.
+      responses:
+        201:
+          description: Successfully created the component.
+        401:
+          $ref: "#/components/responses/401"
+        403:
+          $ref: "#/components/responses/403"
+  /boards/{boardId}/components/{componentId}:
+    get:
+      tags:
+        - Component
+      summary: Returns a single component.
+      description: >
+        Returns a single component.
+      parameters:
+        - name: boardId
+          in: path
+          description: Unique identifier of the board.
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 3377cf8f-da29-4aa7-9036-91951b8fce87
+        - name: componentId
+          in: path
+          description: Unique identifier of the component.
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 037f610b-f09c-4648-8c08-39a3ade3f447
+      responses:
+        200:
+          description: Successfully fetched the component.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ComponentDto"
+              example:
+                id: 037f610b-f09c-4648-8c08-39a3ade3f447
+                name: Component A
+                description: >
+                  A sample component.
+        401:
+          $ref: "#/components/responses/401"
+        403:
+          $ref: "#/components/responses/403"
+    delete:
+      tags:
+        - Component
+      summary: Deletes a single component.
+      description: >
+        Deletes a single component. Only available for board administrators.
+      parameters:
+        - name: boardId
+          in: path
+          description: Unique identifier of the board.
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 3377cf8f-da29-4aa7-9036-91951b8fce87
+        - name: componentId
+          in: path
+          description: Unique identifier of the component.
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 037f610b-f09c-4648-8c08-39a3ade3f447
+      responses:
+        204:
+          description: Successfully deleted the component.
+        401:
+          $ref: "#/components/responses/401"
+        403:
+          $ref: "#/components/responses/403"
+    patch:
+      tags:
+        - Component
+      summary: Updates the details of a single component.
+      description: >
+        Updates a component. Only available for board administrators.
+      parameters:
+        - name: boardId
+          in: path
+          description: Unique identifier of the board.
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 3377cf8f-da29-4aa7-9036-91951b8fce87
+        - name: componentId
+          in: path
+          description: Unique identifier of the component.
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 037f610b-f09c-4648-8c08-39a3ade3f447
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateComponentDto"
+            example:
+              name: Component A
+              description: >
+                A sample component.
+      responses:
+        204:
+          description: Successfully updated the component.
         401:
           $ref: "#/components/responses/401"
         403:
@@ -1595,7 +1797,7 @@ components:
         id:
           type: string
           format: uuid
-          description: Unique identifier of member.
+          description: Unique identifier of status.
         name:
           type: string
           description: Name of status.
@@ -1636,6 +1838,53 @@ components:
         description:
           type: string
           description: Description of status.
+    ComponentDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier of the component.
+        name:
+          type: string
+          description: Name of component.
+        description:
+          type: string
+          description: Description of component.
+      required:
+        - id
+        - name
+    ComponentPageDto:
+      allOf:
+        - $ref: "#/components/schemas/PageDto"
+        - type: object
+          properties:
+            content:
+              type: array
+              items:
+                $ref: "#/components/schemas/ComponentDto"
+          required:
+            - content
+    AddComponentDto:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of component.
+        description:
+          type: string
+          description: Description of component.
+      required:
+        - name
+    UpdateComponentDto:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of component.
+        description:
+          type: string
+          description: Description of component.
   responses:
     500:
       description: An internal error has occurred on the server side.
