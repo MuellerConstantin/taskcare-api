@@ -37,8 +37,8 @@ caching frequently accessed data and reducing latency in data retrieval. MinIO a
 managing file attachments, binary data, and user-uploaded content efficiently, ensuring scalable and reliable
 handling of media files.
 
-<div style="text-align: center;">
-  <img src="docs/images/architecture.png" alt="Architecture" style="width: 100%; max-width: 250px; height: auto;" />
+<div style="text-align: center;" align="center">
+  <img src="docs/images/architecture.png" alt="Architecture" style="width: 250px; height: auto;" />
 </div>
 
 The system employs Event Sourcing for the write model, where all changes to the application state are stored as
@@ -53,8 +53,8 @@ for each domain. MySQL serves a dual purpose in this architecture: it acts as th
 persistently logging all domain events, while simultaneously functioning as the relational database for the read
 model, storing structured and query-optimized data.
 
-<div style="text-align: center;">
-  <img src="docs/images/dataflow.png" alt="Dataflow" style="width: 100%; max-width: 500px; height: auto;" />
+<div style="text-align: center;" align="center">
+  <img src="docs/images/dataflow.png" alt="Dataflow" style="width: 500px; height: auto;" />
 </div>
 
 ## Getting Started
