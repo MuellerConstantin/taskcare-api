@@ -4,7 +4,6 @@ import de.mueller_constantin.taskcare.api.core.common.application.ApplicationSer
 import de.mueller_constantin.taskcare.api.core.common.application.NoSuchEntityException;
 import de.mueller_constantin.taskcare.api.core.common.application.event.DomainEventBus;
 import de.mueller_constantin.taskcare.api.core.common.application.persistence.MediaStorage;
-import de.mueller_constantin.taskcare.api.core.common.application.validation.Validated;
 import de.mueller_constantin.taskcare.api.core.common.domain.DomainEvent;
 import de.mueller_constantin.taskcare.api.core.user.application.command.*;
 import de.mueller_constantin.taskcare.api.core.user.application.persistence.UserEventStoreRepository;
@@ -12,11 +11,16 @@ import de.mueller_constantin.taskcare.api.core.user.application.persistence.User
 import de.mueller_constantin.taskcare.api.core.user.application.security.CredentialsEncoder;
 import de.mueller_constantin.taskcare.api.core.user.domain.*;
 import jakarta.validation.Valid;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 
 import java.util.Objects;
 import java.util.Optional;
 
+@Service
 @Validated
+@Transactional
 public class UserWriteService implements ApplicationService {
     private final UserEventStoreRepository userEventStoreRepository;
     private final UserReadModelRepository userReadModelRepository;

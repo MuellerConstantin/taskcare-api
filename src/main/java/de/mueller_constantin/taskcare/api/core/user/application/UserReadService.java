@@ -10,7 +10,11 @@ import de.mueller_constantin.taskcare.api.core.user.application.query.FindAllUse
 import de.mueller_constantin.taskcare.api.core.user.application.query.FindUserByIdQuery;
 import de.mueller_constantin.taskcare.api.core.user.application.query.FindUserByUsernameQuery;
 import de.mueller_constantin.taskcare.api.core.user.domain.UserProjection;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+@Service
+@Transactional
 public class UserReadService implements ApplicationService {
     private final UserReadModelRepository userReadModelRepository;
 

@@ -13,7 +13,11 @@ import de.mueller_constantin.taskcare.api.core.board.application.query.*;
 import de.mueller_constantin.taskcare.api.core.board.domain.BoardProjection;
 import de.mueller_constantin.taskcare.api.core.board.domain.MemberProjection;
 import de.mueller_constantin.taskcare.api.core.board.domain.StatusProjection;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+@Service
+@Transactional
 public class BoardReadService implements ApplicationService {
     private final BoardReadModelRepository boardReadModelRepository;
     private final MemberReadModelRepository memberReadModelRepository;

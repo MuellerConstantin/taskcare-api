@@ -204,7 +204,7 @@ class BoardReadServiceTest {
 
     @Test
     void handleFindAllStatusesByBoardIdQuery() {
-        when(statusReadModelRepository.findAllByBoardId(eq(this.id), any(PageInfo.class))).thenReturn(Page.<StatusProjection>builder()
+        when(statusReadModelRepository.findAllByBoardId(eq(this.id), any(PageInfo.class), any())).thenReturn(Page.<StatusProjection>builder()
                 .content(statusProjections)
                 .info(PageInfo.builder()
                         .page(0)
@@ -223,7 +223,7 @@ class BoardReadServiceTest {
 
     @Test
     void handleFindAllComponentsByBoardIdQuery() {
-        when(componentReadModelRepository.findAllByBoardId(eq(this.id), any(PageInfo.class))).thenReturn(Page.<ComponentProjection>builder()
+        when(componentReadModelRepository.findAllByBoardId(eq(this.id), any(PageInfo.class), any())).thenReturn(Page.<ComponentProjection>builder()
                 .content(componentProjections)
                 .info(PageInfo.builder()
                         .page(0)
