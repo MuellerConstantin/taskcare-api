@@ -16,7 +16,10 @@ import de.mueller_constantin.taskcare.api.core.user.application.query.ExistsUser
 import de.mueller_constantin.taskcare.api.core.user.domain.UserDeletedEvent;
 import jakarta.validation.Valid;
 import lombok.SneakyThrows;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.integration.support.locks.LockRegistry;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -29,6 +32,11 @@ import static lombok.Lombok.sneakyThrow;
 @Service
 @Validated
 @Transactional
+@Retryable(
+        retryFor = OptimisticLockingFailureException.class,
+        maxAttempts = 3,
+        backoff = @Backoff(delay = 100, multiplier = 2)
+)
 public class BoardWriteService {
     private final BoardEventStoreRepository boardEventStoreRepository;
     private final BoardReadModelRepository boardReadModelRepository;

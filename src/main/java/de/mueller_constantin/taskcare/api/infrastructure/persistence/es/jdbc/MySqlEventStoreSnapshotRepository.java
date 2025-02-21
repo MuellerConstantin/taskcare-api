@@ -8,6 +8,8 @@ import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import de.mueller_constantin.taskcare.api.core.common.domain.Aggregate;
 import lombok.NonNull;
 import lombok.SneakyThrows;
+import org.springframework.dao.DuplicateKeyException;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.transaction.annotation.Propagation;
@@ -58,7 +60,13 @@ public class MySqlEventStoreSnapshotRepository implements JdbcEventStoreSnapshot
             )
         """.formatted(SNAPSHOT_TABLE_NAME);
 
-        jdbcTemplate.update(query, parameters);
+        try {
+            jdbcTemplate.update(query, parameters);
+        } catch (DuplicateKeyException exc) {
+            throw new OptimisticLockingFailureException(
+                    "Optimistic locking failed for snapshot (AggregateId: %s; Version %d)".formatted(
+                            aggregate.getId(), aggregate.getVersion()), exc);
+        }
     }
 
     public <T extends Aggregate> Optional<T> loadSnapshot(@NonNull UUID aggregateId, Integer version) {

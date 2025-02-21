@@ -5,6 +5,8 @@ import de.mueller_constantin.taskcare.api.core.common.domain.DomainEvent;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import org.springframework.dao.DuplicateKeyException;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.transaction.annotation.Propagation;
@@ -46,7 +48,13 @@ public class MySqlEventStoreEventRepository implements JdbcEventStoreEventReposi
             )
         """.formatted(EVENTS_TABLE_NAME);
 
-        jdbcTemplate.update(query, parameters);
+        try {
+            jdbcTemplate.update(query, parameters);
+        } catch (DuplicateKeyException exc) {
+            throw new OptimisticLockingFailureException(
+                    "Optimistic locking failed for event (AggregateId: %s; Version %d)".formatted(
+                            event.getAggregateId(), event.getVersion()), exc);
+        }
     }
 
     public List<DomainEvent> loadEvents(@NonNull UUID aggregateId, Integer fromVersion, Integer toVersion) {

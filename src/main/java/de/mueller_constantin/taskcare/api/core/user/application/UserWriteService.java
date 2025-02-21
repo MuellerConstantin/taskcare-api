@@ -12,7 +12,10 @@ import de.mueller_constantin.taskcare.api.core.user.application.security.Credent
 import de.mueller_constantin.taskcare.api.core.user.domain.*;
 import jakarta.validation.Valid;
 import lombok.SneakyThrows;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.integration.support.locks.LockRegistry;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -23,6 +26,11 @@ import java.util.Optional;
 @Service
 @Validated
 @Transactional
+@Retryable(
+        retryFor = OptimisticLockingFailureException.class,
+        maxAttempts = 3,
+        backoff = @Backoff(delay = 100, multiplier = 2)
+)
 public class UserWriteService implements ApplicationService {
     private final UserEventStoreRepository userEventStoreRepository;
     private final UserReadModelRepository userReadModelRepository;

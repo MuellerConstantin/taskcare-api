@@ -3,6 +3,8 @@ package de.mueller_constantin.taskcare.api.infrastructure.persistence.es.jdbc;
 import de.mueller_constantin.taskcare.api.core.common.domain.Aggregate;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DuplicateKeyException;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.transaction.annotation.Propagation;
@@ -38,13 +40,19 @@ public class MySqlEventStoreMetadataRepository implements JdbcEventStoreMetadata
             )
         """.formatted(METADATA_TABLE_NAME);
 
-        jdbcTemplate.update(query, parameters);
+        try {
+            jdbcTemplate.update(query, parameters);
+        } catch (DuplicateKeyException exc) {
+            throw new OptimisticLockingFailureException(
+                    "Optimistic locking failed for metadata (AggregateId: %s)".formatted(aggregate.getId()), exc);
+        }
     }
 
     public void updateMetadata(@NonNull Aggregate aggregate) {
         MapSqlParameterSource parameters = new MapSqlParameterSource();
         parameters.addValue("aggregateId", aggregate.getId().toString());
         parameters.addValue("version", aggregate.getVersion(), Types.INTEGER);
+        parameters.addValue("expectedVersion", aggregate.getCommittedVersion(), Types.INTEGER);
         parameters.addValue("deleted", aggregate.isDeleted(), Types.BOOLEAN);
 
         String query = """
@@ -52,9 +60,13 @@ public class MySqlEventStoreMetadataRepository implements JdbcEventStoreMetadata
             SET
                 version = :version,
                 deleted = :deleted
-            WHERE aggregate_id = :aggregateId
+            WHERE aggregate_id = :aggregateId AND version = :expectedVersion
         """.formatted(METADATA_TABLE_NAME);
 
-        jdbcTemplate.update(query, parameters);
+        int updated = jdbcTemplate.update(query, parameters);
+
+        if (updated == 0) {
+            throw new OptimisticLockingFailureException("Optimistic locking failed for metadata (AggregateId: %s; Version %d)".formatted(aggregate.getId(), aggregate.getVersion()));
+        }
     }
 }
