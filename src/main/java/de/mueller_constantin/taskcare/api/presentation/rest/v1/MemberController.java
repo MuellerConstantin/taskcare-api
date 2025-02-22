@@ -51,7 +51,7 @@ public class MemberController {
     }
 
     @GetMapping("/boards/{boardId}/members/{memberId}")
-    @PreAuthorize("hasRole('ADMINISTRATOR') or @domainSecurityService.isBoardMember(#id, principal.getUserProjection().getId())")
+    @PreAuthorize("hasRole('ADMINISTRATOR') or @domainSecurityService.isBoardMember(#boardId, principal.getUserProjection().getId())")
     public MemberDto getMember(@PathVariable UUID boardId, @PathVariable UUID memberId) {
         return memberDtoMapper.mapToDto(boardReadService.query(FindMemberByIdAndBoardIdQuery.builder()
                 .id(memberId)
