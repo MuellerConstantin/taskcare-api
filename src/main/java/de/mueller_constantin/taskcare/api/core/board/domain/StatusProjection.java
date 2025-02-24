@@ -17,11 +17,13 @@ public class StatusProjection implements Projection {
     private final UUID boardId;
     private final String name;
     private final String description;
+    private final StatusCategory category;
 
-    public StatusProjection(UUID id, UUID boardId, String name, String description) {
+    public StatusProjection(UUID id, UUID boardId, String name, String description, StatusCategory category) {
         this.id = id;
         this.boardId = boardId;
         this.name = name;
         this.description = description;
+        this.category = category;
     }
 }

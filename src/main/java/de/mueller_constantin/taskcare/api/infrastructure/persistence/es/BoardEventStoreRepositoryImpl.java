@@ -61,6 +61,7 @@ public class BoardEventStoreRepositoryImpl implements BoardEventStoreRepository 
                                     .boardId(s.getBoardId())
                                     .name(s.getName())
                                     .description(s.getDescription())
+                                    .category(s.getCategory())
                                     .build())
                     .toList();
 

@@ -1,5 +1,7 @@
 package de.mueller_constantin.taskcare.api.presentation.rest.v1.dto;
 
+import de.mueller_constantin.taskcare.api.core.board.domain.StatusCategory;
+import de.mueller_constantin.taskcare.api.core.common.application.validation.Enumerated;
 import de.mueller_constantin.taskcare.api.core.common.application.validation.NullOrNotEmpty;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -22,6 +24,10 @@ public class AddStatusDto {
     private String name;
 
     private String description;
+
+    @NotNull
+    @Enumerated(enumClass = StatusCategory.class)
+    private String category;
 
     public Optional<@NullOrNotEmpty @Size(max = 1024) String> getDescription() { return Optional.ofNullable(this.description); }
 }

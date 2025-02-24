@@ -12,12 +12,15 @@ import de.mueller_constantin.taskcare.api.core.user.domain.Role;
 import de.mueller_constantin.taskcare.api.core.user.domain.UserAggregate;
 import de.mueller_constantin.taskcare.api.core.user.domain.UserProjection;
 import jakarta.validation.Validator;
+import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.integration.support.locks.LockRegistry;
+import org.springframework.integration.util.CheckedRunnable;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -44,7 +47,7 @@ class UserWriteServiceTest {
     private DomainEventBus domainEventBus;
 
     @Mock
-    private Validator validator;
+    LockRegistry lockRegistry;
 
     @InjectMocks
     private UserWriteService userWriteService;
@@ -105,11 +108,18 @@ class UserWriteServiceTest {
     }
 
     @Test
+    @SneakyThrows
     void handleUpdateUserByIdCommand() {
         when(userReadModelRepository.findById(id)).thenReturn(Optional.of(userProjection));
         when(userEventStoreRepository.load(id)).thenReturn(Optional.of(userAggregate));
         when(credentialsEncoder.encode(any())).thenAnswer(i -> i.getArguments()[0].toString());
         doNothing().when(userEventStoreRepository).save(any(UserAggregate.class));
+
+        doAnswer(invocation -> {
+            CheckedRunnable<?> runnable = invocation.getArgument(1);
+            runnable.run();
+            return null;
+        }).when(lockRegistry).executeLocked(any(), any(CheckedRunnable.class));
 
         userWriteService.dispatch(UpdateUserByIdCommand.builder()
                 .id(id)
@@ -125,8 +135,15 @@ class UserWriteServiceTest {
     }
 
     @Test
+    @SneakyThrows
     void handleUpdateUserByIdCommandUnknownId() {
         when(userReadModelRepository.findById(id)).thenReturn(Optional.empty());
+
+        doAnswer(invocation -> {
+            CheckedRunnable<?> runnable = invocation.getArgument(1);
+            runnable.run();
+            return null;
+        }).when(lockRegistry).executeLocked(any(), any(CheckedRunnable.class));
 
         assertThrows(NoSuchEntityException.class, () -> {
             userWriteService.dispatch(UpdateUserByIdCommand.builder()
@@ -139,9 +156,16 @@ class UserWriteServiceTest {
     }
 
     @Test
+    @SneakyThrows
     void handleDeleteUserByIdCommand() {
         when(userEventStoreRepository.load(id)).thenReturn(Optional.of(userAggregate));
         doNothing().when(userEventStoreRepository).save(any(UserAggregate.class));
+
+        doAnswer(invocation -> {
+            CheckedRunnable<?> runnable = invocation.getArgument(1);
+            runnable.run();
+            return null;
+        }).when(lockRegistry).executeLocked(any(), any(CheckedRunnable.class));
 
         userWriteService.dispatch(DeleteUserByIdCommand.builder()
                 .id(id)
@@ -152,8 +176,15 @@ class UserWriteServiceTest {
     }
 
     @Test
+    @SneakyThrows
     void handleDeleteUserByIdCommandUnknownId() {
         when(userEventStoreRepository.load(id)).thenReturn(Optional.empty());
+
+        doAnswer(invocation -> {
+            CheckedRunnable<?> runnable = invocation.getArgument(1);
+            runnable.run();
+            return null;
+        }).when(lockRegistry).executeLocked(any(), any(CheckedRunnable.class));
 
         assertThrows(NoSuchEntityException.class, () -> {
             userWriteService.dispatch(DeleteUserByIdCommand.builder()
@@ -163,9 +194,16 @@ class UserWriteServiceTest {
     }
 
     @Test
+    @SneakyThrows
     void handleLockUserByIdCommand() {
         when(userEventStoreRepository.load(id)).thenReturn(Optional.of(userAggregate));
         doNothing().when(userEventStoreRepository).save(any(UserAggregate.class));
+
+        doAnswer(invocation -> {
+            CheckedRunnable<?> runnable = invocation.getArgument(1);
+            runnable.run();
+            return null;
+        }).when(lockRegistry).executeLocked(any(), any(CheckedRunnable.class));
 
         userWriteService.dispatch(LockUserByIdCommand.builder()
                 .id(id)
@@ -176,9 +214,16 @@ class UserWriteServiceTest {
     }
 
     @Test
+    @SneakyThrows
     void handleUnlockUserByIdCommand() {
         when(userEventStoreRepository.load(id)).thenReturn(Optional.of(userAggregate));
         doNothing().when(userEventStoreRepository).save(any(UserAggregate.class));
+
+        doAnswer(invocation -> {
+            CheckedRunnable<?> runnable = invocation.getArgument(1);
+            runnable.run();
+            return null;
+        }).when(lockRegistry).executeLocked(any(), any(CheckedRunnable.class));
 
         userWriteService.dispatch(UnlockUserByIdCommand.builder()
                 .id(id)
@@ -189,8 +234,15 @@ class UserWriteServiceTest {
     }
 
     @Test
+    @SneakyThrows
     void handleLockUserByIdCommandUnknownId() {
         when(userEventStoreRepository.load(id)).thenReturn(Optional.empty());
+
+        doAnswer(invocation -> {
+            CheckedRunnable<?> runnable = invocation.getArgument(1);
+            runnable.run();
+            return null;
+        }).when(lockRegistry).executeLocked(any(), any(CheckedRunnable.class));
 
         assertThrows(NoSuchEntityException.class, () -> {
             userWriteService.dispatch(LockUserByIdCommand.builder()
@@ -200,8 +252,15 @@ class UserWriteServiceTest {
     }
 
     @Test
+    @SneakyThrows
     void handleUnlockUserByIdCommandUnknownId() {
         when(userEventStoreRepository.load(id)).thenReturn(Optional.empty());
+
+        doAnswer(invocation -> {
+            CheckedRunnable<?> runnable = invocation.getArgument(1);
+            runnable.run();
+            return null;
+        }).when(lockRegistry).executeLocked(any(), any(CheckedRunnable.class));
 
         assertThrows(NoSuchEntityException.class, () -> {
             userWriteService.dispatch(UnlockUserByIdCommand.builder()

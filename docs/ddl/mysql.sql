@@ -55,6 +55,7 @@ CREATE TABLE IF NOT EXISTS statuses (
     board_id VARCHAR(255) NOT NULL,
     name VARCHAR(255) NOT NULL,
     description VARCHAR(1024),
+    category VARCHAR(255) NOT NULL,
     FOREIGN KEY (board_id) REFERENCES boards(id)
 );
 

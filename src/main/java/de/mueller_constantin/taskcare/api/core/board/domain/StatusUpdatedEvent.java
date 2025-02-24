@@ -16,6 +16,7 @@ public class StatusUpdatedEvent extends DomainEvent {
     private final UUID statusId;
     private final String name;
     private final String description;
+    private StatusCategory category;
 
     public StatusUpdatedEvent() {
         this(UUID.randomUUID(), 0, null, null, null);

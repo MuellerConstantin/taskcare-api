@@ -1,5 +1,6 @@
 package de.mueller_constantin.taskcare.api.core.board.application.command;
 
+import de.mueller_constantin.taskcare.api.core.board.domain.StatusCategory;
 import de.mueller_constantin.taskcare.api.core.common.application.Command;
 import de.mueller_constantin.taskcare.api.core.common.application.validation.NullOrNotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -28,14 +29,17 @@ public class UpdateStatusByIdCommand implements Command {
     @Size(max = 1024)
     private String description;
 
+    private StatusCategory category;
+
     private boolean descriptionTouched;
 
-    public UpdateStatusByIdCommand(UUID boardId, UUID statusId, String name, String description, boolean descriptionTouched) {
+    public UpdateStatusByIdCommand(UUID boardId, UUID statusId, String name, String description, StatusCategory category, boolean descriptionTouched) {
         this.boardId = boardId;
         this.statusId = statusId;
         this.name = name;
         this.description = description;
         this.descriptionTouched = descriptionTouched;
+        this.category = category;
     }
 
     public void setDescription(String description) {

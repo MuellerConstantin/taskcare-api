@@ -1,6 +1,8 @@
 package de.mueller_constantin.taskcare.api.presentation.rest.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import de.mueller_constantin.taskcare.api.core.board.domain.StatusCategory;
+import de.mueller_constantin.taskcare.api.core.common.application.validation.Enumerated;
 import de.mueller_constantin.taskcare.api.core.common.application.validation.NullOrNotEmpty;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -17,6 +19,7 @@ import java.util.Optional;
 public class UpdateStatusDto {
     private String name;
     private String description;
+    private String category;
 
     @JsonIgnore
     private boolean descriptionTouched;
@@ -32,5 +35,9 @@ public class UpdateStatusDto {
 
     public Optional<@NullOrNotEmpty @Size(max = 1024) String> getDescription() {
         return Optional.ofNullable(this.description);
+    }
+
+    public Optional<@NullOrNotEmpty @Enumerated(enumClass = StatusCategory.class) String> getCategory() {
+        return Optional.ofNullable(this.category);
     }
 }

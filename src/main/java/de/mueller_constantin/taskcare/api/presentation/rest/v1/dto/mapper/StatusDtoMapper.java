@@ -1,5 +1,6 @@
 package de.mueller_constantin.taskcare.api.presentation.rest.v1.dto.mapper;
 
+import de.mueller_constantin.taskcare.api.core.board.domain.StatusCategory;
 import de.mueller_constantin.taskcare.api.core.common.domain.Page;
 import de.mueller_constantin.taskcare.api.core.board.application.command.AddStatusByIdCommand;
 import de.mueller_constantin.taskcare.api.core.board.application.command.UpdateStatusByIdCommand;
@@ -24,6 +25,7 @@ public interface StatusDtoMapper {
 
     @Mapping(source = "updateStatusDto.name", target = "name", qualifiedByName = "unwrapOptional")
     @Mapping(source = "updateStatusDto.description", target = "description", qualifiedByName = "unwrapOptional")
+    @Mapping(source = "updateStatusDto.category", target = "category", qualifiedByName = "unwrapOptional")
     UpdateStatusByIdCommand mapToCommand(UUID boardId, UUID statusId, UpdateStatusDto updateStatusDto);
 
     @Mapping(source = "content", target = "content", defaultExpression = "java(new ArrayList<>())")
@@ -32,5 +34,13 @@ public interface StatusDtoMapper {
                                 @Named("unwrapOptional")
     default <T> T unwrapOptional(Optional<T> optional) {
         return optional.orElse(null);
+    }
+
+    default StatusCategory mapCategory(String category) {
+        if(category != null) {
+            return StatusCategory.valueOf(category);
+        } else {
+            return null;
+        }
     }
 }

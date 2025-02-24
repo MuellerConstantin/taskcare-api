@@ -1,5 +1,6 @@
 package de.mueller_constantin.taskcare.api.core.board.application;
 
+import de.mueller_constantin.taskcare.api.core.board.domain.*;
 import de.mueller_constantin.taskcare.api.core.common.application.NoSuchEntityException;
 import de.mueller_constantin.taskcare.api.core.common.application.event.DomainEventBus;
 import de.mueller_constantin.taskcare.api.core.common.application.persistence.MediaStorage;
@@ -7,10 +8,6 @@ import de.mueller_constantin.taskcare.api.core.common.domain.DomainEvent;
 import de.mueller_constantin.taskcare.api.core.board.application.command.*;
 import de.mueller_constantin.taskcare.api.core.board.application.persistence.BoardEventStoreRepository;
 import de.mueller_constantin.taskcare.api.core.board.application.persistence.BoardReadModelRepository;
-import de.mueller_constantin.taskcare.api.core.board.domain.BoardAggregate;
-import de.mueller_constantin.taskcare.api.core.board.domain.BoardDeletedEvent;
-import de.mueller_constantin.taskcare.api.core.board.domain.BoardProjection;
-import de.mueller_constantin.taskcare.api.core.board.domain.Role;
 import de.mueller_constantin.taskcare.api.core.user.application.UserReadService;
 import de.mueller_constantin.taskcare.api.core.user.application.query.ExistsUserByIdQuery;
 import de.mueller_constantin.taskcare.api.core.user.domain.UserDeletedEvent;
@@ -150,7 +147,7 @@ public class BoardWriteService {
             BoardAggregate boardAggregate = boardEventStoreRepository.load(command.getBoardId())
                     .orElseThrow(NoSuchEntityException::new);
 
-            boardAggregate.addStatus(command.getName(), command.getDescription());
+            boardAggregate.addStatus(command.getName(), command.getDescription(), command.getCategory());
             boardEventStoreRepository.save(boardAggregate);
         });
     }
@@ -188,7 +185,15 @@ public class BoardWriteService {
                             .orElseThrow(NoSuchEntityException::new)
                             .getDescription();
 
-            boardAggregate.updateStatus(command.getStatusId(), name, description);
+            StatusCategory category = command.getCategory() != null ?
+                    command.getCategory() :
+                    boardAggregate.getStatuses().stream()
+                            .filter(s -> s.getId().equals(command.getStatusId()))
+                            .findFirst()
+                            .orElseThrow(NoSuchEntityException::new)
+                            .getCategory();
+
+            boardAggregate.updateStatus(command.getStatusId(), name, description, category);
             boardEventStoreRepository.save(boardAggregate);
         });
     }

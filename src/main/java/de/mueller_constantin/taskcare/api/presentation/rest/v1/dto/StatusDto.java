@@ -22,4 +22,7 @@ public class StatusDto {
 
     @Searchable
     private String description;
+
+    @Searchable
+    private String category;
 }

@@ -70,6 +70,7 @@ public class BoardAggregate extends Aggregate {
                 if(status.getId().equals(((StatusUpdatedEvent) event).getStatusId())) {
                     status.setName(((StatusUpdatedEvent) event).getName());
                     status.setDescription(((StatusUpdatedEvent) event).getDescription());
+                    status.setCategory(((StatusUpdatedEvent) event).getCategory());
                 }
             });
             return;
@@ -188,11 +189,11 @@ public class BoardAggregate extends Aggregate {
         );
     }
 
-    public void addStatus(String name, String description) {
+    public void addStatus(String name, String description, StatusCategory category) {
         this.applyChange(StatusAddedEvent.builder()
                 .aggregateId(this.getId())
                 .version(this.getNextVersion())
-                .status(new Status(UUID.randomUUID(), this.getId(), name, description))
+                .status(new Status(UUID.randomUUID(), this.getId(), name, description, category))
                 .build()
         );
     }
@@ -212,7 +213,7 @@ public class BoardAggregate extends Aggregate {
         );
     }
 
-    public void updateStatus(UUID statusId, String name, String description) {
+    public void updateStatus(UUID statusId, String name, String description, StatusCategory category) {
         Status status = this.statuses.stream().filter(s -> s.getId().equals(statusId)).findFirst().orElse(null);
 
         if(status == null) {
@@ -225,6 +226,7 @@ public class BoardAggregate extends Aggregate {
                 .statusId(statusId)
                 .name(name)
                 .description(description)
+                .category(category)
                 .build()
         );
     }

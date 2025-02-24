@@ -1,5 +1,6 @@
 package de.mueller_constantin.taskcare.api.infrastructure.persistence.crud.jdbc;
 
+import de.mueller_constantin.taskcare.api.core.board.domain.StatusCategory;
 import de.mueller_constantin.taskcare.api.core.common.domain.Page;
 import de.mueller_constantin.taskcare.api.core.common.domain.PageInfo;
 import de.mueller_constantin.taskcare.api.core.board.domain.StatusProjection;
@@ -36,7 +37,8 @@ public class MySqlStatusCrudRepository implements StatusCrudRepository {
                 id,
                 board_id,
                 name,
-                description
+                description,
+                category
             FROM %s
             WHERE id = :id
         """.formatted(STATUS_TABLE_NAME);
@@ -56,7 +58,8 @@ public class MySqlStatusCrudRepository implements StatusCrudRepository {
                 id,
                 board_id,
                 name,
-                description
+                description,
+                category
             FROM %s
         """.formatted(STATUS_TABLE_NAME);
 
@@ -83,7 +86,8 @@ public class MySqlStatusCrudRepository implements StatusCrudRepository {
                 id,
                 board_id,
                 name,
-                description
+                description,
+                category
             FROM %s
             LIMIT :limit
             OFFSET :offset
@@ -125,6 +129,7 @@ public class MySqlStatusCrudRepository implements StatusCrudRepository {
         parameters.addValue("boardId", projection.getBoardId().toString());
         parameters.addValue("name", projection.getName());
         parameters.addValue("description", projection.getDescription());
+        parameters.addValue("category", projection.getCategory().toString());
 
         String query;
 
@@ -134,7 +139,8 @@ public class MySqlStatusCrudRepository implements StatusCrudRepository {
                 SET
                     board_id = :boardId,
                     name = :name,
-                    description = :description
+                    description = :description,
+                    category = :category
                 WHERE id = :id
             """.formatted(STATUS_TABLE_NAME);
         } else {
@@ -143,12 +149,14 @@ public class MySqlStatusCrudRepository implements StatusCrudRepository {
                     id,
                     board_id,
                     name,
-                    description
+                    description,
+                    category
                 ) VALUES (
                     :id,
                     :boardId,
                     :name,
-                    :description
+                    :description,
+                    :category
                 )
             """.formatted(STATUS_TABLE_NAME);
         }
@@ -180,6 +188,7 @@ public class MySqlStatusCrudRepository implements StatusCrudRepository {
                         nestedParameters.addValue("boardId", boardId.toString());
                         nestedParameters.addValue("name", status.getName());
                         nestedParameters.addValue("description", status.getDescription());
+                        nestedParameters.addValue("category", status.getCategory().toString());
                         return nestedParameters;
                     })
                     .toList();
@@ -189,12 +198,14 @@ public class MySqlStatusCrudRepository implements StatusCrudRepository {
                             id,
                             board_id,
                             name,
-                            description
+                            description,
+                            category
                         ) VALUES (
                             :id,
                             :boardId,
                             :name,
-                            :description
+                            :description,
+                            :category
                         )
                     """.formatted(STATUS_TABLE_NAME);
 
@@ -210,6 +221,7 @@ public class MySqlStatusCrudRepository implements StatusCrudRepository {
                         nestedParameters.addValue("boardId", boardId.toString());
                         nestedParameters.addValue("name", status.getName());
                         nestedParameters.addValue("description", status.getDescription());
+                        nestedParameters.addValue("category", status.getCategory().toString());
                         return nestedParameters;
                     })
                     .toList();
@@ -219,7 +231,8 @@ public class MySqlStatusCrudRepository implements StatusCrudRepository {
                 SET
                     board_id = :boardId,
                     name = :name,
-                    description = :description
+                    description = :description,
+                    category = :category
                 WHERE id = :id
             """.formatted(STATUS_TABLE_NAME);
 
@@ -291,7 +304,8 @@ public class MySqlStatusCrudRepository implements StatusCrudRepository {
                 id,
                 board_id,
                 name,
-                description
+                description,
+                category
             FROM %s
             WHERE id = :id AND board_id = :boardId
         """.formatted(STATUS_TABLE_NAME);
@@ -328,7 +342,8 @@ public class MySqlStatusCrudRepository implements StatusCrudRepository {
                 id,
                 board_id,
                 name,
-                description
+                description,
+                category
             FROM %s
             WHERE board_id = :boardId
             LIMIT :limit
@@ -382,7 +397,8 @@ public class MySqlStatusCrudRepository implements StatusCrudRepository {
                 id,
                 board_id,
                 name,
-                description
+                description,
+                category
             FROM %s
             WHERE board_id = :boardId AND %s
             LIMIT :limit
@@ -408,12 +424,14 @@ public class MySqlStatusCrudRepository implements StatusCrudRepository {
         UUID boardId = UUID.fromString(resultSet.getString("board_id"));
         String name = resultSet.getString("name");
         String description = resultSet.getString("description");
+        StatusCategory category = StatusCategory.valueOf(resultSet.getString("category"));
 
         return StatusProjection.builder()
                 .id(id)
                 .boardId(boardId)
                 .name(name)
                 .description(description)
+                .category(category)
                 .build();
     }
 }

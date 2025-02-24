@@ -1,5 +1,6 @@
 package de.mueller_constantin.taskcare.api.infrastructure.persistence.crud.jdbc;
 
+import de.mueller_constantin.taskcare.api.core.board.domain.StatusCategory;
 import de.mueller_constantin.taskcare.api.core.common.domain.Page;
 import de.mueller_constantin.taskcare.api.core.common.domain.PageInfo;
 import de.mueller_constantin.taskcare.api.core.board.domain.StatusProjection;
@@ -69,12 +70,14 @@ class MySqlStatusCrudRepositoryTest {
                                 .boardId(UUID.fromString("527c3e1e-6b2d-4887-a747-9dfb7cb3bb1e"))
                                 .name("Done")
                                 .description("Task has been finished")
+                                .category(StatusCategory.DONE)
                                 .build(),
                         StatusProjection.builder()
                                 .id(UUID.randomUUID())
                                 .boardId(UUID.fromString("527c3e1e-6b2d-4887-a747-9dfb7cb3bb1e"))
                                 .name("Archived")
                                 .description("Task has been archived")
+                                .category(StatusCategory.DONE)
                                 .build()
                 )
         );

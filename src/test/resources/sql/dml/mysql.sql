@@ -48,18 +48,18 @@ VALUES ('e9fe1f44-33f4-400f-9c0e-a73b8f12668d', '6aa18950-81e0-4ac4-ad3a-37437db
 
 -- # Aggregate - 09271e9a-c145-4a6b-92e4-2bc0d5a0710a
 
-INSERT INTO statuses (id, board_id, name, description)
-VALUES ('09271e9a-c145-4a6b-92e4-2bc0d5a0710a', '527c3e1e-6b2d-4887-a747-9dfb7cb3bb1e', 'To Do', 'Task has not been started yet.');
+INSERT INTO statuses (id, board_id, name, description, category)
+VALUES ('09271e9a-c145-4a6b-92e4-2bc0d5a0710a', '527c3e1e-6b2d-4887-a747-9dfb7cb3bb1e', 'To Do', 'Task has not been started yet.', 'TO_DO');
 
 -- # Aggregate - 60d8b592-6916-4ac5-ab1c-1183577d5fc4
 
-INSERT INTO statuses (id, board_id, name, description)
-VALUES ('60d8b592-6916-4ac5-ab1c-1183577d5fc4', '527c3e1e-6b2d-4887-a747-9dfb7cb3bb1e', 'In Progress', 'Task is currently being worked on.');
+INSERT INTO statuses (id, board_id, name, description, category)
+VALUES ('60d8b592-6916-4ac5-ab1c-1183577d5fc4', '527c3e1e-6b2d-4887-a747-9dfb7cb3bb1e', 'In Progress', 'Task is currently being worked on.', 'IN_PROGRESS');
 
 -- # Aggregate - 9e3baa5e-0f1c-4ad1-b3d9-19f48e02c0a2
 
-INSERT INTO statuses (id, board_id, name, description)
-VALUES ('9e3baa5e-0f1c-4ad1-b3d9-19f48e02c0a2', '527c3e1e-6b2d-4887-a747-9dfb7cb3bb1e', 'Done', 'Task has been completed.');
+INSERT INTO statuses (id, board_id, name, description, category)
+VALUES ('9e3baa5e-0f1c-4ad1-b3d9-19f48e02c0a2', '527c3e1e-6b2d-4887-a747-9dfb7cb3bb1e', 'Done', 'Task has been completed.', 'DONE');
 
 -- ### Seed 'components' ###
 

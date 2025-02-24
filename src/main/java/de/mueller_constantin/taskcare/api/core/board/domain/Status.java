@@ -20,15 +20,17 @@ public class Status extends Entity {
     private UUID boardId;
     private String name;
     private String description;
+    private StatusCategory category;
 
     public Status() {
         super(UUID.randomUUID());
     }
 
-    public Status(UUID id, UUID boardId, String name, String description) {
+    public Status(UUID id, UUID boardId, String name, String description, StatusCategory category) {
         super(id);
         this.boardId = boardId;
         this.name = name;
         this.description = description;
+        this.category = category;
     }
 }

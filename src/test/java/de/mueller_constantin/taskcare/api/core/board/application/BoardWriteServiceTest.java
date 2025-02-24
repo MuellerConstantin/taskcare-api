@@ -9,13 +9,15 @@ import de.mueller_constantin.taskcare.api.core.board.application.persistence.Boa
 import de.mueller_constantin.taskcare.api.core.board.domain.*;
 import de.mueller_constantin.taskcare.api.core.user.application.UserReadService;
 import de.mueller_constantin.taskcare.api.core.user.application.query.ExistsUserByIdQuery;
-import jakarta.validation.Validator;
+import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.integration.support.locks.LockRegistry;
+import org.springframework.integration.util.CheckedRunnable;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -39,7 +41,7 @@ class BoardWriteServiceTest {
     private DomainEventBus domainEventBus;
 
     @Mock
-    private Validator validator;
+    LockRegistry lockRegistry;
 
     @InjectMocks
     private BoardWriteService boardWriteService;
@@ -111,9 +113,16 @@ class BoardWriteServiceTest {
     }
 
     @Test
+    @SneakyThrows
     void handleUpdateBoardByIdCommand() {
         when(boardEventStoreRepository.load(id)).thenReturn(Optional.of(boardAggregate));
         doNothing().when(boardEventStoreRepository).save(any(BoardAggregate.class));
+
+        doAnswer(invocation -> {
+            CheckedRunnable<?> runnable = invocation.getArgument(1);
+            runnable.run();
+            return null;
+        }).when(lockRegistry).executeLocked(any(), any(CheckedRunnable.class));
 
         boardWriteService.dispatch(UpdateBoardByIdCommand.builder()
                 .id(id)
@@ -125,8 +134,15 @@ class BoardWriteServiceTest {
     }
 
     @Test
+    @SneakyThrows
     void handleUpdateBoardByIdCommandUnknownId() {
         when(boardEventStoreRepository.load(id)).thenReturn(Optional.empty());
+
+        doAnswer(invocation -> {
+            CheckedRunnable<?> runnable = invocation.getArgument(1);
+            runnable.run();
+            return null;
+        }).when(lockRegistry).executeLocked(any(), any(CheckedRunnable.class));
 
         assertThrows(NoSuchEntityException.class, () -> {
             boardWriteService.dispatch(UpdateBoardByIdCommand.builder()
@@ -137,9 +153,16 @@ class BoardWriteServiceTest {
     }
 
     @Test
+    @SneakyThrows
     void handleDeleteBoardByIdCommand() {
         when(boardEventStoreRepository.load(id)).thenReturn(Optional.of(boardAggregate));
         doNothing().when(boardEventStoreRepository).save(any(BoardAggregate.class));
+
+        doAnswer(invocation -> {
+            CheckedRunnable<?> runnable = invocation.getArgument(1);
+            runnable.run();
+            return null;
+        }).when(lockRegistry).executeLocked(any(), any(CheckedRunnable.class));
 
         boardWriteService.dispatch(DeleteBoardByIdCommand.builder()
                 .id(id)
@@ -150,8 +173,15 @@ class BoardWriteServiceTest {
     }
 
     @Test
+    @SneakyThrows
     void handleDeleteBoardByIdCommandUnknownId() {
         when(boardEventStoreRepository.load(id)).thenReturn(Optional.empty());
+
+        doAnswer(invocation -> {
+            CheckedRunnable<?> runnable = invocation.getArgument(1);
+            runnable.run();
+            return null;
+        }).when(lockRegistry).executeLocked(any(), any(CheckedRunnable.class));
 
         assertThrows(NoSuchEntityException.class, () -> {
             boardWriteService.dispatch(DeleteBoardByIdCommand.builder()
@@ -161,10 +191,17 @@ class BoardWriteServiceTest {
     }
 
     @Test
+    @SneakyThrows
     void handleAddMemberByIdCommand() {
         when(userReadService.query(any(ExistsUserByIdQuery.class))).thenReturn(true);
         when(boardEventStoreRepository.load(id)).thenReturn(Optional.of(boardAggregate));
         doNothing().when(boardEventStoreRepository).save(any(BoardAggregate.class));
+
+        doAnswer(invocation -> {
+            CheckedRunnable<?> runnable = invocation.getArgument(1);
+            runnable.run();
+            return null;
+        }).when(lockRegistry).executeLocked(any(), any(CheckedRunnable.class));
 
         boardWriteService.dispatch(AddMemberByIdCommand.builder()
                 .boardId(id)
@@ -179,8 +216,15 @@ class BoardWriteServiceTest {
     }
 
     @Test
+    @SneakyThrows
     void handleAddMemberByIdCommandWithUnknownUser() {
         when(userReadService.query(any(ExistsUserByIdQuery.class))).thenReturn(false);
+
+        doAnswer(invocation -> {
+            CheckedRunnable<?> runnable = invocation.getArgument(1);
+            runnable.run();
+            return null;
+        }).when(lockRegistry).executeLocked(any(), any(CheckedRunnable.class));
 
         assertThrows(NoSuchEntityException.class, () -> {
             boardWriteService.dispatch(AddMemberByIdCommand.builder()
@@ -192,9 +236,16 @@ class BoardWriteServiceTest {
     }
 
     @Test
+    @SneakyThrows
     void handleAddMemberByIdCommandWithAlreadyExistingMember() {
         when(userReadService.query(any(ExistsUserByIdQuery.class))).thenReturn(true);
         when(boardEventStoreRepository.load(id)).thenReturn(Optional.of(boardAggregate));
+
+        doAnswer(invocation -> {
+            CheckedRunnable<?> runnable = invocation.getArgument(1);
+            runnable.run();
+            return null;
+        }).when(lockRegistry).executeLocked(any(), any(CheckedRunnable.class));
 
         assertThrows(BoardMemberAlreadyExistsException.class, () -> {
             boardWriteService.dispatch(AddMemberByIdCommand.builder()
@@ -206,9 +257,16 @@ class BoardWriteServiceTest {
     }
 
     @Test
+    @SneakyThrows
     void handleRemoveMemberByIdCommand() {
         when(boardEventStoreRepository.load(id)).thenReturn(Optional.of(boardAggregate));
         doNothing().when(boardEventStoreRepository).save(any(BoardAggregate.class));
+
+        doAnswer(invocation -> {
+            CheckedRunnable<?> runnable = invocation.getArgument(1);
+            runnable.run();
+            return null;
+        }).when(lockRegistry).executeLocked(any(), any(CheckedRunnable.class));
 
         boardWriteService.dispatch(RemoveMemberByIdCommand.builder()
                 .boardId(id)
@@ -221,8 +279,15 @@ class BoardWriteServiceTest {
     }
 
     @Test
+    @SneakyThrows
     void handleRemoveMemberByIdCommandWithMissingMember() {
         when(boardEventStoreRepository.load(id)).thenReturn(Optional.of(boardAggregate));
+
+        doAnswer(invocation -> {
+            CheckedRunnable<?> runnable = invocation.getArgument(1);
+            runnable.run();
+            return null;
+        }).when(lockRegistry).executeLocked(any(), any(CheckedRunnable.class));
 
         assertThrows(NoSuchEntityException.class, () -> {
             boardWriteService.dispatch(RemoveMemberByIdCommand.builder()
@@ -233,8 +298,15 @@ class BoardWriteServiceTest {
     }
 
     @Test
+    @SneakyThrows
     void handleRemoveMemberByIdCommandRemoveLastAdmin() {
         when(boardEventStoreRepository.load(id)).thenReturn(Optional.of(boardAggregate));
+
+        doAnswer(invocation -> {
+            CheckedRunnable<?> runnable = invocation.getArgument(1);
+            runnable.run();
+            return null;
+        }).when(lockRegistry).executeLocked(any(), any(CheckedRunnable.class));
 
         assertThrows(BoardMustBeAdministrableException.class, () -> {
             boardWriteService.dispatch(RemoveMemberByIdCommand.builder()
@@ -245,9 +317,16 @@ class BoardWriteServiceTest {
     }
 
     @Test
+    @SneakyThrows
     void handleUpdateMemberByIdCommand() {
         when(boardEventStoreRepository.load(id)).thenReturn(Optional.of(boardAggregate));
         doNothing().when(boardEventStoreRepository).save(any(BoardAggregate.class));
+
+        doAnswer(invocation -> {
+            CheckedRunnable<?> runnable = invocation.getArgument(1);
+            runnable.run();
+            return null;
+        }).when(lockRegistry).executeLocked(any(), any(CheckedRunnable.class));
 
         boardWriteService.dispatch(UpdateMemberByIdCommand.builder()
                 .boardId(id)
@@ -259,8 +338,15 @@ class BoardWriteServiceTest {
     }
 
     @Test
+    @SneakyThrows
     void handleUpdateMemberByIdCommandWithMissingMember() {
         when(boardEventStoreRepository.load(id)).thenReturn(Optional.of(boardAggregate));
+
+        doAnswer(invocation -> {
+            CheckedRunnable<?> runnable = invocation.getArgument(1);
+            runnable.run();
+            return null;
+        }).when(lockRegistry).executeLocked(any(), any(CheckedRunnable.class));
 
         assertThrows(NoSuchEntityException.class, () -> {
             boardWriteService.dispatch(UpdateMemberByIdCommand.builder()
@@ -272,8 +358,15 @@ class BoardWriteServiceTest {
     }
 
     @Test
+    @SneakyThrows
     void handleUpdateMemberByIdCommandChangeLastAdminRole() {
         when(boardEventStoreRepository.load(id)).thenReturn(Optional.of(boardAggregate));
+
+        doAnswer(invocation -> {
+            CheckedRunnable<?> runnable = invocation.getArgument(1);
+            runnable.run();
+            return null;
+        }).when(lockRegistry).executeLocked(any(), any(CheckedRunnable.class));
 
         assertThrows(BoardMustBeAdministrableException.class, () -> {
             boardWriteService.dispatch(UpdateMemberByIdCommand.builder()

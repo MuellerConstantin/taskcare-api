@@ -1804,9 +1804,17 @@ components:
         description:
           type: string
           description: Description of status.
+        category:
+          type: string
+          description: Category of status.
+          enum:
+            - TO_DO
+            - IN_PROGRESS
+            - DONE
       required:
         - id
         - name
+        - category
     StatusPageDto:
       allOf:
         - $ref: "#/components/schemas/PageDto"
@@ -1827,8 +1835,16 @@ components:
         description:
           type: string
           description: Description of status.
+        category:
+          type: string
+          description: Category of status.
+          enum:
+            - TO_DO
+            - IN_PROGRESS
+            - DONE
       required:
         - name
+        - category
     UpdateStatusDto:
       type: object
       properties:
@@ -1838,6 +1854,13 @@ components:
         description:
           type: string
           description: Description of status.
+        category:
+          type: string
+          description: Category of status.
+          enum:
+            - TO_DO
+            - IN_PROGRESS
+            - DONE
     ComponentDto:
       type: object
       properties:
