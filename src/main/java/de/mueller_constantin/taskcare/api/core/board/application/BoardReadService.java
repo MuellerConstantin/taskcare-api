@@ -74,6 +74,18 @@ public class BoardReadService implements ApplicationService {
         return memberReadModelRepository.existsByUserIdAndBoardId(query.getUserId(), query.getBoardId());
     }
 
+    public boolean query(ExistsMemberByMemberIdAndBoardIdQuery query) {
+        return memberReadModelRepository.existsByIdAndBoardId(query.getMemberId(), query.getBoardId());
+    }
+
+    public boolean query(ExistsStatusByStatusIdAndBoardIdQuery query) {
+        return statusReadModelRepository.existsByIdAndBoardId(query.getStatusId(), query.getBoardId());
+    }
+
+    public boolean query(ExistsComponentByComponentIdAndBoardIdQuery query) {
+        return componentReadModelRepository.existsByIdAndBoardId(query.getComponentId(), query.getBoardId());
+    }
+
     public Page<StatusProjection> query(FindAllStatusesByBoardIdQuery query) {
         return statusReadModelRepository.findAllByBoardId(query.getBoardId(), PageInfo.builder()
                 .page(query.getPage())

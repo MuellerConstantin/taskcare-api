@@ -193,6 +193,24 @@ public class MySqlMemberCrudRepository implements MemberCrudRepository {
     }
 
     @Override
+    public boolean existsByIdAndBoardId(UUID id, UUID boardId) {
+        MapSqlParameterSource parameters = new MapSqlParameterSource();
+        parameters.addValue("id", id.toString());
+        parameters.addValue("boardId", boardId.toString());
+
+        String query = """
+            SELECT
+                COUNT(*)
+            FROM %s
+            WHERE id = :id AND board_id = :boardId
+        """.formatted(MEMBER_TABLE_NAME);
+
+        Integer count = jdbcTemplate.queryForObject(query, parameters, Integer.class);
+
+        return count != null && count > 0;
+    }
+
+    @Override
     public Optional<MemberProjection> findById(UUID id) {
         MapSqlParameterSource parameters = new MapSqlParameterSource();
         parameters.addValue("id", id.toString());

@@ -14,4 +14,6 @@ public interface StatusReadModelRepository extends ReadModelRepository {
     Page<StatusProjection> findAllByBoardId(UUID boarId, PageInfo pageInfo);
 
     Page<StatusProjection> findAllByBoardId(UUID boarId, PageInfo pageInfo, String predicate);
+
+    boolean existsByIdAndBoardId(UUID id, UUID boardId);
 }
