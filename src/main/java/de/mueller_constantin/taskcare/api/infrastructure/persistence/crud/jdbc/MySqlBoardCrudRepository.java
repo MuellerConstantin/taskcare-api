@@ -15,7 +15,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.*;
 
 @Component
@@ -26,7 +25,7 @@ public class MySqlBoardCrudRepository implements BoardCrudRepository {
     private final String MEMBER_TABLE_NAME = "members";
     private final String STATUS_TABLE_NAME = "statuses";
     private final String COMPONENT_TABLE_NAME = "components";
-    private final String COLUMN_TABLE_NAME = "columns";
+    private final String BOARD_COLUMNS_TABLE_NAME = "board_columns";
 
     private final NamedParameterJdbcTemplate jdbcTemplate;
 
@@ -41,7 +40,7 @@ public class MySqlBoardCrudRepository implements BoardCrudRepository {
             FROM %s
             WHERE board_id = :id
             ORDER BY position
-        """.formatted(COLUMN_TABLE_NAME);
+        """.formatted(BOARD_COLUMNS_TABLE_NAME);
 
         List<ColumnProjection> columns = jdbcTemplate.query(query, parameters, this::toColumnProjection);
 
@@ -90,7 +89,7 @@ public class MySqlBoardCrudRepository implements BoardCrudRepository {
             FROM %s
             WHERE board_id IN (:boardIds)
             ORDER BY status_id, position
-        """.formatted(COLUMN_TABLE_NAME);
+        """.formatted(BOARD_COLUMNS_TABLE_NAME);
 
         Map<UUID, List<ColumnProjection>> columns = jdbcTemplate.query(query, parameters, rs -> {
             Map<UUID, List<ColumnProjection>> column_mapping = new HashMap<>();
@@ -161,7 +160,7 @@ public class MySqlBoardCrudRepository implements BoardCrudRepository {
             FROM %s
             WHERE board_id IN (:boardIds)
             ORDER BY status_id, position
-        """.formatted(COLUMN_TABLE_NAME);
+        """.formatted(BOARD_COLUMNS_TABLE_NAME);
 
         Map<UUID, List<ColumnProjection>> columns = jdbcTemplate.query(query, parameters, rs -> {
             Map<UUID, List<ColumnProjection>> column_mapping = new HashMap<>();
@@ -255,7 +254,7 @@ public class MySqlBoardCrudRepository implements BoardCrudRepository {
             FROM %s
             WHERE board_id IN (:boardIds)
             ORDER BY status_id, position
-        """.formatted(COLUMN_TABLE_NAME);
+        """.formatted(BOARD_COLUMNS_TABLE_NAME);
 
         Map<UUID, List<ColumnProjection>> columns = jdbcTemplate.query(query, parameters, rs -> {
             Map<UUID, List<ColumnProjection>> column_mapping = new HashMap<>();
@@ -368,7 +367,7 @@ public class MySqlBoardCrudRepository implements BoardCrudRepository {
             FROM %s
             WHERE board_id IN (:boardIds)
             ORDER BY status_id, position
-        """.formatted(COLUMN_TABLE_NAME);
+        """.formatted(BOARD_COLUMNS_TABLE_NAME);
 
         Map<UUID, List<ColumnProjection>> columns = jdbcTemplate.query(query, parameters, rs -> {
             Map<UUID, List<ColumnProjection>> column_mapping = new HashMap<>();
@@ -498,7 +497,7 @@ public class MySqlBoardCrudRepository implements BoardCrudRepository {
             FROM %s
             WHERE board_id IN (:boardIds)
             ORDER BY status_id, position
-        """.formatted(COLUMN_TABLE_NAME);
+        """.formatted(BOARD_COLUMNS_TABLE_NAME);
 
         Map<UUID, List<ColumnProjection>> columns = jdbcTemplate.query(query, parameters, rs -> {
             Map<UUID, List<ColumnProjection>> column_mapping = new HashMap<>();
@@ -578,7 +577,7 @@ public class MySqlBoardCrudRepository implements BoardCrudRepository {
             FROM %s
             WHERE board_id IN (:boardIds)
             ORDER BY status_id, position
-        """.formatted(COLUMN_TABLE_NAME);
+        """.formatted(BOARD_COLUMNS_TABLE_NAME);
 
         Map<UUID, List<ColumnProjection>> columns = jdbcTemplate.query(query, parameters, rs -> {
             Map<UUID, List<ColumnProjection>> column_mapping = new HashMap<>();
@@ -619,7 +618,7 @@ public class MySqlBoardCrudRepository implements BoardCrudRepository {
             DELETE
             FROM %s
             WHERE board_id = :boardId
-        """.formatted(COLUMN_TABLE_NAME);
+        """.formatted(BOARD_COLUMNS_TABLE_NAME);
 
         jdbcTemplate.update(query, parameters);
 
@@ -668,7 +667,7 @@ public class MySqlBoardCrudRepository implements BoardCrudRepository {
             DELETE
             FROM %s
             WHERE board_id = :boardId
-        """.formatted(COLUMN_TABLE_NAME);
+        """.formatted(BOARD_COLUMNS_TABLE_NAME);
 
         jdbcTemplate.update(query, parameters);
 
@@ -696,7 +695,7 @@ public class MySqlBoardCrudRepository implements BoardCrudRepository {
                     :board_id,
                     :position
                 )
-            """.formatted(COLUMN_TABLE_NAME);
+            """.formatted(BOARD_COLUMNS_TABLE_NAME);
 
             jdbcTemplate.batchUpdate(query, parametersList.toArray(new MapSqlParameterSource[0]));
         }

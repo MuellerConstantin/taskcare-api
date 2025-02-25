@@ -43,7 +43,7 @@ CREATE TABLE IF NOT EXISTS components (
     FOREIGN KEY (board_id) REFERENCES boards(id)
 );
 
-CREATE TABLE IF NOT EXISTS columns (
+CREATE TABLE IF NOT EXISTS board_columns (
     board_id VARCHAR(255) NOT NULL,
     status_id VARCHAR(255) NOT NULL,
     position INT NOT NULL,
