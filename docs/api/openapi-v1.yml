@@ -164,6 +164,8 @@ tags:
     description: Allows to manage task statuses within a board.
   - name: Component
     description: Allows to manage components within a board.
+  - name: Task
+    description: Allows to manage tasks within a board.
 paths:
   /auth/token:
     post:
@@ -1486,6 +1488,412 @@ paths:
           $ref: "#/components/responses/401"
         403:
           $ref: "#/components/responses/403"
+  /boards/{boardId}/tasks:
+    get:
+      tags:
+        - Task
+      summary: Returns a list of tasks.
+      description: >
+        Returns a list of tasks.
+      parameters:
+        - name: boardId
+          in: path
+          description: Unique identifier of the board.
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 3377cf8f-da29-4aa7-9036-91951b8fce87
+        - name: page
+          in: query
+          description: Zero based index of page to load.
+          required: false
+          schema:
+            type: integer
+            example: 0
+        - name: perPage
+          in: query
+          description: Number of elements per page.
+          required: false
+          schema:
+            type: integer
+            example: 10
+      responses:
+        200:
+          description: Successfully fetched the tasks.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TaskPageDto"
+              example:
+                page: 0
+                perPage: 10
+                totalElements: 1
+                totalPages: 1
+                content:
+                  - id: 037f610b-f09c-4648-8c08-39a3ade3f447
+                    name: Task A
+                    description: >
+                      A sample task.
+                    statusId: 037f610b-f09c-4648-8c08-39a3ade3f447
+                    componentIds:
+                      - 037f610b-f09c-4648-8c08-39a3ade3f447
+                      - f098bf60-57d6-4ff9-9b17-0be1b5e37a83
+                    assigneeId: 037f610b-f09c-4648-8c08-39a3ade3f447
+                    priority: MEDIUM
+                    estimatedEffort: 3600
+        401:
+          $ref: "#/components/responses/401"
+        403:
+          $ref: "#/components/responses/403"
+        404:
+          $ref: "#/components/responses/404"
+    post:
+      tags:
+        - Task
+      summary: Creates a new task.
+      description: >
+        Creates a new task within a board.
+      parameters:
+        - name: boardId
+          in: path
+          description: Unique identifier of the board.
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 3377cf8f-da29-4aa7-9036-91951b8fce87
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateTaskDto"
+            example:
+              name: Task A
+              description: >
+                A sample task.
+              statusId: 037f610b-f09c-4648-8c08-39a3ade3f447
+              componentIds:
+                - 037f610b-f09c-4648-8c08-39a3ade3f447
+                - f098bf60-57d6-4ff9-9b17-0be1b5e37a83
+              assigneeId: 037f610b-f09c-4648-8c08-39a3ade3f447
+              priority: MEDIUM
+              estimatedEffort: 3600
+      responses:
+        204:
+          description: Successfully created the task.
+        401:
+          $ref: "#/components/responses/401"
+        403:
+          $ref: "#/components/responses/403"
+        404:
+          $ref: "#/components/responses/404"
+        422:
+          $ref: "#/components/responses/422"
+  /boards/{boardId}/statuses/{statusId}/tasks:
+    get:
+      tags:
+        - Task
+      summary: Returns a list of tasks for a status.
+      description: >
+        Returns a list with all tasks associated to a status within a board.
+      parameters:
+        - name: boardId
+          in: path
+          description: Unique identifier of the board.
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 3377cf8f-da29-4aa7-9036-91951b8fce87
+        - name: statusId
+          in: path
+          description: Unique identifier of the status.
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 3377cf8f-da29-4aa7-9036-91951b8fce87
+        - name: page
+          in: query
+          description: Zero based index of page to load.
+          required: false
+          schema:
+            type: integer
+            example: 0
+        - name: perPage
+          in: query
+          description: Number of elements per page.
+          required: false
+          schema:
+            type: integer
+            example: 10
+      responses:
+        200:
+          description: Successfully fetched the tasks.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TaskPageDto"
+              example:
+                page: 0
+                perPage: 10
+                totalElements: 1
+                totalPages: 1
+                content:
+                  - id: 037f610b-f09c-4648-8c08-39a3ade3f447
+                    name: Task A
+                    description: >
+                      A sample task.
+                    statusId: 037f610b-f09c-4648-8c08-39a3ade3f447
+                    componentIds:
+                      - 037f610b-f09c-4648-8c08-39a3ade3f447
+                      - f098bf60-57d6-4ff9-9b17-0be1b5e37a83
+                    assigneeId: 037f610b-f09c-4648-8c08-39a3ade3f447
+                    priority: MEDIUM
+                    estimatedEffort: 3600
+        401:
+          $ref: "#/components/responses/401"
+        403:
+          $ref: "#/components/responses/403"
+        404:
+          $ref: "#/components/responses/404"
+  /boards/{boardId}/components/{componentId}/tasks:
+    get:
+      tags:
+        - Task
+      summary: Returns a list of tasks for a component.
+      description: >
+        Returns a list with all tasks associated to a component within a board.
+      parameters:
+        - name: boardId
+          in: path
+          description: Unique identifier of the board.
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 3377cf8f-da29-4aa7-9036-91951b8fce87
+        - name: componentId
+          in: path
+          description: Unique identifier of the component.
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 3377cf8f-da29-4aa7-9036-91951b8fce87
+        - name: page
+          in: query
+          description: Zero based index of page to load.
+          required: false
+          schema:
+            type: integer
+            example: 0
+        - name: perPage
+          in: query
+          description: Number of elements per page.
+          required: false
+          schema:
+            type: integer
+            example: 10
+      responses:
+        200:
+          description: Successfully fetched the tasks.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TaskPageDto"
+              example:
+                page: 0
+                perPage: 10
+                totalElements: 1
+                totalPages: 1
+                content:
+                  - id: 037f610b-f09c-4648-8c08-39a3ade3f447
+                    name: Task A
+                    description: >
+                      A sample task.
+                    statusId: 037f610b-f09c-4648-8c08-39a3ade3f447
+                    componentIds:
+                      - 037f610b-f09c-4648-8c08-39a3ade3f447
+                      - f098bf60-57d6-4ff9-9b17-0be1b5e37a83
+                    assigneeId: 037f610b-f09c-4648-8c08-39a3ade3f447
+                    priority: MEDIUM
+                    estimatedEffort: 3600
+        401:
+          $ref: "#/components/responses/401"
+        403:
+          $ref: "#/components/responses/403"
+        404:
+          $ref: "#/components/responses/404"
+  /boards/{boardId}/members/{memberId}/tasks:
+    get:
+      tags:
+        - Task
+      summary: Returns a list of tasks for a member.
+      description: >
+        Returns a list with all tasks assigned to a member within a board.
+      parameters:
+        - name: boardId
+          in: path
+          description: Unique identifier of the board.
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 3377cf8f-da29-4aa7-9036-91951b8fce87
+        - name: memberId
+          in: path
+          description: Unique identifier of the member.
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 3377cf8f-da29-4aa7-9036-91951b8fce87
+        - name: page
+          in: query
+          description: Zero based index of page to load.
+          required: false
+          schema:
+            type: integer
+            example: 0
+        - name: perPage
+          in: query
+          description: Number of elements per page.
+          required: false
+          schema:
+            type: integer
+            example: 10
+      responses:
+        200:
+          description: Successfully fetched the tasks.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TaskPageDto"
+              example:
+                page: 0
+                perPage: 10
+                totalElements: 1
+                totalPages: 1
+                content:
+                  - id: 037f610b-f09c-4648-8c08-39a3ade3f447
+                    name: Task A
+                    description: >
+                      A sample task.
+                    statusId: 037f610b-f09c-4648-8c08-39a3ade3f447
+                    componentIds:
+                      - 037f610b-f09c-4648-8c08-39a3ade3f447
+                      - f098bf60-57d6-4ff9-9b17-0be1b5e37a83
+                    assigneeId: 037f610b-f09c-4648-8c08-39a3ade3f447
+                    priority: MEDIUM
+                    estimatedEffort: 3600
+        401:
+          $ref: "#/components/responses/401"
+        403:
+          $ref: "#/components/responses/403"
+        404:
+          $ref: "#/components/responses/404"
+  /tasks/{taskId}:
+    get:
+      tags:
+        - Task
+      summary: Returns a task.
+      description: >
+        Returns a task.
+      parameters:
+        - name: taskId
+          in: path
+          description: Unique identifier of the task.
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 3377cf8f-da29-4aa7-9036-91951b8fce87
+      responses:
+        200:
+          description: Successfully fetched the task.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TaskDto"
+              example:
+                id: 037f610b-f09c-4648-8c08-39a3ade3f447
+                name: Task A
+                description: >
+                  A sample task.
+                statusId: 037f610b-f09c-4648-8c08-39a3ade3f447
+                componentIds:
+                  - 037f610b-f09c-4648-8c08-39a3ade3f447
+                  - f098bf60-57d6-4ff9-9b17-0be1b5e37a83
+                assigneeId: 037f610b-f09c-4648-8c08-39a3ade3f447
+                priority: MEDIUM
+                estimatedEffort: 3600
+        401:
+          $ref: "#/components/responses/401"
+        403:
+          $ref: "#/components/responses/403"
+        404:
+          $ref: "#/components/responses/404"
+    patch:
+      tags:
+        - Task
+      summary: Updates the details of a single task.
+      description: >
+        Updates a task.
+      parameters:
+        - name: taskId
+          in: path
+          description: Unique identifier of the task.
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 3377cf8f-da29-4aa7-9036-91951b8fce87
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateTaskDto"
+            example:
+              name: Task A
+              description: >
+                A sample task.
+      responses:
+        204:
+          description: Successfully updated the task.
+        401:
+          $ref: "#/components/responses/401"
+        403:
+          $ref: "#/components/responses/403"
+        404:
+          $ref: "#/components/responses/404"
+    delete:
+      tags:
+        - Task
+      summary: Deletes a single task.
+      description: >
+        Allows deleting a task. Only available for admin users.
+      parameters:
+        - name: taskId
+          in: path
+          description: Unique identifier of the task.
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 3377cf8f-da29-4aa7-9036-91951b8fce87
+      responses:
+        204:
+          description: Successfully deleted the task.
+        401:
+          $ref: "#/components/responses/401"
+        403:
+          $ref: "#/components/responses/403"
+        404:
+          $ref: "#/components/responses/404"
 components:
   schemas:
     ValidationErrorDetailsDto:
@@ -1908,6 +2316,156 @@ components:
         description:
           type: string
           description: Description of component.
+    TaskDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier of task.
+        boardId:
+          type: string
+          format: uuid
+          description: Unique identifier of board.
+        name:
+          type: string
+          description: Name of task.
+        description:
+          type: string
+          description: Description of task.
+        statusId:
+          type: string
+          format: uuid
+          description: Unique identifier of status.
+        statusUpdatedAt:
+          type: string
+          format: date-time
+          description: Time the status was last updated.
+        assigneeId:
+          type: string
+          format: uuid
+          description: Unique identifier of assignee (member).
+        createdAt:
+          type: string
+          format: date-time
+          description: Time the task was created.
+        componentIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+          description: Unique identifiers of components.
+        estimatedEffort:
+          type: integer
+          description: Estimated effort of task in seconds.
+        dueDate:
+          type: string
+          format: date-time
+          description: Due date of task.
+        priority:
+          type: string
+          description: Priority of task.
+          enum:
+            - VERY_LOW
+            - LOW
+            - MEDIUM
+            - HIGH
+            - VERY_HIGH
+      required:
+        - id
+        - boardId
+        - name
+    TaskPageDto:
+      allOf:
+        - $ref: "#/components/schemas/PageDto"
+        - type: object
+          properties:
+            content:
+              type: array
+              items:
+                $ref: "#/components/schemas/TaskDto"
+          required:
+            - content
+    CreateTaskDto:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of task.
+        description:
+          type: string
+          description: Description of task.
+        statusId:
+          type: string
+          format: uuid
+          description: Unique identifier of status.
+        assigneeId:
+          type: string
+          format: uuid
+          description: Unique identifier of assignee (member).
+        componentIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+          description: Unique identifiers of components.
+        estimatedEffort:
+          type: integer
+          description: Estimated effort of task in seconds.
+        dueDate:
+          type: string
+          format: date-time
+          description: Due date of task.
+        priority:
+          type: string
+          description: Priority of task.
+          enum:
+            - VERY_LOW
+            - LOW
+            - MEDIUM
+            - HIGH
+            - VERY_HIGH
+      required:
+        - name
+    UpdateTaskDto:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of task.
+        description:
+          type: string
+          description: Description of task.
+        statusId:
+          type: string
+          format: uuid
+          description: Unique identifier of status.
+        assigneeId:
+          type: string
+          format: uuid
+          description: Unique identifier of assignee (member).
+        componentIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+          description: Unique identifiers of components.
+        estimatedEffort:
+          type: integer
+          description: Estimated effort of task in seconds.
+        dueDate:
+          type: string
+          format: date-time
+          description: Due date of task.
+        priority:
+          type: string
+          description: Priority of task.
+          enum:
+            - VERY_LOW
+            - LOW
+            - MEDIUM
+            - HIGH
+            - VERY_HIGH
   responses:
     500:
       description: An internal error has occurred on the server side.

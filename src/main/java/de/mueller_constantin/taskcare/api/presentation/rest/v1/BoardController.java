@@ -135,7 +135,7 @@ public class BoardController {
     @DeleteMapping("/boards/{id}/logo-image")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("hasRole('ADMINISTRATOR') or @domainSecurityService.isBoardMemberWithRole(#id, principal.getUserProjection().getId(), 'ADMINISTRATOR')")
-    void removeProfileImage(@PathVariable UUID id) {
+    void removeLogoImage(@PathVariable UUID id) {
         FindBoardByIdQuery query = new FindBoardByIdQuery(id);
         BoardProjection result = boardReadService.query(query);
 

@@ -48,5 +48,27 @@ CREATE TABLE IF NOT EXISTS board_columns (
     status_id VARCHAR(255) NOT NULL,
     position INT NOT NULL,
     FOREIGN KEY (board_id) REFERENCES boards(id),
-    FOREIGN KEY (status_id) REFERENCES statuses(id)
+    FOREIGN KEY (status_id) REFERENCES statuses(id),
+    PRIMARY KEY (board_id, status_id)
+);
+
+CREATE TABLE IF NOT EXISTS tasks (
+    id VARCHAR(255) PRIMARY KEY,
+    board_id VARCHAR(255) NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    description VARCHAR(1024),
+    status_id VARCHAR(255),
+    status_updated_at DATETIME,
+    assignee_id VARCHAR(255),
+    due_date DATETIME,
+    created_at DATETIME NOT NULL,
+    priority VARCHAR(255),
+    estimated_effort BIGINT
+);
+
+CREATE TABLE IF NOT EXISTS task_components (
+    task_id VARCHAR(255) NOT NULL,
+    component_id VARCHAR(255) NOT NULL,
+    FOREIGN KEY (task_id) REFERENCES tasks(id),
+    PRIMARY KEY (task_id, component_id)
 );

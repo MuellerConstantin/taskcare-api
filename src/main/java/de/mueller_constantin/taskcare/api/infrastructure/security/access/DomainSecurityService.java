@@ -5,6 +5,9 @@ import de.mueller_constantin.taskcare.api.core.board.application.BoardReadServic
 import de.mueller_constantin.taskcare.api.core.board.application.query.ExistsMemberByUserIdAndBoardIdQuery;
 import de.mueller_constantin.taskcare.api.core.board.application.query.FindMemberByUserIdAndBoardIdQuery;
 import de.mueller_constantin.taskcare.api.core.board.domain.MemberProjection;
+import de.mueller_constantin.taskcare.api.core.task.application.TaskReadService;
+import de.mueller_constantin.taskcare.api.core.task.application.query.FindTaskByIdQuery;
+import de.mueller_constantin.taskcare.api.core.task.domain.TaskProjection;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,10 +16,12 @@ import java.util.UUID;
 @Service
 public class DomainSecurityService {
     private final BoardReadService boardReadService;
+    private final TaskReadService taskReadService;
 
     @Autowired
-    public DomainSecurityService(BoardReadService boardReadService) {
+    public DomainSecurityService(BoardReadService boardReadService, TaskReadService taskReadService) {
         this.boardReadService = boardReadService;
+        this.taskReadService = taskReadService;
     }
 
     public boolean isBoardMember(UUID boardId, UUID userId) {
@@ -56,5 +61,21 @@ public class DomainSecurityService {
         } catch(NoSuchEntityException e) {
             return false;
         }
+    }
+
+    public boolean isMemberOfTasksBoard(UUID taskId, UUID userId) {
+        TaskProjection task = taskReadService.query(FindTaskByIdQuery.builder()
+                .id(taskId)
+                .build());
+
+        return isBoardMember(task.getBoardId(), userId);
+    }
+
+    public boolean isMemberOfTasksBoardWithRole(UUID taskId, UUID userId, String role) {
+        TaskProjection task = taskReadService.query(FindTaskByIdQuery.builder()
+                .id(taskId)
+                .build());
+
+        return isBoardMemberWithRole(task.getBoardId(), userId, role);
     }
 }
