@@ -661,9 +661,40 @@ public class MySqlBoardCrudRepository implements BoardCrudRepository {
         boolean exists = existsById(projection.getId());
 
         MapSqlParameterSource parameters = new MapSqlParameterSource();
+        parameters.addValue("id", projection.getId().toString());
+        parameters.addValue("name", projection.getName());
+        parameters.addValue("description", projection.getDescription());
+
+        String query;
+
+        if(exists) {
+            query = """
+                UPDATE %s
+                SET
+                    name = :name,
+                    description = :description
+                WHERE id = :id
+            """.formatted(BOARD_TABLE_NAME);
+        } else {
+            query = """
+                INSERT INTO %s (
+                    id,
+                    name,
+                    description
+                ) VALUES (
+                    :id,
+                    :name,
+                    :description
+                )
+            """.formatted(BOARD_TABLE_NAME);
+        }
+
+        jdbcTemplate.update(query, parameters);
+
+        parameters = new MapSqlParameterSource();
         parameters.addValue("boardId", projection.getId().toString());
 
-        String query = """
+        query = """
             DELETE
             FROM %s
             WHERE board_id = :boardId
@@ -699,35 +730,6 @@ public class MySqlBoardCrudRepository implements BoardCrudRepository {
 
             jdbcTemplate.batchUpdate(query, parametersList.toArray(new MapSqlParameterSource[0]));
         }
-
-        parameters = new MapSqlParameterSource();
-        parameters.addValue("id", projection.getId().toString());
-        parameters.addValue("name", projection.getName());
-        parameters.addValue("description", projection.getDescription());
-
-        if(exists) {
-            query = """
-                UPDATE %s
-                SET
-                    name = :name,
-                    description = :description
-                WHERE id = :id
-            """.formatted(BOARD_TABLE_NAME);
-        } else {
-            query = """
-                INSERT INTO %s (
-                    id,
-                    name,
-                    description
-                ) VALUES (
-                    :id,
-                    :name,
-                    :description
-                )
-            """.formatted(BOARD_TABLE_NAME);
-        }
-
-        jdbcTemplate.update(query, parameters);
     }
 
     @Override

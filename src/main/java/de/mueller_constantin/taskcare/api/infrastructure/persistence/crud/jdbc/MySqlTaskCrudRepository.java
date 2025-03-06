@@ -240,37 +240,6 @@ public class MySqlTaskCrudRepository implements TaskCrudRepository {
         boolean exists = existsById(projection.getId());
 
         MapSqlParameterSource parameters = new MapSqlParameterSource();
-        parameters.addValue("taskId", projection.getId().toString());
-
-        String query = """
-            DELETE
-            FROM %s
-            WHERE task_id = :taskId
-        """.formatted(TASK_COMPONENTS_TABLE_NAME);
-
-        jdbcTemplate.update(query, parameters);
-
-        if(projection.getComponentIds() != null && !projection.getComponentIds().isEmpty()) {
-            List<MapSqlParameterSource> parametersList = new ArrayList<>();
-            List<UUID> componentIds = new ArrayList<>(projection.getComponentIds());
-
-            for (UUID componentId : componentIds) {
-                parameters = new MapSqlParameterSource();
-                parameters.addValue("taskId", projection.getId().toString());
-                parameters.addValue("componentId", componentId.toString());
-
-                parametersList.add(parameters);
-            }
-
-            query = """
-                INSERT INTO %s (task_id, component_id)
-                VALUES (:taskId, :componentId)
-            """.formatted(TASK_COMPONENTS_TABLE_NAME);
-
-            jdbcTemplate.batchUpdate(query, parametersList.toArray(new MapSqlParameterSource[0]));
-        }
-
-        parameters = new MapSqlParameterSource();
         parameters.addValue("id", projection.getId().toString());
         parameters.addValue("boardId", projection.getBoardId().toString());
         parameters.addValue("name", projection.getName());
@@ -282,6 +251,8 @@ public class MySqlTaskCrudRepository implements TaskCrudRepository {
         parameters.addValue("createdAt", projection.getCreatedAt());
         parameters.addValue("estimatedEffort", projection.getEstimatedEffort());
         parameters.addValue("priority", projection.getPriority() != null ? projection.getPriority().toString() : null);
+
+        String query;
 
         if(exists) {
             query = """
@@ -330,6 +301,37 @@ public class MySqlTaskCrudRepository implements TaskCrudRepository {
         }
 
         jdbcTemplate.update(query, parameters);
+
+        parameters = new MapSqlParameterSource();
+        parameters.addValue("taskId", projection.getId().toString());
+
+        query = """
+            DELETE
+            FROM %s
+            WHERE task_id = :taskId
+        """.formatted(TASK_COMPONENTS_TABLE_NAME);
+
+        jdbcTemplate.update(query, parameters);
+
+        if(projection.getComponentIds() != null && !projection.getComponentIds().isEmpty()) {
+            List<MapSqlParameterSource> parametersList = new ArrayList<>();
+            List<UUID> componentIds = new ArrayList<>(projection.getComponentIds());
+
+            for (UUID componentId : componentIds) {
+                parameters = new MapSqlParameterSource();
+                parameters.addValue("taskId", projection.getId().toString());
+                parameters.addValue("componentId", componentId.toString());
+
+                parametersList.add(parameters);
+            }
+
+            query = """
+                INSERT INTO %s (task_id, component_id)
+                VALUES (:taskId, :componentId)
+            """.formatted(TASK_COMPONENTS_TABLE_NAME);
+
+            jdbcTemplate.batchUpdate(query, parametersList.toArray(new MapSqlParameterSource[0]));
+        }
     }
 
     @Override
