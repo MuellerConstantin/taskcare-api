@@ -50,6 +50,18 @@ public class TaskController {
                 .build()));
     }
 
+    @GetMapping("/boards/{boardId}/tasks/no-status")
+    @PreAuthorize("hasRole('ADMINISTRATOR') or @domainSecurityService.isBoardMember(#boardId, principal.getUserProjection().getId())")
+    public PageDto<TaskDto> getTasksByStatusNone(@PathVariable UUID boardId,
+                                                 @RequestParam(required = false, defaultValue = "0") @Min(0) int page,
+                                                 @RequestParam(required = false, defaultValue = "25") @Min(0) int perPage) {
+        return taskDtoMapper.mapToDto(taskReadService.query(FindAllTasksByBoardIdAndNoStatusQuery.builder()
+                .boardId(boardId)
+                .page(page)
+                .perPage(perPage)
+                .build()));
+    }
+
     @GetMapping("/boards/{boardId}/statuses/{statusId}/tasks")
     @PreAuthorize("hasRole('ADMINISTRATOR') or @domainSecurityService.isBoardMember(#boardId, principal.getUserProjection().getId())")
     public PageDto<TaskDto> getTasksByStatus(@PathVariable UUID boardId, @PathVariable UUID statusId,

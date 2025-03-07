@@ -487,6 +487,100 @@ public class MySqlTaskCrudRepository implements TaskCrudRepository {
     }
 
     @Override
+    public Page<TaskProjection> findAllByBoardIdAndNoStatus(UUID boardId, PageInfo pageInfo) {
+        MapSqlParameterSource parameters = new MapSqlParameterSource();
+        parameters.addValue("boardId", boardId.toString());
+
+        String query = """
+            SELECT
+                COUNT(*)
+            FROM %s
+            WHERE board_id = :boardId AND status_id IS NULL
+        """.formatted(TASK_TABLE_NAME);
+
+        Integer totalElements = jdbcTemplate.queryForObject(query, parameters, Integer.class);
+        int totalPages = (int) Math.ceil((double) totalElements / pageInfo.getPerPage());
+
+        parameters = new MapSqlParameterSource();
+        parameters.addValue("offset", pageInfo.getPage() * pageInfo.getPerPage());
+        parameters.addValue("limit", pageInfo.getPerPage());
+        parameters.addValue("boardId", boardId.toString());
+
+        query = """
+            SELECT
+                id,
+                board_id,
+                name,
+                description,
+                assignee_id,
+                status_id,
+                status_updated_at,
+                due_date,
+                created_at,
+                updated_at,
+                priority
+            FROM %s
+            WHERE board_id = :boardId AND status_id IS NULL
+            LIMIT :limit
+            OFFSET :offset
+        """.formatted(TASK_TABLE_NAME);
+
+        List<TaskProjection> taskProjections = jdbcTemplate.query(query, parameters, this::toTaskProjection);
+
+        if(taskProjections.isEmpty()) {
+            return Page.<TaskProjection>builder()
+                    .content(Collections.emptyList())
+                    .info(PageInfo.builder()
+                            .page(pageInfo.getPage())
+                            .perPage(pageInfo.getPerPage())
+                            .totalElements(totalElements)
+                            .totalPages(totalPages)
+                            .build())
+                    .build();
+        }
+
+        parameters = new MapSqlParameterSource();
+        parameters.addValue("taskIds", taskProjections.stream()
+                .map(TaskProjection::getId).map(UUID::toString).toList());
+
+        query = """
+            SELECT
+                task_id,
+                component_id
+            FROM %s
+            WHERE task_id IN (:taskIds)
+        """.formatted(TASK_COMPONENTS_TABLE_NAME);
+
+        Map<UUID, Set<UUID>> componentIds = jdbcTemplate.query(query, parameters, rs -> {
+            Map<UUID, Set<UUID>> component_id_mapping = new HashMap<>();
+
+            while(rs.next()) {
+                UUID taskId = UUID.fromString(rs.getString("task_id"));
+                UUID componentId = UUID.fromString(rs.getString("component_id"));
+
+                component_id_mapping.putIfAbsent(taskId, new HashSet<>());
+                component_id_mapping.get(taskId).add(componentId);
+            }
+
+            return component_id_mapping;
+        });
+
+        taskProjections = taskProjections.stream().map(b -> b.toBuilder()
+                .componentIds(componentIds.getOrDefault(b.getId(), Collections.emptySet()))
+                .build()).toList();
+
+        return Page.<TaskProjection>builder()
+                .content(taskProjections)
+                .info(PageInfo.builder()
+                        .page(pageInfo.getPage())
+                        .perPage(pageInfo.getPerPage())
+                        .totalElements(totalElements)
+                        .totalPages(totalPages)
+                        .build())
+                .build();
+    }
+
+    @Override
     public Page<TaskProjection> findAllByBoardIdAndStatusId(UUID boardId, UUID statusId, PageInfo pageInfo) {
         MapSqlParameterSource parameters = new MapSqlParameterSource();
         parameters.addValue("boardId", boardId.toString());

@@ -1541,7 +1541,6 @@ paths:
                       - f098bf60-57d6-4ff9-9b17-0be1b5e37a83
                     assigneeId: 037f610b-f09c-4648-8c08-39a3ade3f447
                     priority: MEDIUM
-                    estimatedEffort: 3600
         401:
           $ref: "#/components/responses/401"
         403:
@@ -1579,7 +1578,6 @@ paths:
                 - f098bf60-57d6-4ff9-9b17-0be1b5e37a83
               assigneeId: 037f610b-f09c-4648-8c08-39a3ade3f447
               priority: MEDIUM
-              estimatedEffort: 3600
       responses:
         204:
           description: Successfully created the task.
@@ -1591,6 +1589,65 @@ paths:
           $ref: "#/components/responses/404"
         422:
           $ref: "#/components/responses/422"
+  /boards/{boardId}/tasks/no-status:
+    get:
+      tags:
+        - Task
+      summary: Returns a list of tasks.
+      description: >
+        Returns a list of tasks without a status.
+      parameters:
+        - name: boardId
+          in: path
+          description: Unique identifier of the board.
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 3377cf8f-da29-4aa7-9036-91951b8fce87
+        - name: page
+          in: query
+          description: Zero based index of page to load.
+          required: false
+          schema:
+            type: integer
+            example: 0
+        - name: perPage
+          in: query
+          description: Number of elements per page.
+          required: false
+          schema:
+            type: integer
+            example: 10
+      responses:
+        200:
+          description: Successfully fetched the tasks.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TaskPageDto"
+              example:
+                page: 0
+                perPage: 10
+                totalElements: 1
+                totalPages: 1
+                content:
+                  - id: 037f610b-f09c-4648-8c08-39a3ade3f447
+                    name: Task A
+                    description: >
+                      A sample task.
+                    statusId: 037f610b-f09c-4648-8c08-39a3ade3f447
+                    componentIds:
+                      - 037f610b-f09c-4648-8c08-39a3ade3f447
+                      - f098bf60-57d6-4ff9-9b17-0be1b5e37a83
+                    assigneeId: 037f610b-f09c-4648-8c08-39a3ade3f447
+                    priority: MEDIUM
+        401:
+          $ref: "#/components/responses/401"
+        403:
+          $ref: "#/components/responses/403"
+        404:
+          $ref: "#/components/responses/404"
   /boards/{boardId}/statuses/{statusId}/tasks:
     get:
       tags:
@@ -1652,7 +1709,6 @@ paths:
                       - f098bf60-57d6-4ff9-9b17-0be1b5e37a83
                     assigneeId: 037f610b-f09c-4648-8c08-39a3ade3f447
                     priority: MEDIUM
-                    estimatedEffort: 3600
         401:
           $ref: "#/components/responses/401"
         403:
@@ -1720,7 +1776,6 @@ paths:
                       - f098bf60-57d6-4ff9-9b17-0be1b5e37a83
                     assigneeId: 037f610b-f09c-4648-8c08-39a3ade3f447
                     priority: MEDIUM
-                    estimatedEffort: 3600
         401:
           $ref: "#/components/responses/401"
         403:
@@ -1788,7 +1843,6 @@ paths:
                       - f098bf60-57d6-4ff9-9b17-0be1b5e37a83
                     assigneeId: 037f610b-f09c-4648-8c08-39a3ade3f447
                     priority: MEDIUM
-                    estimatedEffort: 3600
         401:
           $ref: "#/components/responses/401"
         403:
@@ -1829,7 +1883,6 @@ paths:
                   - f098bf60-57d6-4ff9-9b17-0be1b5e37a83
                 assigneeId: 037f610b-f09c-4648-8c08-39a3ade3f447
                 priority: MEDIUM
-                estimatedEffort: 3600
         401:
           $ref: "#/components/responses/401"
         403:
@@ -2349,15 +2402,16 @@ components:
           type: string
           format: date-time
           description: Time the task was created.
+        updatedAt:
+          type: string
+          format: date-time
+          description: Time the task was last updated.
         componentIds:
           type: array
           items:
             type: string
             format: uuid
           description: Unique identifiers of components.
-        estimatedEffort:
-          type: integer
-          description: Estimated effort of task in seconds.
         dueDate:
           type: string
           format: date-time
@@ -2409,9 +2463,6 @@ components:
             type: string
             format: uuid
           description: Unique identifiers of components.
-        estimatedEffort:
-          type: integer
-          description: Estimated effort of task in seconds.
         dueDate:
           type: string
           format: date-time
@@ -2450,9 +2501,6 @@ components:
             type: string
             format: uuid
           description: Unique identifiers of components.
-        estimatedEffort:
-          type: integer
-          description: Estimated effort of task in seconds.
         dueDate:
           type: string
           format: date-time

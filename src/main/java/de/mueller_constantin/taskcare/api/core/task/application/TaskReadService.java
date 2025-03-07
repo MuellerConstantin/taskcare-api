@@ -31,6 +31,13 @@ public class TaskReadService implements ApplicationService {
                 .build());
     }
 
+    public Page<TaskProjection> query(FindAllTasksByBoardIdAndNoStatusQuery query) {
+        return taskReadModelRepository.findAllByBoardIdAndNoStatus(query.getBoardId(), PageInfo.builder()
+                .page(query.getPage())
+                .perPage(query.getPerPage())
+                .build());
+    }
+
     public Page<TaskProjection> query(FindAllTasksByBoardIdAndAssigneeIdQuery query) {
         return taskReadModelRepository.findAllByBoardIdAndAssigneeId(query.getBoardId(), query.getAssigneeId(), PageInfo.builder()
                 .page(query.getPage())

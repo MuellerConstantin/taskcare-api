@@ -24,6 +24,7 @@ public class TaskDto {
     private String statusUpdatedAt;
     private String assigneeId;
     private String createdAt;
+    private String updatedAt;
     private List<String> componentIds;
     private String dueDate;
     private String priority;

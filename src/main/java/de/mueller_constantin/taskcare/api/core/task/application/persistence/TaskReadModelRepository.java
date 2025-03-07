@@ -16,6 +16,8 @@ public interface TaskReadModelRepository extends ReadModelRepository {
 
     Page<TaskProjection> findAllByBoardId(UUID boardId, PageInfo pageInfo);
 
+    Page<TaskProjection> findAllByBoardIdAndNoStatus(UUID boardId, PageInfo pageInfo);
+
     Page<TaskProjection> findAllByBoardIdAndStatusId(UUID boardId, UUID statusId, PageInfo pageInfo);
 
     Page<TaskProjection> findAllByBoardIdAndComponentId(UUID boardId, UUID componentId, PageInfo pageInfo);
