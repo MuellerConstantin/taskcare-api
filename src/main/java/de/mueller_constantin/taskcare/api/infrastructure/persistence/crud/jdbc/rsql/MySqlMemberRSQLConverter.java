@@ -25,11 +25,15 @@ public class MySqlMemberRSQLConverter {
     private String query;
 
     @Getter
+    private String joinStatement;
+
+    @Getter
     private MapSqlParameterSource parameters;
 
     public void parse(String predicate) {
         Node rootNode = parser.parse(predicate);
         query = rootNode.accept(visitor);
         parameters = visitor.getParameters();
+        joinStatement = visitor.getJoinStatement();
     }
 }

@@ -946,6 +946,8 @@ paths:
             * id
             * userId
             * role
+            * username
+            * displayName
           schema:
             type: string
             format: rsql

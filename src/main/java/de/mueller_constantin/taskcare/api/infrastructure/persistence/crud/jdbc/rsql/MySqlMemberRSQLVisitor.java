@@ -9,13 +9,24 @@ import java.util.Map;
 
 public class MySqlMemberRSQLVisitor extends NoArgRSQLVisitorAdapter<String> {
     private static final Map<String, String> PARAMETER_MAPPING = Map.of(
-            "userId", "user_id"
+            "userId", "user_id",
+            "username", "u.username",
+            "displayName", "u.display_name"
     );
 
     private int parameterIndex = 0;
+    private boolean userTableRequired = false;
 
     @Getter
     private final MapSqlParameterSource parameters = new MapSqlParameterSource();
+
+    public String getJoinStatement() {
+        if(userTableRequired) {
+            return "INNER JOIN users u ON m.user_id = u.id";
+        } else {
+            return "";
+        }
+    }
 
     @Override
     public String visit(AndNode andNode) {
@@ -55,6 +66,14 @@ public class MySqlMemberRSQLVisitor extends NoArgRSQLVisitorAdapter<String> {
         String operator = comparisonNode.getOperator().getSymbol();
         List<String> arguments = comparisonNode.getArguments();
         String parameterName = generateParameterName();
+
+        if("username".equals(selector)) {
+            userTableRequired = true;
+        }
+
+        if("displayName".equals(selector)) {
+            userTableRequired = true;
+        }
 
         if (PARAMETER_MAPPING.containsKey(selector)) {
             selector = PARAMETER_MAPPING.get(selector);

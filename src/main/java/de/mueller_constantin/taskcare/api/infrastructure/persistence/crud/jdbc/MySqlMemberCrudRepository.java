@@ -136,9 +136,10 @@ public class MySqlMemberCrudRepository implements MemberCrudRepository {
         String query = """
             SELECT
                 COUNT(*)
-            FROM %s
-            WHERE board_id = :boardId AND %s
-        """.formatted(MEMBER_TABLE_NAME, converter.getQuery());
+            FROM %s m
+            %s
+            WHERE m.board_id = :boardId AND %s
+        """.formatted(MEMBER_TABLE_NAME, converter.getJoinStatement(), converter.getQuery());
 
         Integer totalElements = jdbcTemplate.queryForObject(query, parameters, Integer.class);
         int totalPages = (int) Math.ceil((double) totalElements / pageInfo.getPerPage());
@@ -151,15 +152,16 @@ public class MySqlMemberCrudRepository implements MemberCrudRepository {
 
         query = """
             SELECT
-                id,
-                board_id,
-                user_id,
-                role
-            FROM %s
-            WHERE board_id = :boardId AND %s
+                m.id,
+                m.board_id,
+                m.user_id,
+                m.role
+            FROM %s m
+            %s
+            WHERE m.board_id = :boardId AND %s
             LIMIT :limit
             OFFSET :offset
-        """.formatted(MEMBER_TABLE_NAME, converter.getQuery());
+        """.formatted(MEMBER_TABLE_NAME, converter.getJoinStatement(), converter.getQuery());
 
         List<MemberProjection> memberProjections = jdbcTemplate.query(query, parameters, this::toMemberProjection);
 

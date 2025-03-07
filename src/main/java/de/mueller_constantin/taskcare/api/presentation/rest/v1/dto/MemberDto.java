@@ -1,5 +1,6 @@
 package de.mueller_constantin.taskcare.api.presentation.rest.v1.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
 import de.mueller_constantin.taskcare.api.presentation.rest.v1.dto.search.Searchable;
 import de.mueller_constantin.taskcare.api.presentation.rest.v1.dto.view.DefaultJsonViews;
@@ -22,4 +23,12 @@ public class MemberDto {
 
     @Searchable
     private String role;
+
+    @Searchable
+    @JsonIgnore
+    private String username;
+
+    @Searchable
+    @JsonIgnore
+    private String displayName;
 }
