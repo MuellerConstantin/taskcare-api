@@ -21,7 +21,8 @@ CREATE TABLE IF NOT EXISTS members (
     board_id VARCHAR(255) NOT NULL,
     user_id VARCHAR(255) NOT NULL,
     role VARCHAR(255) NOT NULL,
-    FOREIGN KEY (board_id) REFERENCES boards(id)
+    FOREIGN KEY (board_id) REFERENCES boards(id),
+    FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
 ALTER TABLE members ADD CONSTRAINT UNIQUE_BOARD_USER UNIQUE (board_id, user_id);
@@ -63,7 +64,10 @@ CREATE TABLE IF NOT EXISTS tasks (
     due_date DATETIME,
     created_at DATETIME NOT NULL,
     updated_at DATETIME NOT NULL,
-    priority VARCHAR(255)
+    priority VARCHAR(255),
+    FOREIGN KEY (board_id) REFERENCES boards(id),
+    FOREIGN KEY (status_id) REFERENCES statuses(id),
+    FOREIGN KEY (assignee_id) REFERENCES members(id)
 );
 
 CREATE TABLE IF NOT EXISTS task_components (
