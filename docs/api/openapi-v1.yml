@@ -78,7 +78,8 @@ info:
 
     When filtering a collection, not all fields of a Data Transfer Object (DTO) necessarily
     have to be supported. In individual cases, only a subset of the available fields may
-    be supported.
+    be supported. This also applies to the available operators, some might not be supported
+    for certain properties.
     ---
     
     ## Error Handling
@@ -262,7 +263,15 @@ paths:
             example: 25
         - name: search
           in: query
-          description: Search query for filtering collection.
+          description: |
+            Search query for filtering collection.
+            
+            Supported properties:
+            * id
+            * username
+            * displayName
+            * role
+            * identityProvider
           required: false
           schema:
             type: string
@@ -550,8 +559,13 @@ paths:
             example: 10
         - name: search
           in: query
-          description: Search query for filtering collection.
-          required: false
+          description: |
+            Search query for filtering collection.
+
+            Supported properties:
+            * id
+            * name
+            * description
           schema:
             type: string
             format: rsql
@@ -621,8 +635,13 @@ paths:
             example: 10
         - name: search
           in: query
-          description: Search query for filtering collection.
-          required: false
+          description: |
+            Search query for filtering collection.
+
+            Supported properties:
+            * id
+            * name
+            * description
           schema:
             type: string
             format: rsql
@@ -678,8 +697,13 @@ paths:
             example: 10
         - name: search
           in: query
-          description: Search query for filtering collection.
-          required: false
+          description: |
+            Search query for filtering collection.
+
+            Supported properties:
+            * id
+            * name
+            * description
           schema:
             type: string
             format: rsql
@@ -915,8 +939,13 @@ paths:
             example: 10
         - name: search
           in: query
-          description: Search query for filtering collection.
-          required: false
+          description: |
+            Search query for filtering collection.
+
+            Supported properties:
+            * id
+            * userId
+            * role
           schema:
             type: string
             format: rsql
@@ -1120,8 +1149,14 @@ paths:
             example: 10
         - name: search
           in: query
-          description: Search query for filtering collection.
-          required: false
+          description: |
+            Search query for filtering collection.
+
+            Supported properties:
+            * id
+            * name
+            * description
+            * category
           schema:
             type: string
             format: rsql
@@ -1320,8 +1355,13 @@ paths:
             example: 10
         - name: search
           in: query
-          description: Search query for filtering collection.
-          required: false
+          description: |
+            Search query for filtering collection.
+
+            Supported properties:
+            * id
+            * name
+            * description
           schema:
             type: string
             format: rsql
