@@ -41,6 +41,5 @@ public class CreateTaskCommand implements Command {
     @Future
     private OffsetDateTime dueDate;
 
-    private Long estimatedEffort;
     private Priority priority;
 }

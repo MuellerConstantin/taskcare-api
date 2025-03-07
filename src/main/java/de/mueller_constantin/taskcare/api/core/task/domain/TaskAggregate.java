@@ -6,7 +6,6 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 
-import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.HashSet;
 import java.util.Set;
@@ -28,7 +27,7 @@ public class TaskAggregate extends Aggregate {
     private Set<UUID> componentIds = new HashSet<>();
     private OffsetDateTime dueDate;
     private OffsetDateTime createdAt;
-    private Long estimatedEffort;
+    private OffsetDateTime updatedAt;
     private Priority priority;
 
     public TaskAggregate() {
@@ -51,7 +50,7 @@ public class TaskAggregate extends Aggregate {
             this.componentIds = ((TaskCreatedEvent) event).getComponentIds();
             this.dueDate = ((TaskCreatedEvent) event).getDueDate();
             this.createdAt = ((TaskCreatedEvent) event).getCreatedAt();
-            this.estimatedEffort = ((TaskCreatedEvent) event).getEstimatedEffort();
+            this.updatedAt = ((TaskCreatedEvent) event).getUpdatedAt();
             this.priority = ((TaskCreatedEvent) event).getPriority();
             return;
         } else if(event instanceof TaskUpdatedEvent) {
@@ -62,7 +61,7 @@ public class TaskAggregate extends Aggregate {
             this.statusUpdatedAt = ((TaskUpdatedEvent) event).getStatusUpdatedAt();
             this.componentIds = ((TaskUpdatedEvent) event).getComponentIds();
             this.dueDate = ((TaskUpdatedEvent) event).getDueDate();
-            this.estimatedEffort = ((TaskUpdatedEvent) event).getEstimatedEffort();
+            this.updatedAt = ((TaskUpdatedEvent) event).getUpdatedAt();
             this.priority = ((TaskUpdatedEvent) event).getPriority();
             return;
         } else if (event instanceof TaskDeletedEvent) {
@@ -88,8 +87,8 @@ public class TaskAggregate extends Aggregate {
                        UUID statusId,
                        Set<UUID> componentIds,
                        OffsetDateTime dueDate,
-                       Long estimatedEffort,
                        Priority priority) {
+        OffsetDateTime createdAt = OffsetDateTime.now();
         OffsetDateTime statusUpdatedAt = statusId != null ? OffsetDateTime.now() : null;
         Set<UUID> ensuredComponentIds = componentIds != null ? componentIds : new HashSet<>();
 
@@ -104,8 +103,8 @@ public class TaskAggregate extends Aggregate {
                 .statusUpdatedAt(statusUpdatedAt)
                 .componentIds(ensuredComponentIds)
                 .dueDate(dueDate)
-                .createdAt(OffsetDateTime.now())
-                .estimatedEffort(estimatedEffort)
+                .createdAt(createdAt)
+                .updatedAt(createdAt)
                 .priority(priority)
                 .build());
     }
@@ -116,8 +115,8 @@ public class TaskAggregate extends Aggregate {
                        UUID statusId,
                        Set<UUID> componentIds,
                        OffsetDateTime dueDate,
-                       Long estimatedEffort,
                        Priority priority) {
+        OffsetDateTime updatedAt = OffsetDateTime.now();
         OffsetDateTime statusUpdatedAt = statusId != this.statusId ? OffsetDateTime.now() : this.getStatusUpdatedAt();
 
         this.applyChange(TaskUpdatedEvent.builder()
@@ -130,7 +129,7 @@ public class TaskAggregate extends Aggregate {
                 .statusUpdatedAt(statusUpdatedAt)
                 .componentIds(componentIds)
                 .dueDate(dueDate)
-                .estimatedEffort(estimatedEffort)
+                .updatedAt(updatedAt)
                 .priority(priority)
                 .build());
     }

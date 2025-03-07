@@ -86,8 +86,8 @@ CREATE TABLE IF NOT EXISTS tasks (
     assignee_id VARCHAR(255),
     due_date DATETIME,
     created_at DATETIME NOT NULL,
-    priority VARCHAR(255),
-    estimated_effort BIGINT
+    updated_at DATETIME NOT NULL,
+    priority VARCHAR(255)
 );
 
 CREATE TABLE IF NOT EXISTS task_components (

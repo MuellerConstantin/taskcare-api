@@ -24,7 +24,7 @@ public class TaskUpdatedEvent extends DomainEvent {
     private Set<UUID> componentIds;
     private OffsetDateTime dueDate;
     private OffsetDateTime createdAt;
-    private Long estimatedEffort;
+    private OffsetDateTime updatedAt;
     private Priority priority;
 
     public TaskUpdatedEvent() {
@@ -55,7 +55,7 @@ public class TaskUpdatedEvent extends DomainEvent {
                             Set<UUID> componentIds,
                             OffsetDateTime dueDate,
                             OffsetDateTime createdAt,
-                            Long estimatedEffort,
+                            OffsetDateTime updatedAt,
                             Priority priority) {
         super(aggregateId, version);
         this.boardId = boardId;
@@ -67,7 +67,7 @@ public class TaskUpdatedEvent extends DomainEvent {
         this.componentIds = componentIds;
         this.dueDate = dueDate;
         this.createdAt = createdAt;
-        this.estimatedEffort = estimatedEffort;
+        this.updatedAt = updatedAt;
         this.priority = priority;
     }
 }

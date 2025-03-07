@@ -25,7 +25,6 @@ public interface TaskDtoMapper {
     @Mapping(source = "createTaskDto.assigneeId", target = "assigneeId", qualifiedByName = "unwrapOptional")
     @Mapping(source = "createTaskDto.componentIds", target = "componentIds", qualifiedByName = "unwrapOptionalComponentIds")
     @Mapping(source = "createTaskDto.dueDate", target = "dueDate", qualifiedByName = "unwrapOptional")
-    @Mapping(source = "createTaskDto.estimatedEffort", target = "estimatedEffort", qualifiedByName = "unwrapOptional")
     @Mapping(source = "createTaskDto.priority", target = "priority", qualifiedByName = "unwrapOptional")
     CreateTaskCommand mapToCommand(CreateTaskDto createTaskDto, UUID boardId);
 
@@ -35,7 +34,6 @@ public interface TaskDtoMapper {
     @Mapping(source = "updateTaskDto.assigneeId", target = "assigneeId", qualifiedByName = "unwrapOptional")
     @Mapping(source = "updateTaskDto.componentIds", target = "componentIds", qualifiedByName = "unwrapOptionalComponentIds")
     @Mapping(source = "updateTaskDto.dueDate", target = "dueDate", qualifiedByName = "unwrapOptional")
-    @Mapping(source = "updateTaskDto.estimatedEffort", target = "estimatedEffort", qualifiedByName = "unwrapOptional")
     @Mapping(source = "updateTaskDto.priority", target = "priority", qualifiedByName = "unwrapOptional")
     UpdateTaskByIdCommand mapToCommand(UUID id, UpdateTaskDto updateTaskDto);
 

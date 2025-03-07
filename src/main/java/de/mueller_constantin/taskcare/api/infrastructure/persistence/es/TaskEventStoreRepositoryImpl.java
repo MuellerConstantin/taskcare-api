@@ -36,7 +36,7 @@ public class TaskEventStoreRepositoryImpl implements TaskEventStoreRepository {
                     .description(aggregate.getDescription())
                     .statusId(aggregate.getStatusId())
                     .statusUpdatedAt(aggregate.getStatusUpdatedAt())
-                    .estimatedEffort(aggregate.getEstimatedEffort())
+                    .updatedAt(aggregate.getUpdatedAt())
                     .assigneeId(aggregate.getAssigneeId())
                     .componentIds(aggregate.getComponentIds())
                     .priority(aggregate.getPriority())

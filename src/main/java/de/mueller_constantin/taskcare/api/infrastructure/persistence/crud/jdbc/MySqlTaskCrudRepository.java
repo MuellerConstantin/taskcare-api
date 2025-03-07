@@ -52,7 +52,7 @@ public class MySqlTaskCrudRepository implements TaskCrudRepository {
                 status_updated_at,
                 due_date,
                 created_at,
-                estimated_effort,
+                updated_at,
                 priority
             FROM %s
             WHERE id = :id
@@ -80,7 +80,7 @@ public class MySqlTaskCrudRepository implements TaskCrudRepository {
                 status_updated_at,
                 due_date,
                 created_at,
-                estimated_effort,
+                updated_at,
                 priority
             FROM %s
         """.formatted(TASK_TABLE_NAME);
@@ -148,7 +148,7 @@ public class MySqlTaskCrudRepository implements TaskCrudRepository {
                 status_updated_at,
                 due_date,
                 created_at,
-                estimated_effort,
+                updated_at,
                 priority
             FROM %s
             LIMIT :limit
@@ -249,7 +249,7 @@ public class MySqlTaskCrudRepository implements TaskCrudRepository {
         parameters.addValue("statusUpdatedAt", projection.getStatusUpdatedAt());
         parameters.addValue("dueDate", projection.getDueDate());
         parameters.addValue("createdAt", projection.getCreatedAt());
-        parameters.addValue("estimatedEffort", projection.getEstimatedEffort());
+        parameters.addValue("updatedAt", projection.getUpdatedAt());
         parameters.addValue("priority", projection.getPriority() != null ? projection.getPriority().toString() : null);
 
         String query;
@@ -266,7 +266,7 @@ public class MySqlTaskCrudRepository implements TaskCrudRepository {
                     status_updated_at = :statusUpdatedAt,
                     due_date = :dueDate,
                     created_at = :createdAt,
-                    estimated_effort = :estimatedEffort,
+                    updated_at = :updatedAt,
                     priority = :priority
                 WHERE id = :id
             """.formatted(TASK_TABLE_NAME);
@@ -282,7 +282,7 @@ public class MySqlTaskCrudRepository implements TaskCrudRepository {
                     status_updated_at,
                     due_date,
                     created_at,
-                    estimated_effort,
+                    updated_at,
                     priority
                 ) VALUES (
                     :id,
@@ -294,7 +294,7 @@ public class MySqlTaskCrudRepository implements TaskCrudRepository {
                     :statusUpdatedAt,
                     :dueDate,
                     :createdAt,
-                    :estimatedEffort,
+                    :updatedAt,
                     :priority
                 )
             """.formatted(TASK_TABLE_NAME);
@@ -377,7 +377,7 @@ public class MySqlTaskCrudRepository implements TaskCrudRepository {
                 status_updated_at,
                 due_date,
                 created_at,
-                estimated_effort,
+                updated_at,
                 priority
             FROM %s
             WHERE id = :id
@@ -423,7 +423,7 @@ public class MySqlTaskCrudRepository implements TaskCrudRepository {
                 status_updated_at,
                 due_date,
                 created_at,
-                estimated_effort,
+                updated_at,
                 priority
             FROM %s
             WHERE board_id = :boardId
@@ -519,7 +519,7 @@ public class MySqlTaskCrudRepository implements TaskCrudRepository {
                 status_updated_at,
                 due_date,
                 created_at,
-                estimated_effort,
+                updated_at,
                 priority
             FROM %s
             WHERE board_id = :boardId AND status_id = :statusId
@@ -615,7 +615,7 @@ public class MySqlTaskCrudRepository implements TaskCrudRepository {
                 status_updated_at,
                 due_date,
                 created_at,
-                estimated_effort,
+                updated_at,
                 priority
             FROM %s
             WHERE board_id = :boardId AND component_id = :componentId
@@ -711,7 +711,7 @@ public class MySqlTaskCrudRepository implements TaskCrudRepository {
                 status_updated_at,
                 due_date,
                 created_at,
-                estimated_effort,
+                updated_at,
                 priority
             FROM %s
             WHERE board_id = :boardId AND assignee_id = :assigneeId
@@ -908,11 +908,8 @@ public class MySqlTaskCrudRepository implements TaskCrudRepository {
                 Priority.valueOf(resultSet.getString("priority")) :
                 null;
 
-        Long estimatedEffort = resultSet.getLong("estimated_effort");
-
-        if(resultSet.wasNull()) {
-            estimatedEffort = null;
-        }
+        LocalDateTime localUpdatedAt = resultSet.getTimestamp("created_at").toLocalDateTime();
+        OffsetDateTime updatedAt = localUpdatedAt.atOffset(ZoneOffset.UTC);
 
         return TaskProjection.builder()
                 .id(id)
@@ -924,7 +921,7 @@ public class MySqlTaskCrudRepository implements TaskCrudRepository {
                 .statusUpdatedAt(statusUpdatedAt)
                 .dueDate(dueDate)
                 .createdAt(createdAt)
-                .estimatedEffort(estimatedEffort)
+                .updatedAt(updatedAt)
                 .priority(priority)
                 .build();
     }

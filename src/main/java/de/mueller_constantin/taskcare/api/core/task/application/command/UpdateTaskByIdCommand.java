@@ -38,14 +38,12 @@ public class UpdateTaskByIdCommand implements Command {
     @Future
     private OffsetDateTime dueDate;
 
-    private Long estimatedEffort;
     private Priority priority;
 
     private boolean descriptionTouched;
     private boolean assigneeIdTouched;
     private boolean statusIdTouched;
     private boolean dueDateTouched;
-    private boolean estimatedEffortTouched;
     private boolean priorityTouched;
 
     public void setDescription(String description) {
@@ -66,11 +64,6 @@ public class UpdateTaskByIdCommand implements Command {
     public void setDueDate(OffsetDateTime dueDate) {
         this.dueDate = dueDate;
         this.dueDateTouched = true;
-    }
-
-    public void setEstimatedEffort(Long estimatedEffort) {
-        this.estimatedEffort = estimatedEffort;
-        this.estimatedEffortTouched = true;
     }
 
     public void setPriority(Priority priority) {

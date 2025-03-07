@@ -29,7 +29,6 @@ public class CreateTaskDto {
     private String assigneeId;
     private Set<String> componentIds;
     private OffsetDateTime dueDate;
-    private Long estimatedEffort;
     private String priority;
 
     public Optional<@NullOrNotEmpty @Size(max = 1024) String> getDescription() {
@@ -50,10 +49,6 @@ public class CreateTaskDto {
 
     public Optional<@Future OffsetDateTime> getDueDate() {
         return Optional.ofNullable(this.dueDate);
-    }
-
-    public Optional<@PositiveOrZero Long> getEstimatedEffort() {
-        return Optional.ofNullable(this.estimatedEffort);
     }
 
     public Optional<@NullOrNotEmpty @Enumerated(enumClass = Priority.class) String> getPriority() {

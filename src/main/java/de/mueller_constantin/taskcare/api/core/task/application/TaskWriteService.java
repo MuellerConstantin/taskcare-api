@@ -108,7 +108,6 @@ public class TaskWriteService implements ApplicationService {
                 command.getStatusId(),
                 command.getComponentIds(),
                 command.getDueDate(),
-                command.getEstimatedEffort(),
                 command.getPriority());
         taskEventStoreRepository.save(taskAggregate);
     }
@@ -168,10 +167,6 @@ public class TaskWriteService implements ApplicationService {
                     command.getDueDate() :
                     taskAggregate.getDueDate();
 
-            Long estimatedEffort = command.isEstimatedEffortTouched() ?
-                    command.getEstimatedEffort() :
-                    taskAggregate.getEstimatedEffort();
-
             Priority priority = command.isPriorityTouched() ?
                     command.getPriority() :
                     taskAggregate.getPriority();
@@ -182,7 +177,6 @@ public class TaskWriteService implements ApplicationService {
                     statusId,
                     componentIds,
                     dueDate,
-                    estimatedEffort,
                     priority);
             taskEventStoreRepository.save(taskAggregate);
         });
@@ -235,7 +229,6 @@ public class TaskWriteService implements ApplicationService {
                             null,
                             taskAggregate.getComponentIds(),
                             taskAggregate.getDueDate(),
-                            taskAggregate.getEstimatedEffort(),
                             taskAggregate.getPriority());
 
                     taskEventStoreRepository.save(taskAggregate);
@@ -266,7 +259,6 @@ public class TaskWriteService implements ApplicationService {
                                     .filter(componentId -> !componentId.equals(componentRemovedEvent.getComponent().getId()))
                                     .collect(Collectors.toSet()),
                             taskAggregate.getDueDate(),
-                            taskAggregate.getEstimatedEffort(),
                             taskAggregate.getPriority());
 
                     taskEventStoreRepository.save(taskAggregate);
@@ -295,7 +287,6 @@ public class TaskWriteService implements ApplicationService {
                             taskAggregate.getStatusId(),
                             taskAggregate.getComponentIds(),
                             taskAggregate.getDueDate(),
-                            taskAggregate.getEstimatedEffort(),
                             taskAggregate.getPriority());
 
                     taskEventStoreRepository.save(taskAggregate);

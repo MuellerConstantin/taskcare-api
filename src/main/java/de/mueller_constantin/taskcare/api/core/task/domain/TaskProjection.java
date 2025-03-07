@@ -25,6 +25,6 @@ public class TaskProjection {
     private Set<UUID> componentIds = new HashSet<>();
     private OffsetDateTime dueDate;
     private OffsetDateTime createdAt;
-    private Long estimatedEffort;
+    private OffsetDateTime updatedAt;
     private Priority priority;
 }

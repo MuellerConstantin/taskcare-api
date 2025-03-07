@@ -28,7 +28,6 @@ public class UpdateTaskDto {
     private String assigneeId;
     private Set<String> componentIds;
     private OffsetDateTime dueDate;
-    private Long estimatedEffort;
     private String priority;
 
     @JsonIgnore
@@ -42,9 +41,6 @@ public class UpdateTaskDto {
 
     @JsonIgnore
     private boolean dueDateTouched;
-
-    @JsonIgnore
-    private boolean estimatedEffortTouched;
 
     @JsonIgnore
     private boolean priorityTouched;
@@ -67,11 +63,6 @@ public class UpdateTaskDto {
     public void setDueDate(OffsetDateTime dueDate) {
         this.dueDate = dueDate;
         this.dueDateTouched = true;
-    }
-
-    public void setEstimatedEffort(Long estimatedEffort) {
-        this.estimatedEffort = estimatedEffort;
-        this.estimatedEffortTouched = true;
     }
 
     public void setPriority(String priority) {
@@ -101,10 +92,6 @@ public class UpdateTaskDto {
 
     public Optional<@Future OffsetDateTime> getDueDate() {
         return Optional.ofNullable(this.dueDate);
-    }
-
-    public Optional<@PositiveOrZero Long> getEstimatedEffort() {
-        return Optional.ofNullable(this.estimatedEffort);
     }
 
     public Optional<@NullOrNotEmpty @Enumerated(enumClass = Priority.class) String> getPriority() {
