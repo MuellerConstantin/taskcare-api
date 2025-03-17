@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>de.mueller-constantin.taskcare</groupId>
 	<artifactId>taskcare-api</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.1.0-dev.1</version>
 	<name>taskcare-api</name>
 	<description>Backend of the TaskCare collaboration platform for managing tasks in a team.</description>
 	<url>https://github.com/MuellerConstantin/taskcare-api</url>
