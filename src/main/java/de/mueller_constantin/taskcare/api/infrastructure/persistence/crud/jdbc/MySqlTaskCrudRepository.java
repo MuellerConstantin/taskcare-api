@@ -246,7 +246,9 @@ public class MySqlTaskCrudRepository implements TaskCrudRepository {
         parameters.addValue("description", projection.getDescription());
         parameters.addValue("assigneeId", projection.getAssigneeId() == null ? null : projection.getAssigneeId().toString());
         parameters.addValue("statusId", projection.getStatusId() == null ? null : projection.getStatusId().toString());
-        parameters.addValue("statusUpdatedAt", Timestamp.valueOf(LocalDateTime.ofInstant(projection.getStatusUpdatedAt().toInstant(), ZoneOffset.UTC)));
+        parameters.addValue("statusUpdatedAt", projection.getStatusUpdatedAt() != null ?
+                Timestamp.valueOf(LocalDateTime.ofInstant(projection.getStatusUpdatedAt().toInstant(), ZoneOffset.UTC)) :
+                null);
         parameters.addValue("dueDate", projection.getDueDate() != null ?
                 Timestamp.valueOf(LocalDateTime.ofInstant(projection.getDueDate().toInstant(), ZoneOffset.UTC)) :
                 null);
